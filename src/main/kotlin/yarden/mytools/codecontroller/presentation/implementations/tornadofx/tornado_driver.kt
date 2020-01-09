@@ -4,18 +4,19 @@ import GuiEventsChannel
 import GuiPresentationDriver
 import javafx.application.Platform
 import javafx.stage.Stage
+import javafx.util.Duration
+import kotlinx.coroutines.delay
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
+import tornadofx.*
 import yarden.mytools.codecontroller.presentation.common.entities.CCGuiUnit
-import tornadofx.Controller
-import tornadofx.onChange
-import tornadofx.runLater
+import java.lang.management.ThreadInfo
 
 class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentationDriver, KodeinAware {
 
     val unitsList = UnitsListViewModel(UnitList())
-    private val eventsChannel : GuiEventsChannel by instance()
+    private val eventsChannel: GuiEventsChannel by instance()
 
     override fun addUnit(ccUnit: CCGuiUnit) {
         val tUnit = UnitAdapter.toTornadoUnit(ccUnit)
@@ -25,7 +26,6 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
             unitsList.apply {
                 item.list.add(tUnitVM)
                 item.sort()
-
                 tUnit.valueProperty.onChange {
                     eventsChannel.send(UnitAdapter.toCCUnit(tUnit))
                 }
@@ -46,9 +46,7 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
                     // TODO - change to something other than hard coded numbers. using Screen.getScreens() and the visual bounds property
                 }
                 tornadoApp.start(stage)
-
             }
     }
-
 
 }

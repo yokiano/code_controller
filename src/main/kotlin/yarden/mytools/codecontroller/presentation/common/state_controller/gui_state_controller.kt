@@ -1,8 +1,8 @@
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
+import tornadofx.*
 import yarden.mytools.codecontroller.presentation.common.entities.CCGuiUnit
 import yarden.mytools.codecontroller.presentation.implementations.tornadofx.TornadoDriver
 
@@ -31,7 +31,6 @@ class GuiStateController(override val kodein: Kodein)  : KodeinAware {
     }
 
     private fun addNewUnit(unit : CCGuiUnit) {
-
         guiUnits.add(unit)
         presentationDriver.addUnit(unit)
     }
@@ -45,3 +44,5 @@ class GuiStateController(override val kodein: Kodein)  : KodeinAware {
     }
 
 }
+
+

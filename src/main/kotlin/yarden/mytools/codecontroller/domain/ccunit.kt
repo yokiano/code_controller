@@ -38,7 +38,9 @@ interface CCUnit {
 
 
 class CCDouble(override val id: String) : CCUnit {
-    override var default: Double = 100.0
+    var range: ClosedFloatingPointRange<Double> = 0.1..200.0
+
+    override var default: Double = (range.endInclusive - range.start) / 2.0
         set(v) {
             field = v
             value = v
@@ -49,7 +51,6 @@ class CCDouble(override val id: String) : CCUnit {
 
     override var state = CCUnitState.NEW
 
-    var range: ClosedFloatingPointRange<Double> = 0.1..200.0
 
     override fun getGuiUnit(): CCGuiUnit {
         return CCGuiSlider(id).also {

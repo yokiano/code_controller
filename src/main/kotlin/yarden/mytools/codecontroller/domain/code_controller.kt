@@ -13,10 +13,13 @@ import org.kodein.di.tornadofx.installTornadoSource
 
 
 @ExperimentalCoroutinesApi
-class CodeController : KodeinAware {
+object CodeController : KodeinAware {
 
     // <<< Kodein configurations
     data class UnitKodeinParams(val type: CCType, val id: String)
+
+    private var state : ControllerState = ControllerState.Unused
+
     override val kodein = Kodein {
         installTornadoSource()
 
@@ -88,10 +91,17 @@ class CodeController : KodeinAware {
                     initCode()
                     sendGuiUnit(uiChannel.channel)
                     state = CCUnitState.LIVE
+
+                    if (this@CodeController.state is ControllerState.Unused) {
+                        // TODO - here I need to implement the init (only when actually in use)
+                        this@CodeController.state = ControllerState.InUse
+                    }
                 }
                 else -> {}
             }
         }
+
+
     }
 
     fun ccBool(id: String, initCode: CCBool.() -> Unit = {}): Boolean {
@@ -106,4 +116,8 @@ class CodeController : KodeinAware {
         return unit.value
     }
 
+    sealed class ControllerState {
+        object Unused : ControllerState()
+        object InUse : ControllerState()
+    }
 }
