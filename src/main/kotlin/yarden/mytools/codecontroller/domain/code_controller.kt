@@ -3,6 +3,7 @@ package yarden.mytools.codecontroller.domain
 import GuiEventsChannel
 import GuiStateController
 import GuiUnitsChannel
+import PlotterChannel
 import yarden.mytools.codecontroller.presentation.implementations.tornadofx.TornadoDriver
 import yarden.mytools.codecontroller.presentation.implementations.tornadofx.TornadoApp
 import kotlinx.coroutines.*
@@ -10,7 +11,7 @@ import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.*
 import org.kodein.di.tornadofx.installTornadoSource
-
+import yarden.mytools.codecontroller.domain.entities.CCPlotter
 
 @ExperimentalCoroutinesApi
 object CodeController : KodeinAware {
@@ -37,6 +38,10 @@ object CodeController : KodeinAware {
         bind<GuiStateController>() with singleton { GuiStateController(kodein) }
         bind<TornadoDriver>() with singleton { TornadoDriver(kodein) }
         bind<TornadoApp>() with singleton { TornadoApp(kodein) }
+
+        bind<CCPlotter>() with singleton { CCPlotter(kodein) }
+        bind<PlotterChannel>() with singleton { PlotterChannel() }
+
     }
     // Kodein configurations >>>
 
@@ -44,8 +49,9 @@ object CodeController : KodeinAware {
     private val eventsChannel : GuiEventsChannel by instance()
     private val uiChannel : GuiUnitsChannel by  instance()
     private val guiStateController : GuiStateController by instance()
-    // Properties declaration >>>
 
+    private val plotter : CCPlotter by instance()
+    // Properties declaration >>>
 
     init {
         // Launch the TornadoFx application
@@ -114,6 +120,10 @@ object CodeController : KodeinAware {
         val unit = (getUnit(CCType.DOUBLE, id) as CCDouble)
         handleUnitState(unit,initCode)
         return unit.value
+    }
+
+    fun ccPlot(x : Double, y: Double) {
+        plotter.sendData(Pair(x,y))
     }
 
     sealed class ControllerState {

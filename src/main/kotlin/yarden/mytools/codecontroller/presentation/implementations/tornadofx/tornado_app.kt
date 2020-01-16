@@ -5,6 +5,7 @@ import javafx.geometry.Orientation
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.Parent
+import javafx.scene.chart.NumberAxis
 import javafx.scene.control.ToggleButton
 import javafx.scene.control.Tooltip
 import javafx.scene.layout.HBox
@@ -36,6 +37,7 @@ class MainView() : View() {
                 // Main hbox
                 alignment = Pos.CENTER
 
+                // -------------- TOGGLES --------------
                 flowpane {
                     // Toggles pane
                     addClass(MyStyle.togglesVBox)
@@ -43,7 +45,6 @@ class MainView() : View() {
                     orientation = Orientation.VERTICAL
                     bindChildren(driver.unitsList.listVM.value.filter { it.item is TToggle }.toObservable()) { unitVM ->
                         when (val unit = unitVM.item) {
-                            // -------------- TOGGLES --------------
                             is TToggle -> {
                                 vbox {
                                     alignment = Pos.CENTER
@@ -70,6 +71,7 @@ class MainView() : View() {
 
                     }
                 }
+
                 // -------------- SLIDERS --------------
                 hbox {
                     // Sliders pane (hbox)
@@ -112,18 +114,6 @@ class MainView() : View() {
                                             tooltip = Tooltip(unit.valueProperty.value.toString())
                                         }
                                     }
-//                                    vbox {
-//                                        spacing = 20.0
-//                                        alignment = Pos.CENTER
-//                                        button("Reset") {
-//                                            action {
-//                                                unitVM.valueVM.value.value = unit.initialValue
-//                                            }
-//
-//                                        }
-//                                        button("save")
-//                                    }
-
                                 }
                             }
                             else -> {
@@ -139,7 +129,33 @@ class MainView() : View() {
                     }
                 }
 
+
             }
+        }
+        // -------------- PLOT --------------
+        right {
+//            val chartList = driver.chartSeries.plotList
+            val pointList = driver.chartSeries.dataPointlistVM.value
+            println("driver.chartSeries.dataPointlistVM.value.size = ${pointList.size}")
+            if (pointList.size > 0) {
+                linechart("Plotter", NumberAxis(), NumberAxis()) {
+                    addClass(MyStyle.lineChart)
+                    val singleSeries = series("X") {
+                        addClass(MyStyle.chartSeries)
+                        for (dataPoint in pointList) {
+                            data(dataPoint.x,dataPoint.y)
+                        }
+                    }
+
+                    pointList.onChange{
+                        val newData = it.list.last()
+                        singleSeries.apply {
+                            data(newData.x,newData.y)
+                        }
+                    }
+                }
+            }
+
         }
         getAllNodes(this).filter { it is HBox || it is VBox }.addClass(MyStyle.someBox)
     }

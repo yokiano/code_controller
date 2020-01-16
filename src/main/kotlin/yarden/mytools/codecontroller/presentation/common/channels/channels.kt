@@ -10,3 +10,11 @@ class GuiUnitsChannel {
         channel.sendBlocking(guiUnit)
     }
 }
+
+class PlotterChannel {
+    val channel = Channel<Pair<Double,Double>>()
+
+    fun send(data : Pair<Double,Double>) {
+        channel.sendBlocking(data)
+    }
+}

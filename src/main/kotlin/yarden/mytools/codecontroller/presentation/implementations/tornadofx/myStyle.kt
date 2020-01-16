@@ -26,6 +26,9 @@ class MyStyle : Stylesheet() {
         val sliderStyle by cssclass()
         val slidersVBox by cssclass()
 
+        val lineChart by cssclass()
+        val chartSeries by cssclass()
+
         val textColor = Color.BLANCHEDALMOND
 
     }
@@ -86,7 +89,7 @@ class MyStyle : Stylesheet() {
 
 
         // -------------- TOGGLE BUTTON --------------\
-        Companion.toggleLabel {
+        toggleLabel {
             +defaultTextStyle
         }
         toggleButton {
@@ -99,6 +102,19 @@ class MyStyle : Stylesheet() {
         }
         toggleButtonOff {
             graphic = File("controls/toggle/off.png").toURI()
+        }
+
+        // ------ PLOTS ------ //
+        lineChart {
+            textFill = Color.WHITE
+//            fontSize = 20.px
+
+//            backgroundColor += Color.BLANCHEDALMOND
+
+        }
+        chartSeries {
+            textFill = Color.WHITE
+            backgroundColor += Color.WHITE
         }
     }
 
