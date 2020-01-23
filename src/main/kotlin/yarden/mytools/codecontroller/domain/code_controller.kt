@@ -12,6 +12,9 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.generic.*
 import org.kodein.di.tornadofx.installTornadoSource
 import yarden.mytools.codecontroller.domain.entities.CCPlotter
+import yarden.mytools.codecontroller.domain.entities.DataPoint
+import yarden.mytools.codecontroller.presentation.implementations.tornadofx.PlotLine
+import kotlin.random.Random
 
 @ExperimentalCoroutinesApi
 object CodeController : KodeinAware {
@@ -29,8 +32,13 @@ object CodeController : KodeinAware {
                 when (type) {
                     CCType.BOOL -> CCBool(id)
                     CCType.DOUBLE -> CCDouble(id)
+                    CCType.VEC2 -> CCVec(id)
                 }
             }
+        }
+
+        bind<PlotLine>() with multiton { id : String ->
+            PlotLine(id)
         }
 
         bind<GuiEventsChannel>() with singleton { GuiEventsChannel() }
@@ -95,7 +103,7 @@ object CodeController : KodeinAware {
             when(state) {
                 CCUnitState.NEW -> {
                     initCode()
-                    sendGuiUnit(uiChannel.channel)
+                    sendGuiUnit(uiChannel)
                     state = CCUnitState.LIVE
 
                     if (this@CodeController.state is ControllerState.Unused) {
@@ -116,14 +124,36 @@ object CodeController : KodeinAware {
         return unit.value
     }
 
+    fun ccBool(id: String, on: Boolean, f: () -> Unit) {
+        val curr = ccBool(id)
+        when {
+            curr && on -> f()
+            curr && !on -> return
+            !curr && on -> return
+            !curr && !on -> f()
+        }
+    }
+
     fun ccDouble(id: String, initCode: CCDouble.() -> Unit = {}): Double {
         val unit = (getUnit(CCType.DOUBLE, id) as CCDouble)
         handleUnitState(unit,initCode)
         return unit.value
     }
 
-    fun ccPlot(x : Double, y: Double) {
-        plotter.sendData(Pair(x,y))
+    fun ccVec(id: String, initCode: CCVec.() -> Unit = {}) : Pair<Double,Double> {
+        val unit = (getUnit(CCType.VEC2,id) as CCVec)
+        handleUnitState(unit,initCode)
+        return unit.value
+    }
+
+    //   howMany - between 0.0..1.0, the higher the more dataPoints.
+    fun ccPlot(id : String, x : Double, y: Double, howMany : Double = 1.0) {
+        if (Random.nextDouble() > howMany) {
+            return
+        }
+
+        val dataPoint = DataPoint(id,Pair(x,y))
+        plotter.sendData(dataPoint)
     }
 
     sealed class ControllerState {

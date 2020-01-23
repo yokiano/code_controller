@@ -8,16 +8,22 @@ import tornadofx.ItemViewModel
 import tornadofx.Vector2D
 import tornadofx.getValue
 import tornadofx.sortWith
+import yarden.mytools.codecontroller.domain.CCUnitState
 
-class ChartSeriesViewModel(chartSeries : ChartSeries) : ItemViewModel<ChartSeries>(chartSeries) {
-    val dataPointlistVM = bind(ChartSeries::dataPointsList)
+class Plotter {
+    val lines = ArrayList<PlotLine>()
     var visible = false
 
+    fun addPlotLine(plotLine: PlotLine) {
+        lines.add(plotLine)
+    }
 }
 
-class ChartSeries {
+class PlotLine(val id: String) {
     val dataPointListProperty = SimpleListProperty<Vector2D>(FXCollections.observableArrayList())
     val dataPointsList by dataPointListProperty
+
+    var state = CCUnitState.NEW
 
     fun add(vec: Vector2D) {
         dataPointsList.add(vec)
@@ -61,7 +67,7 @@ class TSlider(override val id: String, override val initialValue: Double = 0.0, 
     TUnit<Double> {
 
     override val valueProperty = SimpleObjectProperty<Double>(initialValue)
-    override val value = initialValue
+    override val value: Double by valueProperty
 
     override val controlType = TType.Slider
 }
@@ -72,8 +78,14 @@ class TToggle(override val id: String, override val initialValue: Boolean = fals
     override val value: Boolean by valueProperty
 }
 
+class TXYControl(override val id: String, override val initialValue: Vector2D = Vector2D.ZERO) : TUnit<Vector2D> {
+    override val controlType = TType.XYControl
+    override val valueProperty = SimpleObjectProperty<Vector2D>(initialValue)
+    override val value: Vector2D by valueProperty
+}
 
 sealed class TType {
     object Slider : TType()
     object Toggle : TType()
+    object XYControl : TType()
 }

@@ -1,8 +1,10 @@
 package yarden.mytools.codecontroller.presentation.implementations.tornadofx
 
+import tornadofx.Vector2D
 import yarden.mytools.codecontroller.presentation.common.entities.CCGuiSlider
 import yarden.mytools.codecontroller.presentation.common.entities.CCGuiToggle
 import yarden.mytools.codecontroller.presentation.common.entities.CCGuiUnit
+import yarden.mytools.codecontroller.presentation.common.entities.CCGuiXYControl
 
 class UnitAdapter {
 
@@ -14,6 +16,9 @@ class UnitAdapter {
                 }
                 is CCGuiSlider -> {
                     TSlider(ccUnit.id, ccUnit.default, ccUnit.range)
+                }
+                is CCGuiXYControl -> {
+                    TXYControl(ccUnit.id, Vector2D(ccUnit.default.first,ccUnit.default.second))
                 }
                 else -> {
                     TToggle("Error with unit conversion")
@@ -31,6 +36,13 @@ class UnitAdapter {
                 is TSlider -> {
                     CCGuiSlider(tUnit.id).apply {
                         value = tUnit.valueProperty.value
+                    }
+                }
+                is TXYControl -> {
+                    CCGuiXYControl(tUnit.id).apply {
+                        tUnit.valueProperty.value.run {
+                            value = Pair(x,y)
+                        }
                     }
                 }
                 else -> CCGuiToggle("Error with unit conversion",false)

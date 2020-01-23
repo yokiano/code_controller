@@ -2,14 +2,17 @@ package yarden.mytools.codecontroller.presentation.implementations.tornadofx
 
 import GuiEventsChannel
 import GuiPresentationDriver
+import XYControl
 import javafx.application.Platform
 import javafx.stage.Stage
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
 import tornadofx.*
+import yarden.mytools.codecontroller.domain.CCUnitState
 import yarden.mytools.codecontroller.presentation.common.entities.CCGuiUnit
 
+@Suppress("MemberVisibilityCanBePrivate")
 class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentationDriver, KodeinAware {
 
     val tornadoApp: TornadoApp by instance()
@@ -17,7 +20,8 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
     val unitsList = UnitsListViewModel(UnitList())
     private val eventsChannel: GuiEventsChannel by instance()
 
-    val chartSeries = ChartSeriesViewModel(ChartSeries())
+    val plotter = Plotter()
+
 
     override fun launchApp() {
         tornadoApp.init()
@@ -33,6 +37,7 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
         }
     }
 
+    var once = false
     override fun addUnit(ccUnit: CCGuiUnit) {
         val tUnit = UnitAdapter.toTornadoUnit(ccUnit)
         val tUnitVM = TUnitViewModel(tUnit)
@@ -42,25 +47,31 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
                 item.list.add(tUnitVM)
                 item.sort()
                 tUnit.valueProperty.onChange {
+                    println("sending data")
                     eventsChannel.send(UnitAdapter.toCCUnit(tUnit))
                 }
             }
 
         }
-
         reloadViews()
-
-
     }
 
-    fun addDataPoint(x : Double, y : Double) {
+    fun addDataPointTo(id: String, data : Pair<Double,Double>) {
+        val plotLine : PlotLine by instance( arg = id)
+        val dataVec = Vector2D(data.first,data.second)
         runLater {
-            chartSeries.item.add(Vector2D(x,y))
+            plotLine.add(dataVec)
         }
 
-        if (!chartSeries.visible) {
+        if (plotLine.state == CCUnitState.NEW) {
+            plotter.addPlotLine(plotLine)
             reloadViews()
-            chartSeries.visible = true
+            plotLine.state = CCUnitState.LIVE
+        }
+
+        if (!plotter.visible) {
+            reloadViews()
+            plotter.visible = true
         }
     }
 

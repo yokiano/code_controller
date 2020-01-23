@@ -21,7 +21,7 @@ class GuiStateController(override val kodein: Kodein)  : KodeinAware {
     init {
         reactToChannelWith(unitsChannel.channel) { unit ->  addNewUnit(unit)}
         reactToChannelWith(plotterChannel.channel) {
-                data -> presentationDriver.addDataPoint(data.first,data.second)
+                data -> presentationDriver.addDataPointTo(data.id,data.data)
         }
 
     }

@@ -1,5 +1,6 @@
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.sendBlocking
+import yarden.mytools.codecontroller.domain.entities.DataPoint
 import yarden.mytools.codecontroller.presentation.common.entities.CCGuiUnit
 
 class GuiUnitsChannel {
@@ -12,9 +13,9 @@ class GuiUnitsChannel {
 }
 
 class PlotterChannel {
-    val channel = Channel<Pair<Double,Double>>()
+    val channel = Channel<DataPoint>()
 
-    fun send(data : Pair<Double,Double>) {
-        channel.sendBlocking(data)
+    fun send(dataPoint : DataPoint) {
+        channel.sendBlocking(dataPoint)
     }
 }

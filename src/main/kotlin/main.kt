@@ -3,22 +3,21 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import yarden.mytools.codecontroller.domain.CodeController
+import kotlin.math.sin
 
 fun main() {
     val controller = CodeController
 
     var j = 0
-//    val interval = interval1 / 2
     while (true) {
 
         for (i in 0..2) {
             val a = controller.ccDouble("test$i") { range = 0.0..20.0; default = i.toDouble() }
-//            println("a = ${a}")
         }
 
         runBlocking {
 
-            for (i in 0..3) {
+            for (i in 0..50) {
                 sendNum(i.toDouble(), controller)
             }
         }
@@ -39,6 +38,11 @@ fun main() {
 }
 
 suspend fun sendNum(num: Double, controller: CodeController) {
-    controller.ccPlot(num, num * num)
-    delay(2000)
+//    controller.ccPlot("expo", num, (num * num).coerceAtMost(400.0),1.0)
+//    controller.ccPlot("sin", num, sin(num)*300,1.0)
+//    controller.ccPlot("from control", num, controller.ccDouble("for plot") { range = 0.0..400.0; default = 0.0},1.0)
+    println(controller.ccVec("testing"))
+    delay(500)
+
+    controller.ccBool("new feature", true) { }
 }

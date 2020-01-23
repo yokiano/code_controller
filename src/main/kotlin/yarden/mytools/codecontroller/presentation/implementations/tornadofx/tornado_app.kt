@@ -1,16 +1,16 @@
 package yarden.mytools.codecontroller.presentation.implementations.tornadofx
 
+import XYControl
 import javafx.beans.value.ObservableValue
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.chart.NumberAxis
+import javafx.scene.chart.XYChart
 import javafx.scene.control.ToggleButton
 import javafx.scene.control.Tooltip
-import javafx.scene.layout.HBox
-import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
+import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -27,16 +27,31 @@ class TornadoApp(override val kodein: Kodein) : App(MainView::class, MyStyle::cl
 
 class MainView() : View() {
 
+
+
     private val driver: TornadoDriver by kodein().instance()
+
 
     override val root = borderpane {
         addClass(MyStyle.root)
 
+        left {
+            flowpane {
+                alignment = Pos.CENTER
+                paddingAll = 20.0
+                bindChildren(driver.unitsList.listVM.value.filter { it.item is TXYControl }.toObservable()) { unitVM ->
+                    val item = unitVM.item as TXYControl
+                    val c = XYControl(unitVM.item.id)
+//                    c.pointerX.bind(item.value)
+                    c.root.attachTo(this)
+                }
+            }
+        }
         center {
             hbox {
                 // Main hbox
-                alignment = Pos.CENTER
 
+                alignment = Pos.CENTER
                 // -------------- TOGGLES --------------
                 flowpane {
                     // Toggles pane
@@ -134,31 +149,55 @@ class MainView() : View() {
         }
         // -------------- PLOT --------------
         right {
-//            val chartList = driver.chartSeries.plotList
-            val pointList = driver.chartSeries.dataPointlistVM.value
-            println("driver.chartSeries.dataPointlistVM.value.size = ${pointList.size}")
-            if (pointList.size > 0) {
-                linechart("Plotter", NumberAxis(), NumberAxis()) {
-                    addClass(MyStyle.lineChart)
-                    val singleSeries = series("X") {
-                        addClass(MyStyle.chartSeries)
-                        for (dataPoint in pointList) {
-                            data(dataPoint.x,dataPoint.y)
-                        }
-                    }
+            vbox {
+                val seriesList = ArrayList<XYChart.Series<Number, Number>>()
+                if (driver.plotter.visible) {
+                    linechart("Plotter", NumberAxis(), NumberAxis()) {
+                        vgrow = Priority.ALWAYS
+                        animated = false
+                        addClass(MyStyle.lineChart)
+                        for (plotLine in driver.plotter.lines) {
+                            val singleSeries =
+                                series(plotLine.id) {
 
-                    pointList.onChange{
-                        val newData = it.list.last()
-                        singleSeries.apply {
-                            data(newData.x,newData.y)
+                                    addClass(MyStyle.plotLine)
+                                    // add the already existing data points
+                                    for (dataPoint in plotLine.dataPointsList) {
+                                        data(dataPoint.x, dataPoint.y)
+                                    }
+                                }
+                            seriesList.add(singleSeries)
+
+                            plotLine.dataPointsList.onChange {
+                                val newData = it.list.last()
+                                singleSeries.apply {
+                                    data(newData.x, newData.y)
+                                }
+                            }
+                        }
+
+
+                    }
+                }
+                hbox {
+                    for (plotLine in driver.plotter.lines) {
+                        button("Reset ${plotLine.id}") {
+                            action {
+                                for (series in seriesList) {
+                                    if (series.name == plotLine.id) {
+                                        series.data.clear()
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
-
         }
         getAllNodes(this).filter { it is HBox || it is VBox }.addClass(MyStyle.someBox)
+
     }
+
 
     private fun ToggleButton.updateToggleStyle(unit: TToggle) {
         if (unit.valueProperty.value == true) {

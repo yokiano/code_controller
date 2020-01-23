@@ -30,5 +30,16 @@ class CCGuiToggle(override val id: String,default: Boolean) : CCGuiUnit {
         }
     override var value : Boolean = default
     override val ccType = CCType.BOOL
+}
+
+class CCGuiXYControl(override val id: String) : CCGuiUnit {
+    override var default = Pair(0.0,0.0)
+        set(v) {
+            field = v
+            value = v
+        }
+    override var value = default
+
+    override val ccType = CCType.VEC2
 
 }

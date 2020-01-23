@@ -4,6 +4,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.OverrunStyle
 import javafx.scene.effect.DropShadow
 import javafx.scene.effect.InnerShadow
+import javafx.scene.image.Image
 import javafx.scene.layout.BackgroundSize
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
@@ -27,7 +28,7 @@ class MyStyle : Stylesheet() {
         val slidersVBox by cssclass()
 
         val lineChart by cssclass()
-        val chartSeries by cssclass()
+        val plotLine by cssclass()
 
         val textColor = Color.BLANCHEDALMOND
 
@@ -42,15 +43,34 @@ class MyStyle : Stylesheet() {
             wrapText = true
         }
 
+        // For debugging
+        val colorize = mixin {
+            val bcolor = Color.RED
+            val color = Color.YELLOW
+//            backgroundColor += bcolor
+            textFill = color
+            barFill = color
+            highlightFill = color
+            promptTextFill = color
+            tickLabelFill = color
+            highlightTextFill = color
+//            fill = color
+            accentColor = color
+            baseColor = color
+            alternativeColumnFillVisible = true
+            alternativeRowFillVisible = true
+        }
+
         root {
             //            backgroundColor += c("#5d5d5d")
             backgroundImage += javaClass.getResource("/main_view/background/2338.jpg").toURI()
             backgroundSize += BackgroundSize(10.0, 100.0, false, false, true, true)
         }
 
+        // for DEBUG
         // -------------- LAYOUT --------------
         someBox {
-//            borderColor += box(Color.WHITE)
+                        borderColor += box(Color.WHITE)
         }
 
 
@@ -89,6 +109,9 @@ class MyStyle : Stylesheet() {
 
 
         // -------------- TOGGLE BUTTON --------------\
+        label {
+            +defaultTextStyle
+        }
         toggleLabel {
             +defaultTextStyle
         }
@@ -97,25 +120,27 @@ class MyStyle : Stylesheet() {
             textOverrun = OverrunStyle.WORD_ELLIPSIS
         }
         toggleButtonOn {
-            graphic = File("controls/toggle/on.png").toURI()
+            graphic = javaClass.getResource("/controls/toggle/on.png").toURI()
+//            graphic = File("/controls/toggle/on.png").toURI()
 
         }
         toggleButtonOff {
-            graphic = File("controls/toggle/off.png").toURI()
+            graphic = javaClass.getResource("/controls/toggle/off.png").toURI()
         }
 
         // ------ PLOTS ------ //
         lineChart {
-            textFill = Color.WHITE
-//            fontSize = 20.px
-
-//            backgroundColor += Color.BLANCHEDALMOND
-
-        }
-        chartSeries {
-            textFill = Color.WHITE
             backgroundColor += Color.WHITE
+
         }
+        chartLegend {
+            hover {
+                backgroundColor += Color.PINK
+
+            }
+        }
+
+
     }
 
 }
