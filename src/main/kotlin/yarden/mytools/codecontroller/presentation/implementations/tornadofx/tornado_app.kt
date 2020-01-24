@@ -41,8 +41,8 @@ class MainView() : View() {
                 paddingAll = 20.0
                 bindChildren(driver.unitsList.listVM.value.filter { it.item is TXYControl }.toObservable()) { unitVM ->
                     val item = unitVM.item as TXYControl
-                    val c = XYControl(unitVM.item.id)
-//                    c.pointerX.bind(item.value)
+                    val c = XYControl(item.id,item.range)
+                    c.pointerProperty.bind(item.valueProperty)
                     c.root.attachTo(this)
                 }
             }

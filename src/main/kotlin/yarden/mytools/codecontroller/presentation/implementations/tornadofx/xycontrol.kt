@@ -1,19 +1,24 @@
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
-import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
 import tornadofx.*
 
-class XYControl(val id: String) : View() {
+class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>) : View() {
 
-    var pointer = Vector2D.ZERO
-    var pointerX = SimpleDoubleProperty(30.0)
-    var pointerY = SimpleDoubleProperty(30.0)
-    val valueLabel = SimpleStringProperty("(${pointerX.value},${pointerY.value})")
+    val pointerProperty = SimpleObjectProperty<XYPoint>(XYPoint(0.0, 0.0))
+    var pointer : XYPoint by pointerProperty
+
+    val internalX = SimpleDoubleProperty(0.0)
+    val internalY = SimpleDoubleProperty(0.0)
+
+    //    var pointerX = SimpleDoubleProperty(30.0)
+//    var pointerY = SimpleDoubleProperty(30.0)
+    val valueLabel = SimpleStringProperty("(${pointer.x},${pointer.y})")
 
     val size = 150.0
     val limit = 190.0
@@ -27,11 +32,11 @@ class XYControl(val id: String) : View() {
         alignment = Pos.CENTER
 
         controller
-            label(this@XYControl.id)
-            label("$valueLabel - ${pointerX.value}") {
-                textProperty().bind(valueLabel)
-                paddingBottom = -14.0
-            }
+        label(this@XYControl.id)
+        label("$valueLabel") {
+            textProperty().bind(valueLabel)
+            paddingBottom = -14.0
+        }
     }
 
     val controller = stackpane {
@@ -45,38 +50,44 @@ class XYControl(val id: String) : View() {
                 arcWidth = 10.0
                 arcHeight = 10.0
 
-                fun update(x: Double, y: Double) {
-
+                fun updatePointer(x: Double, y: Double) {
                     val nx = x.coerceIn(0.0, width)
                     val ny = y.coerceIn(0.0, height)
-                    pointerX.value = nx
-                    pointerY.value = ny
-                    valueLabel.value = "($nx,$ny)"
+                    pointer.x = nx.mapTo(0.0,width,range.first.x,range.second.x)
+                    pointer.y = ny.mapTo(0.0,height,range.first.y,range.second.y)
+                    internalX.value = nx
+                    internalY.value = ny
+                    valueLabel.value = "(${"%.2f".format(pointer.x)},${"%.2f".format(pointer.y)})"
                 }
 
                 setOnMouseDragged {
                     it.apply {
-                        update(x, y)
+                        updatePointer(x, y)
                     }
                 }
                 setOnTouchMoved {
                     it.touchPoint.apply {
-                        update(x, y)
+                        updatePointer(x, y)
                     }
                 }
                 val draggedEvent = onMouseDragged
                 val touchEvent = onTouchMoved
                 setOnMouseClicked {
-                    update(it.x, it.y)
+                    updatePointer(it.x, it.y)
                 }
 
 
                 // ------ CHILDREN ------ //                                                // ------ CHILDREN ------ //
+
+
+
                 circle {
                     fill = Color.WHITE
-                    centerXProperty().bind(pointerX)
-                    centerYProperty().bind(pointerY)
-                    radius = 7.0
+//                    pointer.xProperty.bindBidirectional(centerXProperty())
+//                    pointer.yProperty.bindBidirectional(centerYProperty())
+                    centerXProperty().bind(internalX)
+                    centerYProperty().bind(internalY)
+                    radius = 6.0
 
                     onMouseDragged = draggedEvent
                     onTouchMoved = touchEvent
@@ -84,26 +95,24 @@ class XYControl(val id: String) : View() {
                 }
 
                 val setParams: Line.() -> Unit = {
-                    stroke = Color.WHITE
+                    stroke = Color.GRAY
                     fill = Color.WHITE
                     strokeWidth = .5
                     onMouseDragged = draggedEvent
                     onTouchMoved = touchEvent
 
-
                 }
+
                 line {
                     startX = 0.0
-                    startYProperty().bind(pointerY)
+                    startYProperty().bind(internalY)
                     endX = width
-                    endYProperty().bind(pointerY)
-
-
+                    endYProperty().bind(internalY)
                 }.setParams()
                 line {
-                    startXProperty().bind(pointerX)
+                    startXProperty().bind(internalX)
                     startY = 0.0
-                    endXProperty().bind(pointerX)
+                    endXProperty().bind(internalX)
                     endY = height
                 }.setParams()
 
@@ -113,4 +122,12 @@ class XYControl(val id: String) : View() {
         }
 
     }
+}
+
+class XYPoint(x_: Double, y_: Double) {
+    val xProperty = SimpleDoubleProperty(x_)
+    val yProperty = SimpleDoubleProperty(y_)
+    var x: Double by xProperty
+    var y: Double by yProperty
+
 }

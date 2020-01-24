@@ -39,7 +39,7 @@ class CCGuiXYControl(override val id: String) : CCGuiUnit {
             value = v
         }
     override var value = default
-
     override val ccType = CCType.VEC2
 
+    var range =  Pair(Pair(0.0,0.0),Pair(1.0,1.0))
 }

@@ -1,5 +1,6 @@
 package yarden.mytools.codecontroller.presentation.implementations.tornadofx
 
+import XYPoint
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
@@ -60,10 +61,14 @@ interface TUnit<T> {
     val value: T
     val valueProperty: SimpleObjectProperty<T>
     val controlType: TType
-    val initialValue : T
+    val initialValue: T
 }
 
-class TSlider(override val id: String, override val initialValue: Double = 0.0, val range: ClosedRange<Double> = 0.0..1.0) :
+class TSlider(
+    override val id: String,
+    override val initialValue: Double = 0.0,
+    val range: ClosedRange<Double> = 0.0..1.0
+) :
     TUnit<Double> {
 
     override val valueProperty = SimpleObjectProperty<Double>(initialValue)
@@ -78,10 +83,14 @@ class TToggle(override val id: String, override val initialValue: Boolean = fals
     override val value: Boolean by valueProperty
 }
 
-class TXYControl(override val id: String, override val initialValue: Vector2D = Vector2D.ZERO) : TUnit<Vector2D> {
+class TXYControl(
+    override val id: String,
+    override val initialValue: XYPoint = XYPoint(0.0, 0.0),
+    val range : Pair<XYPoint,XYPoint> = Pair(XYPoint(0.0, 0.0), XYPoint(1.0, 1.0))
+) : TUnit<XYPoint> {
     override val controlType = TType.XYControl
-    override val valueProperty = SimpleObjectProperty<Vector2D>(initialValue)
-    override val value: Vector2D by valueProperty
+    override val valueProperty = SimpleObjectProperty<XYPoint>(initialValue)
+    override val value: XYPoint by valueProperty
 }
 
 sealed class TType {

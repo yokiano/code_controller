@@ -47,7 +47,6 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
                 item.list.add(tUnitVM)
                 item.sort()
                 tUnit.valueProperty.onChange {
-                    println("sending data")
                     eventsChannel.send(UnitAdapter.toCCUnit(tUnit))
                 }
             }

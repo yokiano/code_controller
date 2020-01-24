@@ -1,6 +1,6 @@
 package yarden.mytools.codecontroller.presentation.implementations.tornadofx
 
-import tornadofx.Vector2D
+import XYPoint
 import yarden.mytools.codecontroller.presentation.common.entities.CCGuiSlider
 import yarden.mytools.codecontroller.presentation.common.entities.CCGuiToggle
 import yarden.mytools.codecontroller.presentation.common.entities.CCGuiUnit
@@ -18,7 +18,8 @@ class UnitAdapter {
                     TSlider(ccUnit.id, ccUnit.default, ccUnit.range)
                 }
                 is CCGuiXYControl -> {
-                    TXYControl(ccUnit.id, Vector2D(ccUnit.default.first,ccUnit.default.second))
+                    val range = Pair(XYPoint(ccUnit.range.first.first,ccUnit.range.first.second),XYPoint(ccUnit.range.second.first,ccUnit.range.second.second))
+                    TXYControl(ccUnit.id, XYPoint(ccUnit.default.first,ccUnit.default.second),range)
                 }
                 else -> {
                     TToggle("Error with unit conversion")

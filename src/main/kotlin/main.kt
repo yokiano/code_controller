@@ -41,7 +41,8 @@ suspend fun sendNum(num: Double, controller: CodeController) {
 //    controller.ccPlot("expo", num, (num * num).coerceAtMost(400.0),1.0)
 //    controller.ccPlot("sin", num, sin(num)*300,1.0)
 //    controller.ccPlot("from control", num, controller.ccDouble("for plot") { range = 0.0..400.0; default = 0.0},1.0)
-    println(controller.ccVec("testing"))
+    val a = controller.ccVec("testing") { setRange(30.0,30.0,100.0,100.0)}
+//    println(a)
     delay(500)
 
     controller.ccBool("new feature", true) { }
