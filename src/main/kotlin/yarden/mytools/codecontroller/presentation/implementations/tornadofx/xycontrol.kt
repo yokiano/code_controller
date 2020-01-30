@@ -44,6 +44,8 @@ class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>) : View() {
         paddingAll = 15.0
         group {
             rect = rectangle {
+                stroke = Color.BLANCHEDALMOND
+                strokeWidth = 2.0
                 fill = Color.BLACK
                 width = size
                 height = size
@@ -95,7 +97,7 @@ class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>) : View() {
                 }
 
                 val setParams: Line.() -> Unit = {
-                    stroke = Color.GRAY
+                    stroke = Color.BLANCHEDALMOND
                     fill = Color.WHITE
                     strokeWidth = .5
                     onMouseDragged = draggedEvent

@@ -1,10 +1,7 @@
 package yarden.mytools.codecontroller.domain
 
 import GuiUnitsChannel
-import yarden.mytools.codecontroller.presentation.common.entities.CCGuiSlider
-import yarden.mytools.codecontroller.presentation.common.entities.CCGuiToggle
-import yarden.mytools.codecontroller.presentation.common.entities.CCGuiUnit
-import yarden.mytools.codecontroller.presentation.common.entities.CCGuiXYControl
+import yarden.mytools.codecontroller.presentation.common.entities.*
 
 
 enum class CCType {
@@ -94,6 +91,7 @@ class CCBool(override val id: String) : CCUnit {
 
 }
 
+
 class CCVec(override val id: String) : CCUnit {
     override var default = Pair(0.0, 0.0)
         set(v) {
@@ -105,9 +103,9 @@ class CCVec(override val id: String) : CCUnit {
     override val type = CCType.VEC2
     override var state = CCUnitState.NEW
 
-    var range = Pair(Pair(0.0,0.0),Pair(1.0,1.0))
-    fun setRange(leftTopX : Double,leftTopY: Double, rightBottomX : Double, rightBottomY: Double ) {
-        range = Pair(Pair(leftTopX,leftTopY),Pair(rightBottomX,rightBottomY))
+    var range = Pair(Pair(0.0, 0.0), Pair(1.0, 1.0))
+    fun setRange(leftTopX: Double, leftTopY: Double, rightBottomX: Double, rightBottomY: Double) {
+        range = Pair(Pair(leftTopX, leftTopY), Pair(rightBottomX, rightBottomY))
     }
 
 
@@ -128,3 +126,6 @@ class CCVec(override val id: String) : CCUnit {
         }
     }
 }
+
+data class CCInfoDatum(val id: String, val info : String)
+

@@ -15,6 +15,7 @@ import java.io.File
 class MyStyle : Stylesheet() {
 
     companion object {
+        val labelsPane by cssclass()
         val toggleLabel by cssclass()
         val togglesVBox by cssclass()
         val toggleButton by cssclass()
@@ -43,6 +44,11 @@ class MyStyle : Stylesheet() {
             wrapText = true
         }
 
+        // for DEBUG
+        // -------------- LAYOUT --------------
+        someBox {
+            //            borderColor += box(Color.WHITE)
+        }
         // For debugging
         val colorize = mixin {
             val bcolor = Color.RED
@@ -67,13 +73,12 @@ class MyStyle : Stylesheet() {
             backgroundSize += BackgroundSize(10.0, 100.0, false, false, true, true)
         }
 
-        // for DEBUG
-        // -------------- LAYOUT --------------
-        someBox {
-                        borderColor += box(Color.WHITE)
+        // ------ LABELS ------ //
+        labelsPane {
+            //            borderColor += box(Color.BLANCHEDALMOND)
+//            backgroundColor += Color(1.0,0.0,0.0,0.2)
+            backgroundColor += Color.web("313131", 0.4)
         }
-
-
         // -------------- SLIDER --------------
         track {
             prefWidth = 13.px
@@ -131,12 +136,31 @@ class MyStyle : Stylesheet() {
         // ------ PLOTS ------ //
         lineChart {
             backgroundColor += Color.WHITE
-
+            textFill = Color.BLACK
         }
         chartLegend {
-            hover {
-                backgroundColor += Color.PINK
+            backgroundColor += Color.WHITE
+                chartLineSymbol {
+                    visibility = FXVisibility.VISIBLE
+                    baseColor = Color.BLACK
+            }
+        }
+        chartLegendItem {
+            textFill = Color.BLACK
+            fontWeight = FontWeight.LIGHT
+        }
+        chartSeriesLine {
+            fill = Color.BLACK
 
+        }
+        chartSymbol {
+            fill = Color.BLACK
+
+        }
+        chartLineSymbol {
+            visibility = FXVisibility.COLLAPSE
+            hover {
+                visibility = FXVisibility.VISIBLE
             }
         }
 

@@ -2,8 +2,10 @@ package yarden.mytools.codecontroller.presentation.implementations.tornadofx
 
 import GuiEventsChannel
 import GuiPresentationDriver
+import InternalChannel
 import XYControl
 import javafx.application.Platform
+import javafx.beans.property.SimpleListProperty
 import javafx.stage.Stage
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -19,8 +21,11 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
 
     val unitsList = UnitsListViewModel(UnitList())
     private val eventsChannel: GuiEventsChannel by instance()
+    val internalChannel: InternalChannel by instance()
 
     val plotter = Plotter()
+
+    val infoLabelList = ArrayList<TInfoLabel>()
 
 
     override fun launchApp() {
@@ -55,9 +60,9 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
         reloadViews()
     }
 
-    fun addDataPointTo(id: String, data : Pair<Double,Double>) {
-        val plotLine : PlotLine by instance( arg = id)
-        val dataVec = Vector2D(data.first,data.second)
+    fun addDataPointTo(id: String, data: Pair<Double, Double>) {
+        val plotLine: PlotLine by instance(arg = id)
+        val dataVec = Vector2D(data.first, data.second)
         runLater {
             plotLine.add(dataVec)
         }
@@ -74,6 +79,21 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
         }
     }
 
+    fun updateInfoLabel(id: String, info: String) {
+        val infoLabel: TInfoLabel by instance(arg = id)
+
+        if (infoLabel.state == CCUnitState.NEW) {
+            infoLabelList.add(infoLabel)
+            reloadViews()
+            infoLabel.state = CCUnitState.LIVE
+        }
+
+        runLater {
+            infoLabel.valueProperty.value = info
+        }
+
+    }
+
     fun reloadViews() {
         // Reloading the Views.
         runLater {
@@ -82,5 +102,6 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
             }
         }
     }
+
 
 }

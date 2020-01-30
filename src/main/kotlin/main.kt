@@ -3,6 +3,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import yarden.mytools.codecontroller.domain.CodeController
+import java.time.format.DateTimeFormatter
 import kotlin.math.sin
 
 fun main() {
@@ -17,7 +18,7 @@ fun main() {
 
         runBlocking {
 
-            for (i in 0..50) {
+            for (i in 300..100000) {
                 sendNum(i.toDouble(), controller)
             }
         }
@@ -41,9 +42,10 @@ suspend fun sendNum(num: Double, controller: CodeController) {
 //    controller.ccPlot("expo", num, (num * num).coerceAtMost(400.0),1.0)
 //    controller.ccPlot("sin", num, sin(num)*300,1.0)
 //    controller.ccPlot("from control", num, controller.ccDouble("for plot") { range = 0.0..400.0; default = 0.0},1.0)
+//    controller.ccInfo("test and",num.toString())
+    controller.ccPlot("test2",num,num)
     val a = controller.ccVec("testing") { setRange(30.0,30.0,100.0,100.0)}
-//    println(a)
-    delay(500)
+        delay(50)
 
-    controller.ccBool("new feature", true) { }
+    controller.ccToggleCode("new feature") { }
 }

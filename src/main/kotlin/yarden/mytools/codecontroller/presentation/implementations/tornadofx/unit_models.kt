@@ -3,33 +3,29 @@ package yarden.mytools.codecontroller.presentation.implementations.tornadofx
 import XYPoint
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import org.kodein.di.Kodein
+import org.kodein.di.KodeinAware
+import org.kodein.di.generic.instance
 import tornadofx.ItemViewModel
 import tornadofx.Vector2D
 import tornadofx.getValue
 import tornadofx.sortWith
+import yarden.mytools.codecontroller.domain.CCType
 import yarden.mytools.codecontroller.domain.CCUnitState
 
 class Plotter {
     val lines = ArrayList<PlotLine>()
     var visible = false
 
+    val maxDataPoints = 250
     fun addPlotLine(plotLine: PlotLine) {
         lines.add(plotLine)
     }
 }
 
-class PlotLine(val id: String) {
-    val dataPointListProperty = SimpleListProperty<Vector2D>(FXCollections.observableArrayList())
-    val dataPointsList by dataPointListProperty
-
-    var state = CCUnitState.NEW
-
-    fun add(vec: Vector2D) {
-        dataPointsList.add(vec)
-    }
-}
 
 // class that binds the units list to the dynamic ViewModel
 class UnitsListViewModel(unitList: UnitList) : ItemViewModel<UnitList>(unitList) {
@@ -93,8 +89,29 @@ class TXYControl(
     override val value: XYPoint by valueProperty
 }
 
+class PlotLine(val id: String, override val kodein: Kodein) : KodeinAware {
+    val dataPointListProperty = SimpleListProperty<Vector2D>(FXCollections.observableArrayList())
+    val dataPointsList by dataPointListProperty
+
+    val tornadoDriver : TornadoDriver by instance()
+
+    var state = CCUnitState.NEW
+    fun add(vec: Vector2D) {
+        dataPointsList.add(vec)
+        if (dataPointsList.size > tornadoDriver.plotter.maxDataPoints ) dataPointsList.removeAt(0) // Constrains the size of of the plotter. TODO - configurable?
+    }
+}
+
+class TInfoLabel(val id: String) {
+    val valueProperty = SimpleStringProperty()
+    val value : String by valueProperty
+
+    var state = CCUnitState.NEW
+}
+
 sealed class TType {
     object Slider : TType()
     object Toggle : TType()
     object XYControl : TType()
+    object InfoLabel : TType()
 }

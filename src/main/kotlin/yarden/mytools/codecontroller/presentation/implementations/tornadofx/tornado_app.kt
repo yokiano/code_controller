@@ -27,26 +27,49 @@ class TornadoApp(override val kodein: Kodein) : App(MainView::class, MyStyle::cl
 
 class MainView() : View() {
 
-
-
     private val driver: TornadoDriver by kodein().instance()
-
 
     override val root = borderpane {
         addClass(MyStyle.root)
 
+        // ------ LABELS AND XY CONTROLLERS ------ //
         left {
-            flowpane {
-                alignment = Pos.CENTER
-                paddingAll = 20.0
-                bindChildren(driver.unitsList.listVM.value.filter { it.item is TXYControl }.toObservable()) { unitVM ->
-                    val item = unitVM.item as TXYControl
-                    val c = XYControl(item.id,item.range)
-                    c.pointerProperty.bind(item.valueProperty)
-                    c.root.attachTo(this)
+            hbox {
+
+                // --- iNFO LABELS
+                vbox {
+                    addClass(MyStyle.labelsPane)
+                    maxWidth = 250.0
+                    paddingVertical = 20.0
+                    paddingHorizontal = 10.0
+                    bindChildren(driver.infoLabelList.asObservable()) { infoLabel ->
+                        hbox {
+                            label("${infoLabel.id} - ") {
+                                prefWidth = 150.0
+                            }
+                            label {
+                                textProperty().bindBidirectional(infoLabel.valueProperty)
+                            }
+                        }
+                    }
                 }
+
+                // --- XY CONTROLLERS
+                flowpane {
+                    alignment = Pos.CENTER
+                    paddingAll = 20.0
+                    bindChildren(driver.unitsList.listVM.value.filter { it.item is TXYControl }.toObservable()) { unitVM ->
+                        val item = unitVM.item as TXYControl
+                        val c = XYControl(item.id, item.range)
+                        c.pointerProperty.bind(item.valueProperty)
+                        c.root.attachTo(this)
+                    }
+                }
+
             }
+
         }
+        // ------ TOGGLES AND SLIDERS ------ //
         center {
             hbox {
                 // Main hbox
@@ -69,11 +92,11 @@ class MainView() : View() {
                                     togglebutton("") {
                                         addClass(MyStyle.toggleButton)
                                         isSelected = unit.initialValue
-                                        updateToggleStyle(unit)
+                                        updateToggleStyle(unit.valueProperty.value)
 
                                         selectedProperty().onChange {
                                             unit.valueProperty.value = !unit.valueProperty.value
-                                            updateToggleStyle(unit)
+                                            updateToggleStyle(unit.valueProperty.value)
                                         }
                                     }
 
@@ -147,51 +170,82 @@ class MainView() : View() {
 
             }
         }
-        // -------------- PLOT --------------
+        // -------------- PLOT & ON/OFF TOGGLE--------------
         right {
-            vbox {
-                val seriesList = ArrayList<XYChart.Series<Number, Number>>()
-                if (driver.plotter.visible) {
-                    linechart("Plotter", NumberAxis(), NumberAxis()) {
-                        vgrow = Priority.ALWAYS
-                        animated = false
-                        addClass(MyStyle.lineChart)
-                        for (plotLine in driver.plotter.lines) {
-                            val singleSeries =
-                                series(plotLine.id) {
-
-                                    addClass(MyStyle.plotLine)
-                                    // add the already existing data points
-                                    for (dataPoint in plotLine.dataPointsList) {
-                                        data(dataPoint.x, dataPoint.y)
-                                    }
-                                }
-                            seriesList.add(singleSeries)
-
-                            plotLine.dataPointsList.onChange {
-                                val newData = it.list.last()
-                                singleSeries.apply {
-                                    data(newData.x, newData.y)
-                                }
-                            }
+            borderpane {
+                right {
+                    hbox {
+                        separator(Orientation.VERTICAL) {
+                            paddingHorizontal = 10.0
                         }
+                        togglebutton("") {
+                            addClass(MyStyle.toggleButton)
+                            isSelected = true
+                            updateToggleStyle(true)
 
-
-                    }
-                }
-                hbox {
-                    for (plotLine in driver.plotter.lines) {
-                        button("Reset ${plotLine.id}") {
-                            action {
-                                for (series in seriesList) {
-                                    if (series.name == plotLine.id) {
-                                        series.data.clear()
-                                    }
-                                }
+                            selectedProperty().onChange {
+                              driver.internalChannel.send(it)
+                                updateToggleStyle(isSelected)
                             }
                         }
                     }
                 }
+                left {
+                    vbox {
+                        val seriesList = ArrayList<XYChart.Series<Number, Number>>()
+                        if (driver.plotter.visible) {
+                            val xA = NumberAxis()
+                            val yA = NumberAxis()
+                            linechart("Plotter", xA, yA) {
+                                xA.isForceZeroInRange = false
+                                vgrow = Priority.ALWAYS
+                                animated = false
+                                addClass(MyStyle.lineChart)
+                                for (plotLine in driver.plotter.lines) {
+                                    val singleSeries =
+                                        series(plotLine.id) {
+                                            addClass(MyStyle.plotLine)
+                                            // add the already existing data points
+                                            for (dataPoint in plotLine.dataPointsList) {
+                                                data(dataPoint.x, dataPoint.y)
+                                            }
+                                        }
+                                    seriesList.add(singleSeries)
+
+                                    plotLine.dataPointsList.onChange { listChange ->
+                                        val newData = listChange.list.last()
+
+                                        singleSeries.apply {
+
+
+                                            data(newData.x, newData.y)
+                                            if (singleSeries.data.size > driver.plotter.maxDataPoints) {
+                                                singleSeries.data.removeAt(0)
+                                            }
+    //                                    if (chart.data[0].data.size > driver.plotter.maxDataPoints ) {
+    //                                        chart.data[0].data.removeAt(0)
+    //                                    }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        hbox {
+                            for (plotLine in driver.plotter.lines) {
+                                button("Reset ${plotLine.id}") {
+                                    action {
+                                        for (series in seriesList) {
+                                            if (series.name == plotLine.id) {
+                                                series.data.clear()
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
         }
         getAllNodes(this).filter { it is HBox || it is VBox }.addClass(MyStyle.someBox)
@@ -199,8 +253,8 @@ class MainView() : View() {
     }
 
 
-    private fun ToggleButton.updateToggleStyle(unit: TToggle) {
-        if (unit.valueProperty.value == true) {
+    private fun ToggleButton.updateToggleStyle(value: Boolean) {
+        if (value) {
             removeClass(MyStyle.toggleButtonOff)
             addClass(MyStyle.toggleButtonOn)
         } else {
