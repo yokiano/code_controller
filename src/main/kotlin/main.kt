@@ -23,27 +23,13 @@ fun main() {
             }
         }
 
-//        val interval = 1_000_000_005
-//        val sj = j % interval
-//        val jd = sj.toDouble()
-//        if (sj == 0L) {
-//            val num = (j / interval - 1).toDouble()
-//            controller.ccPlot(num, num * num)
-//            println("YARDEN: sending ====  $  ${num * num})")
-//        }
-//        j += 1
-//        Thread.sleep(500)
-
 
     }
 }
 
 suspend fun sendNum(num: Double, controller: CodeController) {
-//    controller.ccPlot("expo", num, (num * num).coerceAtMost(400.0),1.0)
-//    controller.ccPlot("sin", num, sin(num)*300,1.0)
-//    controller.ccPlot("from control", num, controller.ccDouble("for plot") { range = 0.0..400.0; default = 0.0},1.0)
-//    controller.ccInfo("test and",num.toString())
-    controller.ccPlot("test2",num,num)
+//    controller.ccPlot("test2",num,num)
+//    controller.ccVec("vector2",1.0 to 1.0)
     val a = controller.ccVec("testing") { setRange(30.0,30.0,100.0,100.0)}
         delay(50)
 

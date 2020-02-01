@@ -15,27 +15,44 @@ import java.io.File
 class MyStyle : Stylesheet() {
 
     companion object {
+        // Global
+        val root by cssclass()
+        val textColor = Color.BLANCHEDALMOND
+
+        // Config View
+        val configButton by cssclass()
+        val saveButton by cssclass()
+        val loadButton by cssclass()
+        val deleteButton by cssclass()
+
+        // Info label
         val labelsPane by cssclass()
+
+        // Toggle
         val toggleLabel by cssclass()
         val togglesVBox by cssclass()
         val toggleButton by cssclass()
         val toggleButtonOn by cssclass()
         val toggleButtonOff by cssclass()
+
+        // Sliders
         val sliderLabel by cssclass()
-        val root by cssclass()
         val sliderTextField by cssclass()
-        val someBox by cssclass()
         val sliderStyle by cssclass()
         val slidersVBox by cssclass()
 
+        //Debug
+        val someBox by cssclass()
+
+        //Plots
         val lineChart by cssclass()
         val plotLine by cssclass()
-
-        val textColor = Color.BLANCHEDALMOND
-
     }
 
     init {
+
+        configViewStyle()
+
         val defaultTextStyle = mixin {
             textFill = textColor
             fontSize = 16.px
@@ -47,7 +64,7 @@ class MyStyle : Stylesheet() {
         // for DEBUG
         // -------------- LAYOUT --------------
         someBox {
-            //            borderColor += box(Color.WHITE)
+//                        borderColor += box(Color.WHITE)
         }
         // For debugging
         val colorize = mixin {
@@ -167,4 +184,9 @@ class MyStyle : Stylesheet() {
 
     }
 
+    fun configViewStyle() {
+        configButton {
+            backgroundColor += Color.TRANSPARENT
+        }
+    }
 }

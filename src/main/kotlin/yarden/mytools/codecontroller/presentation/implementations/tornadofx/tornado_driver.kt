@@ -3,9 +3,7 @@ package yarden.mytools.codecontroller.presentation.implementations.tornadofx
 import GuiEventsChannel
 import GuiPresentationDriver
 import InternalChannel
-import XYControl
 import javafx.application.Platform
-import javafx.beans.property.SimpleListProperty
 import javafx.stage.Stage
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -27,8 +25,8 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
 
     val infoLabelList = ArrayList<TInfoLabel>()
 
-
     override fun launchApp() {
+
         tornadoApp.init()
         Platform.startup {
             val stage = Stage().apply {
@@ -57,6 +55,7 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
             }
 
         }
+        tUnit.configView.loadFromConfigFile()
         reloadViews()
     }
 

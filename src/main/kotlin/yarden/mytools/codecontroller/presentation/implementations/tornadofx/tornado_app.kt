@@ -25,6 +25,11 @@ class TornadoApp(override val kodein: Kodein) : App(MainView::class, MyStyle::cl
     }
 }
 
+object GlobalConfig : View() {
+    override val root = borderpane { }
+
+}
+
 class MainView() : View() {
 
     private val driver: TornadoDriver by kodein().instance()
@@ -59,15 +64,25 @@ class MainView() : View() {
                     alignment = Pos.CENTER
                     paddingAll = 20.0
                     bindChildren(driver.unitsList.listVM.value.filter { it.item is TXYControl }.toObservable()) { unitVM ->
-                        val item = unitVM.item as TXYControl
-                        val c = XYControl(item.id, item.range)
-                        c.pointerProperty.bind(item.valueProperty)
+                        val unit = unitVM.item as TXYControl
+//                        println("unit.value = ${unit.value.x}")
+                        val c = XYControl(unit.id, unit.range, unit.value)
+
+//                        unit.valueProperty.onChange {
+//                            it?.let {
+//                                println("changing")
+//                                c.updatePointer(it.x, it.y)
+//                            }
+//
+//                        }
+                        c.pointerProperty.bindBidirectional(unit.valueProperty)
+//                        c.pointer.xProperty.bindBidirectional(unit.valueProperty.value.xProperty)
+//                        c.pointerProperty.value.yProperty.bindBidirectional(unit.valueProperty.value.yProperty)
+                        c.attachConfigButtons(unit.configView)
                         c.root.attachTo(this)
                     }
                 }
-
             }
-
         }
         // ------ TOGGLES AND SLIDERS ------ //
         center {
@@ -100,13 +115,14 @@ class MainView() : View() {
                                         }
                                     }
 
+                                    unit.configView.root.maxWidth = this.width
+                                    unit.configView.root.attachTo(this)
                                 }
                             }
                             else -> {
                                 label("Unrecognized control unit")
                             }
                         }
-
                     }
                 }
 
@@ -152,6 +168,12 @@ class MainView() : View() {
                                             tooltip = Tooltip(unit.valueProperty.value.toString())
                                         }
                                     }
+
+                                    // Attaching the config buttons
+                                    val item = (unitVM.item as TSlider)
+                                    item.configView.root.maxWidth = this.width
+                                    item.configView.root.attachTo(this)
+
                                 }
                             }
                             else -> {
@@ -160,14 +182,10 @@ class MainView() : View() {
                                         textFill = Color.RED
                                     }
                                 }
-
                             }
                         }
-
                     }
                 }
-
-
             }
         }
         // -------------- PLOT & ON/OFF TOGGLE--------------
@@ -184,7 +202,7 @@ class MainView() : View() {
                             updateToggleStyle(true)
 
                             selectedProperty().onChange {
-                              driver.internalChannel.send(it)
+                                driver.internalChannel.send(it)
                                 updateToggleStyle(isSelected)
                             }
                         }
@@ -222,9 +240,9 @@ class MainView() : View() {
                                             if (singleSeries.data.size > driver.plotter.maxDataPoints) {
                                                 singleSeries.data.removeAt(0)
                                             }
-    //                                    if (chart.data[0].data.size > driver.plotter.maxDataPoints ) {
-    //                                        chart.data[0].data.removeAt(0)
-    //                                    }
+                                            //                                    if (chart.data[0].data.size > driver.plotter.maxDataPoints ) {
+                                            //                                        chart.data[0].data.removeAt(0)
+                                            //                                    }
                                         }
                                     }
                                 }
@@ -248,10 +266,8 @@ class MainView() : View() {
 
             }
         }
-        getAllNodes(this).filter { it is HBox || it is VBox }.addClass(MyStyle.someBox)
-
+        getAllNodes(this).filter { it is HBox || it is VBox || it is FlowPane }.addClass(MyStyle.someBox)
     }
-
 
     private fun ToggleButton.updateToggleStyle(value: Boolean) {
         if (value) {
@@ -260,7 +276,6 @@ class MainView() : View() {
         } else {
             removeClass(MyStyle.toggleButtonOn)
             addClass(MyStyle.toggleButtonOff)
-
         }
     }
 }

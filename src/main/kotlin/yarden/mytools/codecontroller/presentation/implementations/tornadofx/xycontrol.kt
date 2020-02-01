@@ -2,65 +2,60 @@ import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
+import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
 import tornadofx.*
 
-class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>) : View() {
+class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>, value: XYPoint) : View() {
 
-    val pointerProperty = SimpleObjectProperty<XYPoint>(XYPoint(0.0, 0.0))
-    var pointer : XYPoint by pointerProperty
+    val pointerProperty = SimpleObjectProperty<XYPoint>(value)
+    var pointer: XYPoint by pointerProperty
 
-    val internalX = SimpleDoubleProperty(0.0)
-    val internalY = SimpleDoubleProperty(0.0)
+    private val dimensions = 150.0
 
-    //    var pointerX = SimpleDoubleProperty(30.0)
-//    var pointerY = SimpleDoubleProperty(30.0)
-    val valueLabel = SimpleStringProperty("(${pointer.x},${pointer.y})")
+    val internalX = SimpleDoubleProperty(fromValuetoPixel(value.x, value.y).first)
+    val internalY = SimpleDoubleProperty(fromValuetoPixel(value.x, value.y).second)
 
-    val size = 150.0
-    val limit = 190.0
-//    var px : Double by pxp
+    val valueLabel = SimpleStringProperty("(${"%.2f".format(pointer.x)},${"%.2f".format(pointer.y)})")
 
+
+
+    lateinit var configBox: HBox
     lateinit var rect: Rectangle
 
     override val root: VBox = vbox {
-        setPrefSize(limit, limit)
-
         alignment = Pos.CENTER
+        configBox = hbox {
+            alignment = Pos.CENTER
+
+            vbox {
+                alignment = Pos.CENTER
+                label(this@XYControl.id)
+                label("$valueLabel") {
+                    textProperty().bindBidirectional(valueLabel)
+                    paddingBottom = -14.0
+                }
+            }
+        }
 
         controller
-        label(this@XYControl.id)
-        label("$valueLabel") {
-            textProperty().bind(valueLabel)
-            paddingBottom = -14.0
-        }
     }
 
     val controller = stackpane {
-
         paddingAll = 15.0
         group {
             rect = rectangle {
                 stroke = Color.BLANCHEDALMOND
                 strokeWidth = 2.0
                 fill = Color.BLACK
-                width = size
-                height = size
+                width = dimensions
+                height = dimensions
                 arcWidth = 10.0
                 arcHeight = 10.0
 
-                fun updatePointer(x: Double, y: Double) {
-                    val nx = x.coerceIn(0.0, width)
-                    val ny = y.coerceIn(0.0, height)
-                    pointer.x = nx.mapTo(0.0,width,range.first.x,range.second.x)
-                    pointer.y = ny.mapTo(0.0,height,range.first.y,range.second.y)
-                    internalX.value = nx
-                    internalY.value = ny
-                    valueLabel.value = "(${"%.2f".format(pointer.x)},${"%.2f".format(pointer.y)})"
-                }
 
                 setOnMouseDragged {
                     it.apply {
@@ -81,15 +76,13 @@ class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>) : View() {
 
                 // ------ CHILDREN ------ //                                                // ------ CHILDREN ------ //
 
-
-
                 circle {
                     fill = Color.WHITE
 //                    pointer.xProperty.bindBidirectional(centerXProperty())
 //                    pointer.yProperty.bindBidirectional(centerYProperty())
-                    centerXProperty().bind(internalX)
-                    centerYProperty().bind(internalY)
-                    radius = 6.0
+                    centerXProperty().bindBidirectional(internalX)
+                    centerYProperty().bindBidirectional(internalY)
+                    radius = 3.0
 
                     onMouseDragged = draggedEvent
                     onTouchMoved = touchEvent
@@ -123,6 +116,38 @@ class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>) : View() {
 
         }
 
+    }
+
+    fun updatePointer(x: Double, y: Double) {
+        fromPixelToValue(x, y).run {
+            pointer.x = first
+            pointer.y = second
+            internalX.value = x.coerceIn(0.0, dimensions)
+            internalY.value = y.coerceIn(0.0, dimensions)
+
+        }
+        valueLabel.value = "(${"%.2f".format(pointer.x)},${"%.2f".format(pointer.y)})"
+    }
+
+    fun attachConfigButtons(cv: ConfigView<XYPoint>) {
+        cv.root.run {
+            maxWidth = (this@XYControl.dimensions / 2.0)
+            attachTo(configBox)
+        }
+    }
+
+    private fun fromPixelToValue(x: Double, y: Double): Pair<Double, Double> {
+        val nx = x.coerceIn(0.0, rect.width).mapTo(0.0, rect.width, range.first.x, range.second.x)
+        val ny = y.coerceIn(0.0, rect.height).mapTo(0.0, rect.height, range.first.y, range.second.y)
+        return (nx to ny)
+    }
+
+    private fun fromValuetoPixel(x: Double, y: Double): Pair<Double, Double> {
+//        val nx = x.mapTo(range.first.x, range.second.x, 0.0, 150.0)
+//        val ny = y.mapTo(range.first.y, range.second.y, 0.0, 150.0)
+        val nx = x.mapTo(range.first.x, range.second.x, 0.0, dimensions)
+        val ny = y.mapTo(range.first.y, range.second.y, 0.0, dimensions)
+        return (nx to ny)
     }
 }
 
