@@ -114,10 +114,9 @@ class TXYControl(
 
     override fun updateFromJson(jsonObject: JsonObject) {
         val xy = jsonObject.getJsonObject("value")
-//        valueProperty.value = XYPoint(xy.getDouble("x"),xy.getDouble("y"))
-//        value.xProperty.value = xy.getDouble("x")
-//        valueProperty.value.yProperty.value = xy.getDouble("y")
-        println("valueProperty = ${valueProperty.value.x}")
+
+
+        valueProperty.value = XYPoint(xy.getDouble("x"),xy.getDouble("y"))
     }
 
     override fun convertToJson(): JsonObject {

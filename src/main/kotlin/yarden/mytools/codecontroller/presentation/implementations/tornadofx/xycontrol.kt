@@ -9,26 +9,44 @@ import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
 import tornadofx.*
 
-class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>, value: XYPoint) : View() {
+class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>, valueP: SimpleObjectProperty<XYPoint>) : View() {
 
-    val pointerProperty = SimpleObjectProperty<XYPoint>(value)
+    val pointerProperty = SimpleObjectProperty<XYPoint>(valueP.value)
     var pointer: XYPoint by pointerProperty
 
     private val dimensions = 150.0
 
-    val internalX = SimpleDoubleProperty(fromValuetoPixel(value.x, value.y).first)
-    val internalY = SimpleDoubleProperty(fromValuetoPixel(value.x, value.y).second)
+    val internalX = SimpleDoubleProperty(fromValuetoPixel(valueP.value.x, valueP.value.y).first)
+    val internalY = SimpleDoubleProperty(fromValuetoPixel(valueP.value.x, valueP.value.y).second)
 
     val valueLabel = SimpleStringProperty("(${"%.2f".format(pointer.x)},${"%.2f".format(pointer.y)})")
-
-
 
     lateinit var configBox: HBox
     lateinit var rect: Rectangle
 
-    override val root: VBox = vbox {
+    override val root: VBox = createView()
+
+//    val controller = createController()
+
+    init {
+        pointerProperty.bindBidirectional(valueP)
+
+
+        pointerProperty.onChange {
+            it?.let {
+                val convertedToPixels = fromValuetoPixel(it.x, it.y)
+                internalX.value = convertedToPixels.first
+                internalY.value = convertedToPixels.second
+                valueLabel.value = "(${"%.2f".format(convertedToPixels.first)},${"%.2f".format(convertedToPixels.second)})"
+            }
+        }
+    }
+
+    fun createView() = vbox {
         alignment = Pos.CENTER
-        configBox = hbox {
+
+        // Configuration Buttons
+        hbox {
             alignment = Pos.CENTER
 
             vbox {
@@ -41,10 +59,12 @@ class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>, value: XYPoin
             }
         }
 
-        controller
+        createController().attachTo(this)
+
     }
 
-    val controller = stackpane {
+
+    fun createController() = stackpane {
         paddingAll = 15.0
         group {
             rect = rectangle {
@@ -78,8 +98,6 @@ class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>, value: XYPoin
 
                 circle {
                     fill = Color.WHITE
-//                    pointer.xProperty.bindBidirectional(centerXProperty())
-//                    pointer.yProperty.bindBidirectional(centerYProperty())
                     centerXProperty().bindBidirectional(internalX)
                     centerYProperty().bindBidirectional(internalY)
                     radius = 3.0
@@ -110,13 +128,11 @@ class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>, value: XYPoin
                     endXProperty().bind(internalX)
                     endY = height
                 }.setParams()
-
-
             }
-
         }
-
     }
+
+
 
     fun updatePointer(x: Double, y: Double) {
         fromPixelToValue(x, y).run {
@@ -129,11 +145,12 @@ class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>, value: XYPoin
         valueLabel.value = "(${"%.2f".format(pointer.x)},${"%.2f".format(pointer.y)})"
     }
 
-    fun attachConfigButtons(cv: ConfigView<XYPoint>) {
+    fun attachConfigButtons(cv: ConfigView<XYPoint>): ConfigView<XYPoint> {
         cv.root.run {
-            maxWidth = (this@XYControl.dimensions / 2.0)
-            attachTo(configBox)
+            maxWidth = (this@XYControl.dimensions)
+            attachTo(this@XYControl.root)
         }
+        return cv
     }
 
     private fun fromPixelToValue(x: Double, y: Double): Pair<Double, Double> {

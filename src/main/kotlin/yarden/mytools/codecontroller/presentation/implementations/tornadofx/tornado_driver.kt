@@ -25,6 +25,8 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
 
     val infoLabelList = ArrayList<TInfoLabel>()
 
+    var hideConfigButtons = false
+
     override fun launchApp() {
 
         tornadoApp.init()
@@ -40,7 +42,6 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
         }
     }
 
-    var once = false
     override fun addUnit(ccUnit: CCGuiUnit) {
         val tUnit = UnitAdapter.toTornadoUnit(ccUnit)
         val tUnitVM = TUnitViewModel(tUnit)

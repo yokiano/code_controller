@@ -24,6 +24,10 @@ class MyStyle : Stylesheet() {
         val saveButton by cssclass()
         val loadButton by cssclass()
         val deleteButton by cssclass()
+        val hideConfig by cssclass()
+        val hideConfigOn by cssclass()
+        val hideConfigOff by cssclass()
+
 
         // Info label
         val labelsPane by cssclass()
@@ -88,6 +92,19 @@ class MyStyle : Stylesheet() {
             //            backgroundColor += c("#5d5d5d")
             backgroundImage += javaClass.getResource("/main_view/background/2338.jpg").toURI()
             backgroundSize += BackgroundSize(10.0, 100.0, false, false, true, true)
+        }
+
+        // ------ MAIN MENU ------ //
+        hideConfig {
+            backgroundColor += Color.TRANSPARENT
+            textOverrun = OverrunStyle.WORD_ELLIPSIS
+        }
+        hideConfigOn {
+            graphic = javaClass.getResource("/main_menu/hide_config_controls_on.png").toURI()
+
+        }
+        Companion.hideConfigOff {
+            graphic = javaClass.getResource("/main_menu/hide_config_controls_off.png").toURI()
         }
 
         // ------ LABELS ------ //

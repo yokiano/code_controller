@@ -122,7 +122,6 @@ class CCVec(override val id: String) : CCUnit {
         if (newVal is Pair<*, *> && newVal.first is Double && newVal.second is Double) {
             this.value = newVal as Pair<Double, Double>
         } else {
-            println("Error when trying to update CCVec value.")
         }
     }
 }

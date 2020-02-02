@@ -27,10 +27,10 @@ class GuiStateController(override val kodein: Kodein) : KodeinAware {
 
     }
 
-    private fun sendEvent(guiUnit: CCGuiUnit) {
-        // TODO - instead of sending modified classes, send a "command" to the yarden.mytools.codecontroller.domain layer (code_controller.kt) to make an operation on the local repository
-        eventsChannel.send(guiUnit)
-    }
+//    private fun sendEvent(guiUnit: CCGuiUnit) {
+//        // TODO - instead of sending modified classes, send a "command" to the yarden.mytools.codecontroller.domain layer (code_controller.kt) to make an operation on the local repository
+//        eventsChannel.send(guiUnit)
+//    }
 
     fun launchApp() {
         presentationDriver.launchApp()
