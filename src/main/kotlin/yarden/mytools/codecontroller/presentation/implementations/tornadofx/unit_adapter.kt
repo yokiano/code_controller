@@ -19,7 +19,7 @@ class UnitAdapter {
                 }
                 is CCGuiXYControl -> {
                     val range = Pair(XYPoint(ccUnit.range.first.first,ccUnit.range.first.second),XYPoint(ccUnit.range.second.first,ccUnit.range.second.second))
-                    TXYControl(ccUnit.id, XYPoint(ccUnit.default.first,ccUnit.default.second),range)
+                    TXYControl(ccUnit.id, range,XYPoint(ccUnit.default.first,ccUnit.default.second))
                 }
                 else -> {
                     TToggle("Error with unit conversion")

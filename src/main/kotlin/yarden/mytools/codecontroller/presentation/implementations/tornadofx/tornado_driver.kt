@@ -60,9 +60,15 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
         reloadViews()
     }
 
-    fun addDataPointTo(id: String, data: Pair<Double, Double>) {
+    fun addDataPointTo(id: String, data: Pair<Double, Double>, limit: Int) {
         val plotLine: PlotLine by instance(arg = id)
         val dataVec = Vector2D(data.first, data.second)
+
+        // Don't issue data point if we reached the limit.
+        if(plotLine.dataPointsList.size >= limit) {
+            return
+        }
+
         runLater {
             plotLine.add(dataVec)
         }

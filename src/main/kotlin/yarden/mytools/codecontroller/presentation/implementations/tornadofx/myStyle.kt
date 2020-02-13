@@ -68,7 +68,7 @@ class MyStyle : Stylesheet() {
         // for DEBUG
         // -------------- LAYOUT --------------
         someBox {
-//                        borderColor += box(Color.WHITE)
+            //                        borderColor += box(Color.WHITE)
         }
         // For debugging
         val colorize = mixin {
@@ -171,26 +171,22 @@ class MyStyle : Stylesheet() {
         lineChart {
             backgroundColor += Color.WHITE
             textFill = Color.BLACK
+
         }
+
+
         chartLegend {
             backgroundColor += Color.WHITE
-                chartLineSymbol {
-                    visibility = FXVisibility.VISIBLE
-                    baseColor = Color.BLACK
+            chartLineSymbol {
+                visibility = FXVisibility.VISIBLE
+                baseColor = Color.BLACK
             }
         }
         chartLegendItem {
             textFill = Color.BLACK
             fontWeight = FontWeight.LIGHT
         }
-        chartSeriesLine {
-            fill = Color.BLACK
 
-        }
-        chartSymbol {
-            fill = Color.BLACK
-
-        }
         chartLineSymbol {
             visibility = FXVisibility.COLLAPSE
             hover {

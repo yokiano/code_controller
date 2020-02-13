@@ -6,6 +6,7 @@ import GuiUnitsChannel
 import InfoLabelChannel
 import InternalChannel
 import PlotterChannel
+import cleanDecimal
 import yarden.mytools.codecontroller.presentation.implementations.tornadofx.TornadoDriver
 import yarden.mytools.codecontroller.presentation.implementations.tornadofx.TornadoApp
 import kotlinx.coroutines.*
@@ -160,15 +161,16 @@ object CodeController : KodeinAware {
         return unit.value
     }
 
-    fun ccToggleCode(id: String, on: Boolean = true, f: () -> Unit) {
+    // Will execute the code given by 'f()' according to 'invokeWhen'
+    fun ccToggleCode(id: String, invokeWhen: Boolean = true, f: () -> Unit = {}) {
         if (controllerState is PAUSED) return // If CC is paused the toggled code will not run.
 
         val curr = ccBool(id)
         when {
-            curr && on -> f()
-            curr && !on -> return
-            !curr && on -> return
-            !curr && !on -> f()
+            curr && invokeWhen -> f()
+            curr && !invokeWhen -> return
+            !curr && invokeWhen -> return
+            !curr && !invokeWhen -> f()
         }
     }
 
@@ -198,19 +200,19 @@ object CodeController : KodeinAware {
         if (Random.nextDouble() > howMany) {
             return
         }
-        infoLabelChannel.send(CCInfoDatum(id, info))
+        infoLabelChannel.send(CCInfoDatum(id, info.cleanDecimal()))
     }
 
     // ------ PLOT ------ //                                                // ------ PLOT ------ //                                                // ------ PLOT ------ //
     //   howMany - between 0.0..1.0, the higher the more dataPoints.
-    fun ccPlot(id: String, x: Double, y: Double, howMany: Double = 1.0) {
+    fun ccPlot(id: String, x: Double, y: Double, howOften: Double = 1.0, howMany : Int = Int.MAX_VALUE) {
         if (controllerState is PAUSED) return
 
-        if (Random.nextDouble() > howMany) {
+        if (Random.nextDouble() > howOften) {
             return
         }
 
-        val dataPoint = DataPoint(id, Pair(x, y))
+        val dataPoint = DataPoint(id, Pair(x, y),howMany)
         plotter.sendData(dataPoint)
     }
 

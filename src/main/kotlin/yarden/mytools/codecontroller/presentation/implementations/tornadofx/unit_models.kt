@@ -104,8 +104,8 @@ class TToggle(override val id: String, override val initialValue: Boolean = fals
 
 class TXYControl(
     override val id: String,
-    override val initialValue: XYPoint = XYPoint(0.0, 0.0),
-    val range: Pair<XYPoint, XYPoint> = Pair(XYPoint(0.0, 0.0), XYPoint(1.0, 1.0))
+    val range: Pair<XYPoint, XYPoint> = Pair(XYPoint(0.0, 0.0), XYPoint(1.0, 1.0)),
+    override val initialValue: XYPoint = XYPoint(range.first.x, range.first.y)
 ) : TUnit<XYPoint> {
     override val controlType = TType.XYControl
     override val valueProperty = SimpleObjectProperty<XYPoint>(initialValue)

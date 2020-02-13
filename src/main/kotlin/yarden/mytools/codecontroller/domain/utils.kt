@@ -43,3 +43,15 @@ public fun <T,R> Channel<T>.reactToChannelOn(receiver : R, op: R.(element: T) ->
         }
     }
 }
+
+fun String.cleanDecimal() : String {
+    if (!this.contains(Regex("^[0-9]+\\.[0-9]+"))) {
+        return this
+    }
+
+    val dotPlace = this.indexOf(".")
+    if (dotPlace < 1) {
+        return this
+    }
+    return this.take(dotPlace + 3)
+}

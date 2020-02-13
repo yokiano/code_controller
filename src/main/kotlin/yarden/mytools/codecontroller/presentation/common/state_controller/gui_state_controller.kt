@@ -19,7 +19,7 @@ class GuiStateController(override val kodein: Kodein) : KodeinAware {
     init {
         unitsChannel.channel.reactToChannelOn(this) { unit -> addNewUnit(unit) }
         plotterChannel.channel.reactToChannelOn(this) { data ->
-            presentationDriver.addDataPointTo(data.id, data.data)
+            presentationDriver.addDataPointTo(data.id, data.data, data.limit)
         }
         infoLabelChannel.channel.reactToChannelOn(this) { data ->
             presentationDriver.updateInfoLabel(data.id,data.info)

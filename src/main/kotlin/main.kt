@@ -28,9 +28,12 @@ fun main() {
 }
 
 suspend fun sendNum(num: Double, controller: CodeController) {
-//    controller.ccPlot("test2",num,num)
-    controller.ccVec("vector2",1.0 to 1.0)
-    val a = controller.ccVec("testing") { setRange(30.0,30.0,100.0,100.0)}
+    controller.ccPlot("test2",num, sin(num), howMany = 100)
+
+    val bounder = 2.0
+    val rangy = bounder to bounder*2
+    controller.ccVec("vector2",1.0 to 1.0) { setRange(-2.0,5.0,-4.0,8.0) }
+//    val a = controller.ccVec("testing") { setRange(30.0,30.0,100.0,100.0)}
         delay(50)
 
     controller.ccToggleCode("new feature") { }

@@ -66,7 +66,6 @@ class MainView() : View() {
                             }
 
                             // TODO - abstract the different toggle buttons to reuse functionality of toggles.
-                            println("change")
                             hideConfigButtonStyle(isSelected)
                         }
 

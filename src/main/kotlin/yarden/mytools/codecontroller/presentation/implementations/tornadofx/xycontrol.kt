@@ -107,6 +107,7 @@ class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>, valueP: Simpl
 
                 }
 
+                // Helper function
                 val setParams: Line.() -> Unit = {
                     stroke = Color.BLANCHEDALMOND
                     fill = Color.WHITE
@@ -162,8 +163,8 @@ class XYControl(val id: String, val range: Pair<XYPoint, XYPoint>, valueP: Simpl
     private fun fromValuetoPixel(x: Double, y: Double): Pair<Double, Double> {
 //        val nx = x.mapTo(range.first.x, range.second.x, 0.0, 150.0)
 //        val ny = y.mapTo(range.first.y, range.second.y, 0.0, 150.0)
-        val nx = x.mapTo(range.first.x, range.second.x, 0.0, dimensions)
-        val ny = y.mapTo(range.first.y, range.second.y, 0.0, dimensions)
+        val nx = x.mapTo(range.first.x, range.second.x, 0.0, dimensions).coerceIn(0.0,dimensions)
+        val ny = y.mapTo(range.first.y, range.second.y, 0.0, dimensions).coerceIn(0.0,dimensions)
         return (nx to ny)
     }
 }

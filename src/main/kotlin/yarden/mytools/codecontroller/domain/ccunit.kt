@@ -79,10 +79,9 @@ class CCBool(override val id: String) : CCUnit {
     override var state = CCUnitState.NEW
 
     override fun getGuiUnit(): CCGuiUnit {
-        val toggle = CCGuiToggle(id, default).also {
-            it.default = this.default
+        return CCGuiToggle(id, default).also {
+            it.default = default
         }
-        return toggle
     }
 
     override fun updateValue(newVal: Any) {
@@ -93,7 +92,12 @@ class CCBool(override val id: String) : CCUnit {
 
 
 class CCVec(override val id: String) : CCUnit {
-    override var default = Pair(0.0, 0.0)
+    var range = Pair(Pair(0.0, 0.0), Pair(1.0, 1.0))
+        set(v) {
+            field = v
+            default = Pair(v.first.first, v.first.second)
+        }
+    override var default = Pair(range.first.first, range.first.second)
         set(v) {
             field = v
             value = v
@@ -103,7 +107,6 @@ class CCVec(override val id: String) : CCUnit {
     override val type = CCType.VEC2
     override var state = CCUnitState.NEW
 
-    var range = Pair(Pair(0.0, 0.0), Pair(1.0, 1.0))
     fun setRange(leftTopX: Double, leftTopY: Double, rightBottomX: Double, rightBottomY: Double) {
         range = Pair(Pair(leftTopX, leftTopY), Pair(rightBottomX, rightBottomY))
     }

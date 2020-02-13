@@ -15,4 +15,4 @@ class CCPlotter(override val kodein: Kodein) : KodeinAware{
 
 }
 
-data class DataPoint(val id :String,val data : Pair<Double,Double>)
+data class DataPoint(val id :String,val data : Pair<Double,Double>, val limit: Int)
