@@ -4,6 +4,8 @@ import GuiEventsChannel
 import GuiPresentationDriver
 import InternalChannel
 import javafx.application.Platform
+import javafx.geometry.Rectangle2D
+import javafx.stage.Screen
 import javafx.stage.Stage
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -27,15 +29,25 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
 
     var hideConfigButtons = false
 
+    val screenBounds: Rectangle2D
+        get() = Screen.getPrimary().visualBounds
+
+    fun playWithWindow() {
+        primaryStage.widthProperty()
+    }
+
     override fun launchApp() {
 
         tornadoApp.init()
         Platform.startup {
             val stage = Stage().apply {
-                minHeight = 300.0
-                x = 20.0
-                y = 900.0
-                isFullScreen = true
+
+                height = screenBounds.height / 3.0
+                width = screenBounds.width - 30.0
+
+                x = (screenBounds.width - width) / 2.0
+                y = screenBounds.height - height - 40.0
+//                isFullScreen = true
                 // TODO - change to something other than hard coded numbers. using Screen.getScreens() and the visual bounds property
             }
             tornadoApp.start(stage)
@@ -53,10 +65,28 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
                 tUnit.valueProperty.onChange {
                     eventsChannel.send(UnitAdapter.toCCUnit(tUnit))
                 }
+
+                tUnit.stateProperty.onChange {
+                    when (it) {
+                        CCUnitState.DEAD -> {
+                            println("DEAD detected on ${tUnit.id}")
+                            eventsChannel.send(UnitAdapter.toCCUnit(tUnit))
+
+                            removeUnit(tUnitVM)
+                        }
+                    }
+
+
+                }
             }
 
         }
         tUnit.configView.loadFromConfigFile()
+        reloadViews()
+    }
+
+    fun removeUnit(tUnit: TUnitViewModel<out Any?>) {
+        unitsList.item.list.remove(tUnit)
         reloadViews()
     }
 
@@ -65,7 +95,7 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
         val dataVec = Vector2D(data.first, data.second)
 
         // Don't issue data point if we reached the limit.
-        if(plotLine.dataPointsList.size >= limit) {
+        if (plotLine.dataPointsList.size >= limit) {
             return
         }
 

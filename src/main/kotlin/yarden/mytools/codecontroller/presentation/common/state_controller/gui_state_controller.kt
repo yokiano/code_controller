@@ -17,6 +17,7 @@ class GuiStateController(override val kodein: Kodein) : KodeinAware {
     private val infoLabelChannel: InfoLabelChannel by instance()
 
     init {
+        // Define the action for each of the data channels
         unitsChannel.channel.reactToChannelOn(this) { unit -> addNewUnit(unit) }
         plotterChannel.channel.reactToChannelOn(this) { data ->
             presentationDriver.addDataPointTo(data.id, data.data, data.limit)
@@ -24,7 +25,6 @@ class GuiStateController(override val kodein: Kodein) : KodeinAware {
         infoLabelChannel.channel.reactToChannelOn(this) { data ->
             presentationDriver.updateInfoLabel(data.id,data.info)
         }
-
     }
 
 //    private fun sendEvent(guiUnit: CCGuiUnit) {

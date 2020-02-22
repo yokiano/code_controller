@@ -1,6 +1,8 @@
 package yarden.mytools.codecontroller.presentation.implementations.tornadofx
 
 import XYControl
+import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.value.ObservableValue
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
@@ -8,15 +10,92 @@ import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.chart.NumberAxis
 import javafx.scene.chart.XYChart
+import javafx.scene.control.ScrollPane
 import javafx.scene.control.ToggleButton
 import javafx.scene.control.Tooltip
-import javafx.scene.layout.*
+import javafx.scene.layout.FlowPane
+import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
+import javafx.stage.Screen
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
 import org.kodein.di.tornadofx.kodein
 import tornadofx.*
+
+// TESTTTT
+class TestView : View() {
+
+    val leftPane = scrollpane {
+        vbox {
+
+            for (i in 0..20) {
+                button("$i is the queen")
+            }
+        }
+    }
+
+    val rightPane = scrollpane {
+        vbox {
+            for (i in 0..20) {
+                button("$i is the king")
+            }
+        }
+    }
+
+    override val root = splitpane(Orientation.HORIZONTAL, leftPane, rightPane).apply {
+        dividers.first().position = 1.0
+        style {
+            backgroundColor += Color.RED
+        }
+    }
+
+/*
+    val root_secondary = anchorpane {
+
+        autosize()
+        val screenBounds = Screen.getPrimary().bounds
+
+        borderpane {
+
+            fitToParentSize()
+            left = hbox {
+                autosize()
+                hgrow = Priority.ALWAYS
+
+                right = linechart("TEST CHART", NumberAxis(), NumberAxis()) {
+                    autosize()
+                    val a: Number = 0.2
+                    val b = a
+
+
+                    val resizeBinding = doubleBinding(this@anchorpane.widthProperty(),prefWidthProperty()) {
+                        this.value / 2.0
+                    }
+                    */
+/*
+                    val resizeBinding = prefWidthProperty().doubleBinding(this@anchorpane.widthProperty()) {
+                        it?.let { it.toDouble() / 2.0 } ?: this.width
+
+                    }*//*
+
+                    prefWidthProperty().bind(resizeBinding)
+//                    prefWidthProperty().bind(this@anchorpane.widthProperty())
+
+                    anchorpaneConstraints {
+                        leftAnchor = 0.0
+                        rightAnchor = 0.0
+                    }
+
+
+                }
+            }
+        }
+    }
+*/
+}
 
 class TornadoApp(override val kodein: Kodein) : App(MainView::class, MyStyle::class), KodeinAware {
     init {
@@ -52,7 +131,6 @@ class MainView() : View() {
                             driver.internalChannel.send(it)
                             updateToggleStyle(isSelected)
                         }
-
                     }
                     togglebutton("") {
                         addClass(MyStyle.hideConfig)
@@ -64,11 +142,11 @@ class MainView() : View() {
                                 hideConfigButtons = !hideConfigButtons
                                 reloadViews()
                             }
-
                             // TODO - abstract the different toggle buttons to reuse functionality of toggles.
                             hideConfigButtonStyle(isSelected)
-                        }
 
+                            driver.playWithWindow()
+                        }
                     }
 
                     style {
@@ -76,7 +154,7 @@ class MainView() : View() {
                     }
                 }
 
-                // --- iNFO LABELS
+                // --- INFO LABELS
                 vbox {
                     addClass(MyStyle.labelsPane)
                     maxWidth = 250.0
@@ -94,123 +172,118 @@ class MainView() : View() {
                     }
                 }
 
-                // ------ XY-CONTROLLERS ------ //                                                // ------ XY-CONTROLLERS ------ //                                                // ------ XY-CONTROLLERS ------ //
-                flowpane {
-                    alignment = Pos.CENTER
-                    paddingAll = 20.0
-                    bindChildren(driver.unitsList.listVM.value.filter { it.item is TXYControl }.toObservable()) { unitVM ->
-                        val unit = unitVM.item as TXYControl
-                        XYControl(unit.id, unit.range, unit.valueProperty).run {
-                            if (!driver.hideConfigButtons) attachConfigButtons(unit.configView)
-                            root.attachTo(this@flowpane)
-                        }
-
-                    }
-                }
             }
         }
+
         // ------ TOGGLES AND SLIDERS ------ //                                                // ------ TOGGLES AND SLIDERS ------ //                                                // ------ TOGGLES AND SLIDERS ------ //
+
         center {
-            hbox {
-                // Main hbox
 
-                alignment = Pos.CENTER
-                // -------------- TOGGLES --------------
+            scrollpane {
+                hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+                // --- Controllers HBOX
                 flowpane {
-                    // Toggles pane
-                    addClass(MyStyle.togglesVBox)
                     alignment = Pos.CENTER
-                    orientation = Orientation.VERTICAL
-                    bindChildren(driver.unitsList.listVM.value.filter { it.item is TToggle }.toObservable()) { unitVM ->
-                        when (val unit = unitVM.item) {
-                            is TToggle -> {
-                                vbox {
-                                    alignment = Pos.CENTER
-                                    label(unit.id) {
-                                        addClass(MyStyle.toggleLabel)
-                                    }
-                                    val button = togglebutton("") {
-                                        addClass(MyStyle.toggleButton)
-                                        isSelected = unit.initialValue
-                                        updateToggleStyle(unit.valueProperty.value)
+                    hgrow = Priority.ALWAYS
+                    addClass(MyStyle.controllersFlowpane)
 
-                                        selectedProperty().onChange {
-                                            unit.valueProperty.value = !unit.valueProperty.value
+                    // -------------- TOGGLES --------------
+                    flowpane {
+                        orientation = Orientation.HORIZONTAL
+                        // Toggles pane
+                        addClass(MyStyle.togglesVBox)
+                        alignment = Pos.BASELINE_LEFT
+                        bindChildren(driver.unitsList.listVM.value.filter { it.item is TToggle }.toObservable()) { unitVM ->
+                            when (val unit = unitVM.item) {
+                                is TToggle -> {
+                                    vbox {
+                                        alignment = Pos.CENTER
+                                        label(unit.id) {
+                                            addClass(MyStyle.toggleLabel)
+                                        }
+                                        val button = togglebutton("") {
+                                            addClass(MyStyle.toggleButton)
+                                            isSelected = unit.initialValue
                                             updateToggleStyle(unit.valueProperty.value)
+
+                                            selectedProperty().onChange {
+                                                unit.valueProperty.value = !unit.valueProperty.value
+                                                updateToggleStyle(unit.valueProperty.value)
+                                            }
+                                        }
+
+                                        // Attach config buttons.
+                                        if (!driver.hideConfigButtons) {
+                                            unit.configView.root.run {
+                                                maxWidth = 100.0
+                                                attachTo(this@vbox)
+                                            }
                                         }
                                     }
+                                }
+                                else -> {
+                                    label("Unrecognized control unit")
+                                }
+                            }
+                        }
+                    }
 
-                                    // Attach config buttons.
-                                    if (!driver.hideConfigButtons) {
-                                        unit.configView.root.run {
+                    // -------------- SLIDERS --------------
+                    hbox {
+                        // Sliders pane (hbox)
+                        alignment = Pos.CENTER
+                        paddingAll = 20
+
+                        bindChildren(driver.unitsList.listVM.value.filter { it.item is TSlider }.asObservable()) { unitVM ->
+                            when (val unit = unitVM.item) {
+                                is TSlider -> {
+                                    val unitValueP = unit.valueProperty as ObservableValue<Number>
+                                    vbox {
+                                        paddingHorizontal = 30
+
+                                        label(unit.id) {
+                                            addClass(MyStyle.sliderLabel)
+                                        }
+                                        autosize()
+                                        slider(range = unit.range, value = unit.initialValue) {
+                                            addClass(MyStyle.sliderStyle)
+                                            alignment = Pos.CENTER
+                                            vgrow = Priority.ALWAYS
+                                            //                                        orientation = Orientation.VERTICAL
+
+                                            bind(unit.valueProperty)
+                                            onDoubleClick {
+                                                unitVM.valueVM.value.value = unit.initialValue
+                                            }
+                                            onRightClick {
+                                                println("saving data to file")
+                                            }
+                                            onHover {
+                                                tooltip =
+                                                    Tooltip("${unit.range.toString()} \n *Double-Click to reset \n *Right-Click to save value")
+                                            }
+                                        }
+                                        textfield(unitValueP) {
+                                            addClass(MyStyle.sliderTextField)
+                                            autosize()
+                                            onHover {
+                                                tooltip = Tooltip(unit.valueProperty.value.toString())
+                                            }
+                                        }
+
+                                        // Attaching the config buttons
+                                        if (!driver.hideConfigButtons) unit.configView.root.run {
                                             maxWidth = 100.0
                                             attachTo(this@vbox)
                                         }
+
                                     }
                                 }
-                            }
-                            else -> {
-                                label("Unrecognized control unit")
-                            }
-                        }
-                    }
-                }
-
-                // -------------- SLIDERS --------------
-                hbox {
-                    // Sliders pane (hbox)
-                    alignment = Pos.CENTER
-                    paddingAll = 20
-
-                    bindChildren(driver.unitsList.listVM.value.filter { it.item is TSlider }.asObservable()) { unitVM ->
-                        when (val unit = unitVM.item) {
-                            is TSlider -> {
-                                val unitValueP = unit.valueProperty as ObservableValue<Number>
-                                vbox {
-                                    paddingHorizontal = 30
-
-                                    label(unit.id) {
-                                        addClass(MyStyle.sliderLabel)
-                                    }
-                                    autosize()
-                                    slider(range = unit.range, value = unit.initialValue) {
-                                        addClass(MyStyle.sliderStyle)
-                                        alignment = Pos.CENTER
-                                        vgrow = Priority.ALWAYS
-                                        orientation = Orientation.VERTICAL
-
-                                        bind(unit.valueProperty)
-                                        onDoubleClick {
-                                            unitVM.valueVM.value.value = unit.initialValue
+                                else -> {
+                                    label("Unrecognized control unit") {
+                                        style {
+                                            textFill = Color.RED
                                         }
-                                        onRightClick {
-                                            println("saving data to file")
-                                        }
-                                        onHover {
-                                            tooltip =
-                                                Tooltip("${unit.range.toString()} \n *Double-Click to reset \n *Right-Click to save value")
-                                        }
-                                    }
-                                    textfield(unitValueP) {
-                                        addClass(MyStyle.sliderTextField)
-                                        autosize()
-                                        onHover {
-                                            tooltip = Tooltip(unit.valueProperty.value.toString())
-                                        }
-                                    }
-
-                                    // Attaching the config buttons
-                                    if (!driver.hideConfigButtons) unit.configView.root.run {
-                                        maxWidth = 100.0
-                                        attachTo(this@vbox)
-                                    }
-
-                                }
-                            }
-                            else -> {
-                                label("Unrecognized control unit") {
-                                    style {
-                                        textFill = Color.RED
                                     }
                                 }
                             }
@@ -219,18 +292,41 @@ class MainView() : View() {
                 }
             }
         }
+
+        // ------ XY-CONTROLLERS ------ //                                                // ------ XY-CONTROLLERS ------ //                                                // ------ XY-CONTROLLERS ------ //
+        flowpane {
+            alignment = Pos.CENTER
+            paddingAll = 20.0
+            bindChildren(driver.unitsList.listVM.value.filter { it.item is TXYControl }.toObservable()) { unitVM ->
+                val unit = unitVM.item as TXYControl
+                XYControl(unit.id, unit.range, unit.valueProperty).run {
+                    if (!driver.hideConfigButtons) attachConfigButtons(unit.configView)
+                    root.attachTo(this@flowpane)
+                }
+            }
+        }
+
         // ------ PLOT  ------ //                                                // ------ PLOT  ------ //                                                // ------ PLOT  ------ //
         right {
             vbox {
+
                 val seriesList = ArrayList<XYChart.Series<Number, Number>>()
                 if (driver.plotter.visible) {
-                    val xA = NumberAxis()
-                    val yA = NumberAxis()
-                    linechart("Plotter", xA, yA) {
-                        xA.isForceZeroInRange = false
+                    val xAxis = NumberAxis().apply { tickLabelFill = MyStyle.textColor }
+                    val yAxis = NumberAxis().apply { tickLabelFill = MyStyle.textColor }
+
+                    linechart("Plotter", xAxis, yAxis) {
+                        addClass(MyStyle.lineChart)
+                        xAxis.isForceZeroInRange = false
                         vgrow = Priority.ALWAYS
                         animated = false
-                        addClass(MyStyle.lineChart)
+
+                        val widthResizeBinding =
+                            doubleBinding(this@borderpane.widthProperty(), prefWidthProperty()) { value / 4.0 }
+                        prefWidthProperty().bind(widthResizeBinding)
+//                        prefWidth = driver.screenBounds.width / 4.0
+
+
                         for (plotLine in driver.plotter.lines) {
                             val singleSeries =
                                 series(plotLine.id) {
@@ -273,7 +369,8 @@ class MainView() : View() {
                 }
             }
         }
-        getAllNodes(this).filter { it is HBox || it is VBox || it is FlowPane }.addClass(MyStyle.someBox)
+        getAllNodes(this).filter { it is HBox || it is VBox || it is FlowPane || it is ScrollPane }
+            .addClass(MyStyle.someBox)
     }
 
     // ------ FUNCTIONS ------ //                                                // ------ FUNCTIONS ------ //                                                // ------ FUNCTIONS ------ //

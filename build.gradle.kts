@@ -27,7 +27,6 @@ dependencies {
     // TornadoFX
     api("no.tornado", "tornadofx", "1.7.19")
     api("no.tornado:tornadofx-controlsfx:0.1")
-
 }
 
 tasks {

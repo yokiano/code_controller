@@ -1,6 +1,7 @@
 package yarden.mytools.codecontroller.presentation.implementations.tornadofx
 
 import ConfigView
+import GuiEventsChannel
 import XYPoint
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -58,9 +59,19 @@ interface TUnit<T> {
     val controlType: TType
     val initialValue: T
 
+    val stateProperty : SimpleObjectProperty<CCUnitState>
+
     val configView: ConfigView<T>
     fun updateFromJson(jsonObject: JsonObject)
     fun convertToJson(): JsonObject
+
+
+    fun dismiss() {
+        println("Dismissing $id")
+
+        stateProperty.value = CCUnitState.DEAD // stateProperty is observable to detect the dismiss event .
+
+    }
 
 }
 
@@ -75,8 +86,9 @@ class TSlider(
     override val value: Double by valueProperty
 
     override val controlType = TType.Slider
+    override val stateProperty =  SimpleObjectProperty<CCUnitState>(CCUnitState.LIVE)
 
-    override val configView = ConfigView<Double>(id, this)
+    override val configView = ConfigView<Double>( this)
     override fun updateFromJson(jsonObject: JsonObject) {
         valueProperty.value = jsonObject.getDouble("value")
     }
@@ -85,13 +97,16 @@ class TSlider(
         val jsonObject = Json.createObjectBuilder().add("value", value).build()
         return jsonObject
     }
+
+
 }
 
 class TToggle(override val id: String, override val initialValue: Boolean = false) : TUnit<Boolean> {
     override val controlType = TType.Toggle
+    override val stateProperty =  SimpleObjectProperty<CCUnitState>(CCUnitState.LIVE)
     override val valueProperty = SimpleObjectProperty<Boolean>(initialValue)
     override val value: Boolean by valueProperty
-    override val configView = ConfigView(id, this)
+    override val configView = ConfigView( this)
     override fun updateFromJson(jsonObject: JsonObject) {
         valueProperty.value = jsonObject.getBoolean("value")
     }
@@ -108,9 +123,11 @@ class TXYControl(
     override val initialValue: XYPoint = XYPoint(range.first.x, range.first.y)
 ) : TUnit<XYPoint> {
     override val controlType = TType.XYControl
+    override val stateProperty =  SimpleObjectProperty<CCUnitState>(CCUnitState.LIVE)
+
     override val valueProperty = SimpleObjectProperty<XYPoint>(initialValue)
     override val value: XYPoint by valueProperty
-    override val configView = ConfigView(id, this)
+    override val configView = ConfigView( this)
 
     override fun updateFromJson(jsonObject: JsonObject) {
         val xy = jsonObject.getJsonObject("value")
@@ -139,6 +156,7 @@ class PlotLine(val id: String, override val kodein: Kodein) : KodeinAware {
     fun add(vec: Vector2D) {
         dataPointsList.add(vec)
         if (dataPointsList.size > tornadoDriver.plotter.maxDataPoints) dataPointsList.removeAt(0) // Constrains the size of of the plotter. TODO - configurable?
+
     }
 }
 
@@ -153,6 +171,5 @@ sealed class TType {
     object Slider : TType()
     object Toggle : TType()
     object XYControl : TType()
-    object InfoLabel : TType()
 }
 

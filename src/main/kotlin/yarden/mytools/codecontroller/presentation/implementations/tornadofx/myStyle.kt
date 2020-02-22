@@ -15,14 +15,17 @@ import java.io.File
 class MyStyle : Stylesheet() {
 
     companion object {
+        val controllersFlowpane by cssclass()
         // Global
         val root by cssclass()
+        //        val textColor = Color.BLACK
         val textColor = Color.BLANCHEDALMOND
 
         // Config View
         val configButton by cssclass()
         val saveButton by cssclass()
         val loadButton by cssclass()
+        val dismissButton by cssclass()
         val deleteButton by cssclass()
         val hideConfig by cssclass()
         val hideConfigOn by cssclass()
@@ -68,7 +71,7 @@ class MyStyle : Stylesheet() {
         // for DEBUG
         // -------------- LAYOUT --------------
         someBox {
-            //                        borderColor += box(Color.WHITE)
+            borderColor += box(Color.WHITE)
         }
         // For debugging
         val colorize = mixin {
@@ -113,18 +116,28 @@ class MyStyle : Stylesheet() {
 //            backgroundColor += Color(1.0,0.0,0.0,0.2)
             backgroundColor += Color.web("313131", 0.4)
         }
+
+        // -------------- CONTROLS SCROLL PANE --------------
+        scrollPane {
+            unsafe("-fx-background", raw("transparent"))
+            unsafe("-fx-background-color", raw("transparent"))
+
+        }
+
         // -------------- SLIDER --------------
         track {
             prefWidth = 13.px
             effect = InnerShadow(5.0, 3.0, 3.0, Color.BLACK)
             backgroundColor += c("#5d5d5d")
         }
-        thumb {
-            val uri = javaClass.getResource("/controls/slider/thumb2.png").toURI()
-            backgroundImage += uri
-            prefWidth = 35.px
-            prefHeight = 71.px
-            effect = DropShadow(3.0, Color.BEIGE)
+        slider {
+            thumb {
+                val uri = javaClass.getResource("/controls/slider/thumb2.png").toURI()
+                backgroundImage += uri
+                prefWidth = 35.px
+                prefHeight = 71.px
+                effect = DropShadow(3.0, Color.BEIGE)
+            }
         }
         sliderTextField {
             +defaultTextStyle
@@ -160,8 +173,6 @@ class MyStyle : Stylesheet() {
         }
         toggleButtonOn {
             graphic = javaClass.getResource("/controls/toggle/on.png").toURI()
-//            graphic = File("/controls/toggle/on.png").toURI()
-
         }
         toggleButtonOff {
             graphic = javaClass.getResource("/controls/toggle/off.png").toURI()
@@ -169,9 +180,21 @@ class MyStyle : Stylesheet() {
 
         // ------ PLOTS ------ //
         lineChart {
-            backgroundColor += Color.WHITE
-            textFill = Color.BLACK
+            //            backgroundColor += Color.WHITE
+//            textFill = Color.BLACK
+        }
 
+        axis {
+            hover {
+                backgroundColor += Color.RED
+                +colorize
+            }
+        }
+        axisLabel {
+            hover {
+                backgroundColor += Color.RED
+                +colorize
+            }
         }
 
 
@@ -201,5 +224,6 @@ class MyStyle : Stylesheet() {
         configButton {
             backgroundColor += Color.TRANSPARENT
         }
+
     }
 }

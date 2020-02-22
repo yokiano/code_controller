@@ -12,7 +12,8 @@ enum class CCType {
 
 enum class CCUnitState {
     NEW,
-    LIVE
+    LIVE,
+    DEAD
 }
 
 interface CCUnit {
@@ -47,7 +48,6 @@ class CCDouble(override val id: String) : CCUnit {
     override val type = CCType.DOUBLE
 
     override var state = CCUnitState.NEW
-
 
     override fun getGuiUnit(): CCGuiUnit {
         return CCGuiSlider(id).also {
@@ -110,7 +110,6 @@ class CCVec(override val id: String) : CCUnit {
     fun setRange(leftTopX: Double, leftTopY: Double, rightBottomX: Double, rightBottomY: Double) {
         range = Pair(Pair(leftTopX, leftTopY), Pair(rightBottomX, rightBottomY))
     }
-
 
     override fun getGuiUnit(): CCGuiUnit {
         val xyControl = CCGuiXYControl(id).also {

@@ -1,40 +1,42 @@
+@file:Suppress("EXPERIMENTAL_API_USAGE", "UNUSED_VARIABLE")
+
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import yarden.mytools.codecontroller.domain.CodeController
+import yarden.mytools.codecontroller.domain.*
 import java.time.format.DateTimeFormatter
 import kotlin.math.sin
 
 fun main() {
-    val controller = CodeController
-
-    var j = 0
+    MyClass().go()
     while (true) {
-
-        for (i in 0..2) {
-            val a = controller.ccDouble("test$i") { range = 0.0..20.0; default = i.toDouble() }
+        // use any controller like below from anywhere in the code
+        CodeController.ccToggleCode("Toggle Something") {
+            /* Do Something */
         }
-
-        runBlocking {
-
-            for (i in 300..100000) {
-                sendNum(i.toDouble(), controller)
-            }
-        }
-
-
     }
 }
 
-suspend fun sendNum(num: Double, controller: CodeController) {
-    controller.ccPlot("test2",num, sin(num), howMany = 100)
+// When extending CCAware you have access to all controllers without referring to the CodeController object as seen below
+class MyClass : CCAware {
 
-    val bounder = 2.0
-    val rangy = bounder to bounder*2
-    controller.ccVec("vector2",1.0 to 1.0) { setRange(-2.0,5.0,-4.0,8.0) }
-//    val a = controller.ccVec("testing") { setRange(30.0,30.0,100.0,100.0)}
-        delay(50)
+    fun go() {
+        runBlocking {
+            for (i in 0..100) {
+                val iSin = sin(i.toDouble() * 0.1)
+                ccPlot("my trace", i.toDouble(), iSin)
 
-    controller.ccToggleCode("new feature") { }
+                val maxRange = ccDouble("MAX RANGE") {
+                    range = 30.0..100.0
+                } // few optional (but sometimes essential) configuration parameters are available in the configuration block.
+
+                val vector = ccVec("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
+
+                ccInfo("i", "$i")
+
+                delay(100)
+            }
+        }
+    }
 }

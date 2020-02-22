@@ -19,6 +19,7 @@ import yarden.mytools.codecontroller.domain.entities.CCPlotter
 import yarden.mytools.codecontroller.domain.entities.DataPoint
 import yarden.mytools.codecontroller.presentation.implementations.tornadofx.PlotLine
 import yarden.mytools.codecontroller.presentation.implementations.tornadofx.TInfoLabel
+import java.io.File
 import kotlin.random.Random
 
 @ExperimentalCoroutinesApi
@@ -104,12 +105,69 @@ object CodeController : KodeinAware {
                 delay(1000)
             }
         }
+
+
+    }
+
+    fun changeFile(id: String, stringReplacement: String) {
+        // TODO -- recursive file change
+        val file = File("src/main/kotlin/main.kt")
+
+        val tempFile = createTempFile()
+        // REGEX --- (controller\.)?cc[A-Za-z]{1,10}(\((?:[^()]++|(?2))*\)) (\{(?:[^{}]++|(?3))*\})
+        val regexID = Regex("""\"$id\"""")
+        val regexReplace = Regex("""(controller\.)?(cc[A-Za-z]{1,10})(\((?:[^()]++|(\3))*\)) (\{(?:[^{}]++|(\4))*\})""")
+        var changedOccurrences = 0
+        tempFile.printWriter().use { writer ->
+            file.forEachLine { line ->
+                val newLine = regexReplace.find(line)?.let {
+                    // Not null means we have a match
+                    val ccType = it.groupValues[2]
+                    println("it.groupValues = ${it.groupValues}")
+                    if (ccType == "ccToggleCode") {
+                        println("Replaced with ${it.groupValues[5]}")
+                        line.replace(regexReplace, "run ${it.groupValues[5]}")
+                    } else {
+                        line.replace(regexReplace, stringReplacement)
+                    }
+                } ?: line // if regex was not matched leave the line as is
+
+                writer.println(
+                    when {
+                        regexID.containsMatchIn(line) && !regexID.containsMatchIn(newLine) -> { // entering here means the 'replace' operation was successful
+                            changedOccurrences++
+                            newLine
+                        }
+                        else -> {
+                            line
+                        }
+                    }
+                )
+            }
+        }
+
+        if (changedOccurrences > 0) {
+            println("Replaced $changedOccurrences occurrences of the controller source code representation")
+        } else {
+            println("Couldn't replace the source code representation for controller $id. If the controller ID is not hard-coded replace manually.")
+        }
+
+        val backupFile = File("${file.parentFile}/ccBackup/${file.name}.bkp").apply {
+            mkdirs()
+        }
+
+        check(file.copyTo(backupFile, true).exists()) { " Couldn't back-up the original file. aborting" }
+        check(file.delete() && tempFile.renameTo(file)) { "failed to replace file" }
     }
 
     private suspend fun eventsConsumer() {
         // The for loop will consume each event once it arrives and will never finish.
         for (event in eventsChannel.channel) {
             event.run {
+                if (event.state == CCUnitState.DEAD) {
+                    println("Changing file for ${event.id}")
+                    changeFile(event.id, event.sourceToValueReplacement())
+                }
                 // This instance() call will fetch the (only) unit with the specified ID from the defined multiton in kodein.
                 val unit: CCUnit by kodein.instance(
                     arg = UnitKodeinParams(
@@ -117,6 +175,7 @@ object CodeController : KodeinAware {
                         id = this.id
                     )
                 )
+
                 unit.updateValue(event.value)
             }
         }
@@ -145,15 +204,16 @@ object CodeController : KodeinAware {
                         else -> Unit
                     }
                 }
-                CCUnitState.LIVE -> {
+                CCUnitState.LIVE, CCUnitState.DEAD -> {
                     callCounter++
                 }
             }
+
         }
     }
 
     // ------ BOOL ------ //                                                // ------ BOOL ------ //                                                // ------ BOOL ------ //
-    fun ccBool(id: String,fallBack: Boolean = true, initCode: CCBool.() -> Unit = {}): Boolean {
+    fun ccBool(id: String, fallBack: Boolean = true, initCode: CCBool.() -> Unit = {}): Boolean {
         if (controllerState is PAUSED) return fallBack
 
         val unit = (getUnit(CCType.BOOL, id) as CCBool)
@@ -185,7 +245,11 @@ object CodeController : KodeinAware {
     }
 
     // ------ VECTOR ------ //                                                // ------ VECTOR ------ //                                                // ------ VECTOR ------ //
-    fun ccVec(id: String, fallBack: Pair<Double,Double> = Pair(0.0,0.0), initCode: CCVec.() -> Unit = {}): Pair<Double, Double> {
+    fun ccVec(
+        id: String,
+        fallBack: Pair<Double, Double> = Pair(0.0, 0.0),
+        initCode: CCVec.() -> Unit = {}
+    ): Pair<Double, Double> {
         if (controllerState is PAUSED) return fallBack
 
         val unit = (getUnit(CCType.VEC2, id) as CCVec)
@@ -205,14 +269,14 @@ object CodeController : KodeinAware {
 
     // ------ PLOT ------ //                                                // ------ PLOT ------ //                                                // ------ PLOT ------ //
     //   howMany - between 0.0..1.0, the higher the more dataPoints.
-    fun ccPlot(id: String, x: Double, y: Double, howOften: Double = 1.0, howMany : Int = Int.MAX_VALUE) {
+    fun ccPlot(id: String, x: Double, y: Double, howOften: Double = 1.0, howMany: Int = Int.MAX_VALUE) {
         if (controllerState is PAUSED) return
 
         if (Random.nextDouble() > howOften) {
             return
         }
 
-        val dataPoint = DataPoint(id, Pair(x, y),howMany)
+        val dataPoint = DataPoint(id, Pair(x, y), howMany)
         plotter.sendData(dataPoint)
     }
 

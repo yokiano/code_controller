@@ -22,7 +22,7 @@ class UnitAdapter {
                     TXYControl(ccUnit.id, range,XYPoint(ccUnit.default.first,ccUnit.default.second))
                 }
                 else -> {
-                    TToggle("Error with unit conversion")
+                    TToggle("Error with unit conversion. The type of the controller is unknown.")
                 }
             }
         }
@@ -32,11 +32,13 @@ class UnitAdapter {
                 is TToggle -> {
                     CCGuiToggle(tUnit.id,tUnit.initialValue).apply {
                         value = tUnit.valueProperty.value
+                        state = tUnit.stateProperty.value
                     }
                 }
                 is TSlider -> {
                     CCGuiSlider(tUnit.id).apply {
                         value = tUnit.valueProperty.value
+                        state = tUnit.stateProperty.value
                     }
                 }
                 is TXYControl -> {
@@ -44,9 +46,10 @@ class UnitAdapter {
                         tUnit.valueProperty.value.run {
                             value = Pair(x,y)
                         }
+                        state = tUnit.stateProperty.value
                     }
                 }
-                else -> CCGuiToggle("Error with unit conversion",false)
+                else -> CCGuiToggle("Error with unit conversion. The type of the controller is unknown",false)
             }
         }
     }
