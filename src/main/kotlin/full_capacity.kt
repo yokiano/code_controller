@@ -15,7 +15,6 @@ fun main() {
     CodeController.ccToggleCode("Toggle3") {}
     CodeController.ccToggleCode("Toggle4") {}
     MyClass2().go()
-
 }
 
 // When extending CCAware you have access to all controllers without referring to the CodeController object as seen below

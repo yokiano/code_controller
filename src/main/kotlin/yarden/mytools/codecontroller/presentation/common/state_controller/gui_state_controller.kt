@@ -2,7 +2,7 @@ import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
 import yarden.mytools.codecontroller.presentation.common.entities.CCGuiUnit
-import yarden.mytools.codecontroller.presentation.implementations.tornadofx.TornadoDriver
+import yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.TornadoDriver
 
 class GuiStateController(override val kodein: Kodein) : KodeinAware {
 

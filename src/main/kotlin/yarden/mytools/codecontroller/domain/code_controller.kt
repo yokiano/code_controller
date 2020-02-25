@@ -7,8 +7,8 @@ import InfoLabelChannel
 import InternalChannel
 import PlotterChannel
 import cleanDecimal
-import yarden.mytools.codecontroller.presentation.implementations.tornadofx.TornadoDriver
-import yarden.mytools.codecontroller.presentation.implementations.tornadofx.TornadoApp
+import yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.TornadoDriver
+import yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.TornadoApp
 import kotlinx.coroutines.*
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
@@ -17,8 +17,8 @@ import org.kodein.di.tornadofx.installTornadoSource
 import reactToChannelOn
 import yarden.mytools.codecontroller.domain.entities.CCPlotter
 import yarden.mytools.codecontroller.domain.entities.DataPoint
-import yarden.mytools.codecontroller.presentation.implementations.tornadofx.PlotLine
-import yarden.mytools.codecontroller.presentation.implementations.tornadofx.TInfoLabel
+import yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.PlotLine
+import yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.TInfoLabel
 import java.io.File
 import kotlin.random.Random
 
@@ -268,7 +268,9 @@ object CodeController : KodeinAware {
     }
 
     // ------ PLOT ------ //                                                // ------ PLOT ------ //                                                // ------ PLOT ------ //
-    //   howMany - between 0.0..1.0, the higher the more dataPoints.
+
+    //   howOften - between 0.0..1.0, the higher the more dataPoints.
+    // howMany - maximum number of data points in the plot
     fun ccPlot(id: String, x: Double, y: Double, howOften: Double = 1.0, howMany: Int = Int.MAX_VALUE) {
         if (controllerState is PAUSED) return
 
