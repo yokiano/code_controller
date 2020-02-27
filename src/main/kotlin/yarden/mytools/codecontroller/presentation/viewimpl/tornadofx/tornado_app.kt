@@ -23,7 +23,6 @@ import org.kodein.di.tornadofx.kodein
 import tornadofx.*
 import yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.panes.InfoPane
 import yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.panes.MenuPane
-import yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.panes.VectorPane
 
 // TESTTTT
 class TestView : View() {
@@ -34,7 +33,6 @@ class TestView : View() {
         vbox {
             button("action") {
                 action {
-                    println("${root.dividers}")
 
                 }
             }
@@ -64,8 +62,6 @@ class TestView : View() {
         root.items.add(rightPane)
         root.items.add(morePane)
 
-        println("aaa")
-        println("fdf")
 //        root.items.add(leftPane)
     }
 //    override val root = splitpane(Orientation.HORIZONTAL, leftPane, rightPane).apply {
@@ -122,8 +118,8 @@ class TestView : View() {
 
 class TornadoApp(override val kodein: Kodein) : App(MainView2::class, MyStyle::class), KodeinAware {
     init {
-        reloadStylesheetsOnFocus()
-        reloadViewsOnFocus()
+//        reloadStylesheetsOnFocus()
+//        reloadViewsOnFocus()
     }
 }
 
@@ -186,13 +182,7 @@ class MainView() : View() {
                                             }
                                         }
 
-                                        // Attach config buttons.
-                                        if (!driver.hideConfigButtons) {
-                                            unit.configView.root.run {
-                                                maxWidth = 100.0
-                                                attachTo(this@vbox)
-                                            }
-                                        }
+
                                     }
                                 }
                                 else -> {
@@ -245,11 +235,6 @@ class MainView() : View() {
                                             }
                                         }
 
-                                        // Attaching the config buttons
-                                        if (!driver.hideConfigButtons) unit.configView.root.run {
-                                            maxWidth = 100.0
-                                            attachTo(this@vbox)
-                                        }
 
                                     }
                                 }
@@ -274,7 +259,6 @@ class MainView() : View() {
             bindChildren(driver.unitsList.listVM.value.filter { it.item is TXYControl }.toObservable()) { unitVM ->
                 val unit = unitVM.item as TXYControl
                 XYControl(unit.id, unit.range, unit.valueProperty).run {
-                    if (!driver.hideConfigButtons) attachConfigButtons(unit.configView)
                     root.attachTo(this@flowpane)
                 }
             }

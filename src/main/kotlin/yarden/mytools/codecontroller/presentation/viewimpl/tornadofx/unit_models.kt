@@ -29,10 +29,12 @@ class Plotter : Controller() {
     fun addPlotLine(plotLine: PlotLine) {
         val driver: TornadoDriver by kodein().instance()
 
-        if(lines.isEmpty()) {
-            driver.activePanes.add(PlotPane())
-            driver.reloadViews()
+        if (lines.isEmpty()) { // if true this is the first plot line - need to create and show the plot pane
+            driver.apply {
+                addNewPanes(PlotPane())
+            }
         }
+
         lines.add(plotLine)
     }
 }
@@ -188,12 +190,33 @@ class TInfoLabel(val id: String) {
 }
 
 // Represents the type of the target pane
-sealed class PaneType {
-    object Slider : PaneType()
-    object Button : PaneType()
-    object Vector : PaneType()
-    object Info : PaneType()
-    object Menu : PaneType()
-    object Plot : PaneType()
+sealed class PaneType(var ordinal: Int) {
+    object Menu : PaneType(0)
+    object Info : PaneType(1)
+    object Vector : PaneType(2)
+    object Slider : PaneType(3)
+    object Button : PaneType(4)
+    object Plot : PaneType(5)
 }
+/*
+sealed class PaneType(var ordinal: Int, var width: Double) {
+
+    object Menu : PaneType(0, PaneWidth.NA)
+    object Info : PaneType(1, 0.15) {
+        fun somethig() {
+            println()
+        }
+    }
+    object Vector : PaneType(2, )
+    object Slider : PaneType(3)
+    object Button : PaneType(4)
+    object Plot : PaneType(5)
+
+    companion object PaneWidth {
+        val NA = 0.0
+        val START = 0.0
+        val END = 1.0
+    }
+}
+*/
 

@@ -49,7 +49,8 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
                 width = screenBounds.width - 30.0
 
                 x = (screenBounds.width - width) / 2.0
-                y = screenBounds.height - height - 40.0
+                y = screenBounds.height - height - 40.0 + 400
+//                y = screenBounds.height - height - 40.0
 //                isFullScreen = true
                 // TODO - change to something other than hard coded numbers. using Screen.getScreens() and the visual bounds property
             }
@@ -113,8 +114,24 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
                 }
             }
 
-            activePanes.add(newPane) // Views are reloaded in the outer function, causing this addition to take effect.
+            addNewPanes(newPane)  // Views are reloaded in the outer function, causing this addition to take effect.
         }
+    }
+
+    fun addNewPanes(vararg panes: ResponsivePane) {
+        activePanes.apply {
+            addAll(panes)
+            sortPanes()
+        }
+        reloadViews()
+    }
+    private fun removePanes(vararg panes: ResponsivePane) {
+        activePanes.apply {
+            removeAll(panes)
+            sortPanes()
+        }
+
+        mainView.splitpane.items.removeAll(panes.map { it.root })
     }
 
     fun removePaneIfNeeded(unit: TUnit<*>) {
@@ -128,10 +145,8 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
                 PaneType.Plot -> {println("Error when trying to remove unit. Type of pane is Plot."); ArrayList<ResponsivePane>()}
             }
 
-            activePanes.removeAll(panesToRemove)
-            panesToRemove.forEach {
-                mainView.splitpane.items.remove(it.root)
-            }
+            removePanes(*panesToRemove.toTypedArray())
+
         }
     }
 
@@ -148,6 +163,7 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
             plotLine.add(dataVec)
         }
 
+        // Checking if it's the first data point in a LINE
         if (plotLine.state == CCUnitState.NEW) {
             plotter.addPlotLine(plotLine)
             reloadViews()
@@ -176,8 +192,8 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
     }
 
     fun reloadViews() {
-        // Reloading the Views.
         runLater {
+            // Reloading the Views. look kind of dumb but needed to trigger the views and panes to reload.
             FX.primaryStage.scene.findUIComponents().forEach {
                 activePanes.filter { it.type != PaneType.Menu && it.type != PaneType.Info  }.forEach {
                     val tmp = it
@@ -189,5 +205,8 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
         }
     }
 
+}
 
+public fun ArrayList<ResponsivePane>.sortPanes() {
+        this.sortBy { it.type.ordinal }
 }

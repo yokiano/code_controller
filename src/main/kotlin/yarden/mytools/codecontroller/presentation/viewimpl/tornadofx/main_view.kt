@@ -1,12 +1,17 @@
 package yarden.mytools.codecontroller.presentation.viewimpl.tornadofx
 
+import javafx.scene.Parent
+import javafx.scene.control.Button
 import javafx.scene.control.SplitPane
 import javafx.scene.control.ToggleButton
 import javafx.scene.control.skin.SplitPaneSkin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.kodein.di.generic.instance
 import org.kodein.di.tornadofx.kodein
 import tornadofx.*
 import yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.panes.*
+import java.time.LocalDateTime
 
 class MainView2() : View() {
 
@@ -24,16 +29,62 @@ class MainView2() : View() {
             MenuPane.root.attachTo(this)
         }
         center {
-            splitpane.attachTo(this)
-                .addCCPanes(InfoPane()) // The infoPane is visible by default hence shouldn't be hidden at start up
 
-            splitpane.addCCPanes(*driver.activePanes.toTypedArray())
+            splitpane.apply {
 
-            val infoDivider = 0.15
-            splitpane.setDividerPositions(infoDivider)
+                attachTo(this@center)
+
+                addInfoPane() // The infoPane is visible by default hence shouldn't be hidden at start up
+
+                addCCPanes(*driver.activePanes.toTypedArray())
+
+                runLater { autoPlaceDividers() }
+
+            }
+
         }
     }
 
+    fun addInfoPane() {
+        driver.activePanes.apply {
+            if ( first() is InfoPane) {
+                removeAt(0)
+                add(0,InfoPane())
+            } else {
+                add(0,InfoPane())
+            }
+        }
+    }
+/*
+    override fun onDock() {
+        println("from onDock - width = ${this.splitpane.width}")
+        println("from onDock - this = ${this}")
+    }
+
+    override fun onBeforeShow() {
+        println("from onBeforeShow - width = ${this.splitpane.width}")
+    }
+
+    override fun onUndock() {
+        println("from onUnDock - width = ${this.splitpane.width}")
+        println("from onUnDock - this = ${this}")
+    }
+*/
+
+
+    fun SplitPane.autoPlaceDividers() {
+
+        val infoDivider = 0.10
+        setDividerPosition(0, infoDivider) // the info pane Has fixed initial width.
+
+        val step = (1-infoDivider) / (items.size - 1)
+        var offset = infoDivider + step
+
+        for (i in 1 until dividers.size) {
+            setDividerPosition(i, offset)
+            offset += step
+        }
+    }
 
 }
 
@@ -65,7 +116,7 @@ fun ToggleButton.updateToggleStyle(value: Boolean) {
     }
 }
 
-fun ToggleButton.hideConfigButtonStyle(value: Boolean) {
+fun Button.setPressedStyle(value: Boolean) {
     if (value) {
         removeClass(MyStyle.hideConfigOff)
         addClass(MyStyle.hideConfigOn)

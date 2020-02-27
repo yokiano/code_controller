@@ -1,5 +1,6 @@
 package yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.panes
 
+import javafx.scene.Node
 import org.kodein.di.generic.instance
 import org.kodein.di.tornadofx.kodein
 import tornadofx.*
@@ -10,10 +11,12 @@ import yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.TornadoDriv
 class InfoPane : ResponsivePane() {
 
     override val type = PaneType.Info
+    override lateinit var draggable: Node
 
     override val root = vbox {
+        draggable = this
         addClass(MyStyle.infoPane)
-        prefWidth = primaryStage.width * 0.2
+//        prefWidth = primaryStage.width * 0.2
         paddingVertical = 20.0
         paddingHorizontal = 10.0
         bindChildren(driver.infoLabelList.asObservable()) { infoLabel ->
@@ -31,12 +34,7 @@ class InfoPane : ResponsivePane() {
     }
 
     init {
-        minWidth = 100.0
-        minHeight = 50.0
-
-        root.minWidth = minWidth
-        root.minHeight = minHeight
-
+        setMouseEvents()
     }
 
 }

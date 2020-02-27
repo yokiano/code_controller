@@ -4,8 +4,6 @@ import javafx.geometry.Pos
 import javafx.scene.control.OverrunStyle
 import javafx.scene.effect.DropShadow
 import javafx.scene.effect.InnerShadow
-import javafx.scene.layout.BackgroundRepeat
-import javafx.scene.layout.BackgroundSize
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import javafx.scene.text.TextAlignment
@@ -58,14 +56,22 @@ class MyStyle : Stylesheet() {
 
     init {
 
-        configViewStyle()
-
-        val defaultTextStyle = mixin {
+        val defaultTextStyle_ = mixin {
             textFill = textColor
-            fontSize = 16.px
+            fontSize = 10.px
             textAlignment = TextAlignment.CENTER
-            fontWeight = FontWeight.BOLD
+//            fontWeight = FontWeight.BOLD
             wrapText = true
+        }
+
+        text {
+            +defaultTextStyle_
+        }
+        label {
+            +defaultTextStyle_
+        }
+        contextMenu {
+            backgroundColor += c("#222222")
         }
 
         // for DEBUG
@@ -151,21 +157,22 @@ class MyStyle : Stylesheet() {
             thumb {
                 val uri = javaClass.getResource("/controls/slider/hthumb.png").toURI()
                 backgroundImage += uri
-                prefWidth = 41.px
-                prefHeight = 20.px
+                prefWidth = 29.px
+                prefHeight = 14.px
                 effect = DropShadow(3.0, Color.BEIGE)
 
             }
         }
         sliderTextField {
-            +defaultTextStyle
+            +defaultTextStyle_
             prefWidth = 100.px
             backgroundColor += Color.TRANSPARENT
             alignment = Pos.CENTER
+
         }
 
         sliderLabel {
-            +defaultTextStyle
+
         }
 
 //            // ** SLIDER BUTTONS **  ---- currently deprecated.
@@ -180,10 +187,8 @@ class MyStyle : Stylesheet() {
 
         // -------------- TOGGLE BUTTON --------------\
         label {
-            +defaultTextStyle
         }
         toggleLabel {
-            +defaultTextStyle
         }
         toggleButton {
             backgroundColor += Color.TRANSPARENT
@@ -238,10 +243,5 @@ class MyStyle : Stylesheet() {
 
     }
 
-    fun configViewStyle() {
-        configButton {
-            backgroundColor += Color.TRANSPARENT
-        }
 
-    }
 }

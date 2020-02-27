@@ -1,5 +1,6 @@
 package yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.panes
 
+import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.chart.NumberAxis
 import javafx.scene.chart.XYChart
@@ -12,6 +13,8 @@ class PlotPane() : ResponsivePane() {
 
     override val type = PaneType.Plot
 
+    override lateinit var draggable: Node
+
     override val root = vbox {
 
         val seriesList = ArrayList<XYChart.Series<Number, Number>>()
@@ -21,11 +24,15 @@ class PlotPane() : ResponsivePane() {
 
             linechart("Plotter", xAxis, yAxis) {
                 addClass(MyStyle.lineChart)
+                draggable = this
+                setMouseEvents()
+
                 xAxis.isForceZeroInRange = false
                 vgrow = Priority.ALWAYS
                 animated = false
 
 
+                // DO NOT DELETE - EXAMPLE FOR doubleBinding()
 /*  This is a binding to make the width 4 times of the main window width. will implement it probably via the split pane dividers.
                 val widthResizeBinding =
                     doubleBinding(this@borderpane.widthProperty(), prefWidthProperty()) { value / 4.0 }

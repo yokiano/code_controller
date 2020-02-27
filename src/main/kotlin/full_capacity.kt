@@ -35,17 +35,17 @@ class MyClass2 : CCAware {
                 ccDouble("Slider3")
                 ccDouble("Slider4")
 
-                val vector1 = ccVec("vector1") { setRange(30.0, 30.0, maxRange, maxRange) }
-                val vector2 = ccVec("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
-                val vector3 = ccVec("vector3") { setRange(30.0, 30.0, maxRange, maxRange) }
-                val vector4 = ccVec("vector4") { setRange(30.0, 30.0, maxRange, maxRange) }
 
                 ccInfo("AB", "${i * 20.5}")
                 ccInfo("information", "${i - 200}")
                 ccInfo("FPS", "${i}")
                 ccInfo("counter", "${i * 0.34}")
 
-                delay(100)
+                val vector1 = ccVec("vector1") { setRange(30.0, 30.0, 100.0, 100.0) }
+//                val vector2 = ccVec("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
+//                val vector3 = ccVec("vector3") { setRange(30.0, 30.0, maxRange, maxRange) }
+//                val vector4 = ccVec("vector4") { setRange(30.0, 30.0, maxRange, maxRange) }
+
             }
         }
     }
