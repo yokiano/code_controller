@@ -19,34 +19,32 @@ class ButtonPane : ResponsivePane() {
 
     override lateinit var draggable: Node
 
-    override val root = vbox {
-        draggable = this
-        scrollpane {
-            hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
-            flowpane {
-                paddingTop = 10.0
-                prefWidthProperty().bind(this@scrollpane.widthProperty())
-                alignment = Pos.CENTER
-                orientation = Orientation.HORIZONTAL
-                // Toggles pane
-                addClass(MyStyle.togglesVBox)
-                bindChildren(driver.unitsList.listVM.value.filter { it.item is TToggle }.toObservable()) { unitVM ->
-                    when (val unit = unitVM.item) {
-                        is TToggle -> {
-                            ToggleView(unit).root
-                        }
-                        else -> {
-                            label("Unrecognized control unit")
-                        }
+    override val paneRoot = scrollpane {
+        hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+        vgrow = Priority.ALWAYS
+        fixScrollerMouseEvents(this)
+        flowpane {
+            draggable = this
+            prefWidthProperty().bind(this@scrollpane.widthProperty())
+            alignment = Pos.CENTER
+            paddingTop = 10.0
+            hgrow = Priority.ALWAYS
+            orientation = Orientation.HORIZONTAL
+            // Toggles pane
+            addClass(MyStyle.togglesVBox)
+            bindChildren(driver.unitsList.listVM.value.filter { it.item is TToggle }.toObservable()) { unitVM ->
+                when (val unit = unitVM.item) {
+                    is TToggle -> {
+                        ToggleView(unit).root
+                    }
+                    else -> {
+                        label("Unrecognized control unit")
                     }
                 }
             }
         }
     }
 
-    init {
-        setMouseEvents()
-    }
 
 }
 

@@ -191,12 +191,11 @@ class TInfoLabel(val id: String) {
 
 // Represents the type of the target pane
 sealed class PaneType(var ordinal: Int) {
-    object Menu : PaneType(0)
-    object Info : PaneType(1)
-    object Vector : PaneType(2)
-    object Slider : PaneType(3)
-    object Button : PaneType(4)
-    object Plot : PaneType(5)
+    object Info : PaneType(0)
+    object Vector : PaneType(1)
+    object Slider : PaneType(2)
+    object Button : PaneType(3)
+    object Plot : PaneType(4)
 }
 /*
 sealed class PaneType(var ordinal: Int, var width: Double) {

@@ -20,28 +20,25 @@ class VectorPane : ResponsivePane() {
 
     override lateinit var draggable: Node
 
-    override val root = stackpane{
-        scrollpane {
-            hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
-            flowpane {
-                draggable = this
-                prefWidthProperty().bind(this@scrollpane.widthProperty())
-                alignment = Pos.CENTER
-                hgrow = Priority.ALWAYS; vgrow = Priority.ALWAYS
+    override val paneRoot = scrollpane {
+        hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+        fixScrollerMouseEvents(this)
+        flowpane {
+            draggable = this
+            prefWidthProperty().bind(this@scrollpane.widthProperty())
+            alignment = Pos.CENTER
+            hgrow = Priority.ALWAYS; vgrow = Priority.ALWAYS
 
-                paddingAll = 20.0
-                bindChildren(driver.unitsList.listVM.value.filter {
-                    it.item is TXYControl
-                }.toObservable()) { unitVM ->
-                    val unit = unitVM.item as TXYControl
-                    XYControlView(unit).root.attachTo(this)
-                }
+            paddingAll = 20.0
+            bindChildren(driver.unitsList.listVM.value.filter {
+                it.item is TXYControl
+            }.toObservable()) { unitVM ->
+                val unit = unitVM.item as TXYControl
+                val xyControl = XYControlView(unit,this@VectorPane)
+                xyControl.root.attachTo(this)
+
             }
         }
-    }
-
-    init {
-        setMouseEvents()
     }
 
 }

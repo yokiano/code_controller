@@ -8,6 +8,7 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
 import tornadofx.*
+import yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.MyStyle
 
 class XYControl(val id_: String, val range: Pair<XYPoint, XYPoint>, valueP: SimpleObjectProperty<XYPoint>) : View() {
 
@@ -42,14 +43,13 @@ class XYControl(val id_: String, val range: Pair<XYPoint, XYPoint>, valueP: Simp
         }
     }
 
-
     fun createController() = stackpane {
         paddingAll = 15.0
         group {
             rect = rectangle {
                 stroke = Color.BLANCHEDALMOND
                 strokeWidth = 2.0
-                fill = Color.BLACK
+                fill = MyStyle.SEMI_OPAQUE
                 width = dimensions
                 height = dimensions
                 arcWidth = 10.0
@@ -57,7 +57,6 @@ class XYControl(val id_: String, val range: Pair<XYPoint, XYPoint>, valueP: Simp
 
 
                 setOnMouseDragged {
-                    println("XY DRAG")
                     it.apply {
                         updatePointer(x, y)
                     }

@@ -5,14 +5,17 @@ import XYControl
 import yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.*
 import javafx.beans.value.ObservableValue
 import javafx.geometry.Pos
+import javafx.scene.Node
 import javafx.scene.control.ToggleButton
 import javafx.scene.control.Tooltip
 import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import org.kodein.di.generic.instance
 import org.kodein.di.tornadofx.kodein
 import tornadofx.*
+import yarden.mytools.codecontroller.presentation.viewimpl.tornadofx.panes.ResponsivePane
 
-class XYControlView(private val tUnit: TXYControl) : ControlView(tUnit) {
+class XYControlView(private val tUnit: TXYControl, val parentPane: ResponsivePane) : ControlView(tUnit) {
 
     val driver: TornadoDriver by kodein().instance()
 
@@ -22,7 +25,8 @@ class XYControlView(private val tUnit: TXYControl) : ControlView(tUnit) {
     override val root = vbox {
         alignment = Pos.CENTER
 
-        // Configuration Buttons
+        disablePaneResizeOnDrag()
+
         hbox {
             alignment = Pos.CENTER
 
@@ -39,6 +43,14 @@ class XYControlView(private val tUnit: TXYControl) : ControlView(tUnit) {
         control.attachTo(this)
     }
 
-
+    // This logic prevents from the parent pane to resize when changing the XYControl value.
+    private fun Node.disablePaneResizeOnDrag() {
+        setOnMousePressed {
+            parentPane.disableFastResize = true
+        }
+        setOnMouseReleased {
+            parentPane.disableFastResize = false
+        }
+    }
 }
 

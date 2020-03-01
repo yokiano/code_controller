@@ -8,6 +8,7 @@ import javafx.geometry.Rectangle2D
 import javafx.scene.Node
 import javafx.stage.Screen
 import javafx.stage.Stage
+import javafx.stage.StageStyle
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
@@ -34,7 +35,7 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
 
     val infoLabelList = ArrayList<TInfoLabel>()
 
-    var hideConfigButtons = false // TODO - remove this
+    var globalDisableFastResize = false
 
     val screenBounds: Rectangle2D
         get() = Screen.getPrimary().visualBounds
@@ -52,6 +53,7 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
                 y = screenBounds.height - height - 40.0 + 400
 //                y = screenBounds.height - height - 40.0
 //                isFullScreen = true
+                initStyle(StageStyle.UNDECORATED)
                 // TODO - change to something other than hard coded numbers. using Screen.getScreens() and the visual bounds property
             }
             tornadoApp.start(stage)
@@ -108,10 +110,6 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
                     println("Error when trying to add the first unit to a pane. Type of pane is Info, we shouldn't reach this situation.")
                     InfoPane()
                 }
-                PaneType.Menu -> {
-                    println("Error when trying to add the first unit to a pane. Type of pane is Menu, we shouldn't reach this situation.")
-                    MenuPane
-                }
             }
 
             addNewPanes(newPane)  // Views are reloaded in the outer function, causing this addition to take effect.
@@ -141,12 +139,10 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
                 PaneType.Button -> activePanes.filter { it.type == PaneType.Button }
                 PaneType.Vector -> activePanes.filter { it.type == PaneType.Vector }
                 PaneType.Info -> {println("Error when trying to remove unit. Type of pane is Info."); ArrayList<ResponsivePane>()}
-                PaneType.Menu -> {println("Error when trying to remove unit. Type of pane is Menu."); ArrayList<ResponsivePane>()}
                 PaneType.Plot -> {println("Error when trying to remove unit. Type of pane is Plot."); ArrayList<ResponsivePane>()}
             }
 
             removePanes(*panesToRemove.toTypedArray())
-
         }
     }
 
@@ -195,13 +191,14 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
         runLater {
             // Reloading the Views. look kind of dumb but needed to trigger the views and panes to reload.
             FX.primaryStage.scene.findUIComponents().forEach {
-                activePanes.filter { it.type != PaneType.Menu && it.type != PaneType.Info  }.forEach {
+                activePanes.filter { it.type != PaneType.Info  }.forEach {
                     val tmp = it
                     activePanes.remove(it)
                     activePanes.add(tmp::class.createInstance())
                 }
                 FX.replaceComponent(it)
             }
+
         }
     }
 

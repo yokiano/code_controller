@@ -13,7 +13,7 @@ class InfoPane : ResponsivePane() {
     override val type = PaneType.Info
     override lateinit var draggable: Node
 
-    override val root = vbox {
+    override val paneRoot = vbox {
         draggable = this
         addClass(MyStyle.infoPane)
 //        prefWidth = primaryStage.width * 0.2
@@ -33,8 +33,5 @@ class InfoPane : ResponsivePane() {
         }
     }
 
-    init {
-        setMouseEvents()
-    }
 
 }

@@ -14,10 +14,13 @@ class MyStyle : Stylesheet() {
     companion object {
         val mainView by cssclass()
         val controllersFlowpane by cssclass()
-        // Global
         val root by cssclass()
-//                val textColor = Color.GRAY
+
+        // Helper Values
         val textColor = Color.BLANCHEDALMOND
+        val SEMI_OPAQUE = Color(0.3,0.3,0.3,0.3)
+        val ALMOST_OPAQUE = Color(0.5,0.5,0.5,0.3)
+        val ALMOST_TRANSPARENT = Color(0.2,0.2,0.2,0.3)
 
         // Config View
         val configButton by cssclass()
@@ -60,7 +63,7 @@ class MyStyle : Stylesheet() {
             textFill = textColor
             fontSize = 10.px
             textAlignment = TextAlignment.CENTER
-//            fontWeight = FontWeight.BOLD
+            fontWeight = FontWeight.BOLD
             wrapText = true
         }
 
@@ -126,10 +129,34 @@ class MyStyle : Stylesheet() {
             backgroundColor += Color.web("313131", 0.4)
         }
 
-        // -------------- CONTROLS SCROLL PANE --------------
+        // -------------- GENERAL PANE ATTRIBUTES (SCROLL PANE / SPLIT PANE) --------------
         scrollPane {
             unsafe("-fx-background", raw("transparent"))
             unsafe("-fx-background-color", raw("transparent"))
+        }
+
+        scrollPane {
+
+            thumb {
+                backgroundColor += SEMI_OPAQUE
+
+                hover {
+//                    backgroundColor += ALMOST_OPAQUE
+                }
+
+            }
+            track {
+                backgroundColor += ALMOST_TRANSPARENT
+            }
+
+            incrementArrow and incrementButton and decrementArrow and decrementButton  {
+//                visibility = FXVisibility.HIDDEN
+            }
+        }
+        scrollBar {
+            backgroundColor += Color.TRANSPARENT
+
+
         }
 
         splitPane {
@@ -138,21 +165,12 @@ class MyStyle : Stylesheet() {
 
         }
         splitPaneDivider {
-            prefWidth = 3.px
-
-            hover {
-                fill = textColor
-                unsafe("-fx-background", raw("red"))
-                unsafe("-fx-background-color", raw("red"))
-            }
+            prefWidth = 1.px
         }
+
 
         // -------------- SLIDER --------------
-        track {
-            prefWidth = 13.px
-            effect = InnerShadow(5.0, 3.0, 3.0, Color.BLACK)
-            backgroundColor += c("#5d5d5d")
-        }
+
         slider {
             thumb {
                 val uri = javaClass.getResource("/controls/slider/hthumb.png").toURI()
@@ -161,6 +179,11 @@ class MyStyle : Stylesheet() {
                 prefHeight = 14.px
                 effect = DropShadow(3.0, Color.BEIGE)
 
+            }
+            track {
+                prefWidth = 13.px
+                effect = InnerShadow(5.0, 3.0, 3.0, Color.BLACK)
+                backgroundColor += c("#5d5d5d")
             }
         }
         sliderTextField {
@@ -205,19 +228,11 @@ class MyStyle : Stylesheet() {
         lineChart {
             //            backgroundColor += Color.WHITE
 //            textFill = Color.BLACK
-        }
-
-        axis {
-            hover {
-                backgroundColor += Color.RED
-                +colorize
-            }
-        }
-        axisLabel {
-            hover {
-                backgroundColor += Color.RED
-                +colorize
-            }
+//            hover {
+//                this.selections[] and chartLineSymbol {
+//                    visibility = FXVisibility.VISIBLE
+//                }
+//            }
         }
 
 
@@ -235,9 +250,7 @@ class MyStyle : Stylesheet() {
 
         chartLineSymbol {
             visibility = FXVisibility.COLLAPSE
-            hover {
-                visibility = FXVisibility.VISIBLE
-            }
+
         }
 
 
