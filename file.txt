@@ -1,7 +1,0 @@
-
-fun greatFile() {
-
-    val a = ccDouble("AAAA")
-
-    val b = ccDouble("BBBB") { range = 0.0..10.0 }
-}

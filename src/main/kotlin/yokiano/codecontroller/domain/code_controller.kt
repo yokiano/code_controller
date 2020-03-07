@@ -15,8 +15,6 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.generic.*
 import org.kodein.di.tornadofx.installTornadoSource
 import reactToChannelOn
-import yokiano.codecontroller.domain.entities.CCPlotter
-import yokiano.codecontroller.domain.entities.DataPoint
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.PlotLine
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.TInfoLabel
 import java.io.File
@@ -56,7 +54,11 @@ object CodeController : KodeinAware {
         bind<TornadoDriver>() with singleton { TornadoDriver(kodein) }
         bind<TornadoApp>() with singleton { TornadoApp(kodein) }
 
-        bind<CCPlotter>() with singleton { CCPlotter(kodein) }
+        bind<CCPlotter>() with singleton {
+            CCPlotter(
+                kodein
+            )
+        }
         bind<PlotterChannel>() with singleton { PlotterChannel() }
         bind<InfoLabelChannel>() with singleton { InfoLabelChannel() }
 

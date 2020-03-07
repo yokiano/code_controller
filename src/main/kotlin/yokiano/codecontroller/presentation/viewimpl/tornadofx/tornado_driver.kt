@@ -6,9 +6,6 @@ import InternalChannel
 import javafx.application.Platform
 import javafx.geometry.Orientation
 import javafx.geometry.Rectangle2D
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyCodeCombination
-import javafx.scene.input.KeyCombination
 import javafx.stage.Screen
 import javafx.stage.Stage
 import javafx.stage.StageStyle
@@ -17,7 +14,7 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
 import tornadofx.*
 import yokiano.codecontroller.domain.*
-import yokiano.codecontroller.presentation.common.entities.CCGuiUnit
+import yokiano.codecontroller.presentation.common.CCGuiUnit
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.panes.*
 import kotlin.reflect.full.createInstance
 

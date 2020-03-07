@@ -14,9 +14,9 @@ package yokiano.codecontroller.presentation.viewimpl.panel
 //
 ////import org.openrndr.panel.style.styleSheet
 //import org.openrndr.panel.styleSheet
-//import yokiano.codecontroller.presentation.common.entities.CCGuiSlider
-//import yokiano.codecontroller.presentation.common.entities.CCGuiToggle
-//import yokiano.codecontroller.presentation.common.entities.CCGuiUnit
+//import yokiano.codecontroller.presentation.common.CCGuiSlider
+//import yokiano.codecontroller.presentation.common.CCGuiToggle
+//import yokiano.codecontroller.presentation.common.CCGuiUnit
 //
 //class PanelGuiPresenter(
 //    private val outChannel: Channel<CCGuiUnit>,

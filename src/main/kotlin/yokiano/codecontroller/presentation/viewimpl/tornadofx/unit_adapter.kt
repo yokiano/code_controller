@@ -1,10 +1,10 @@
 package yokiano.codecontroller.presentation.viewimpl.tornadofx
 
 import XYPoint
-import yokiano.codecontroller.presentation.common.entities.CCGuiSlider
-import yokiano.codecontroller.presentation.common.entities.CCGuiToggle
-import yokiano.codecontroller.presentation.common.entities.CCGuiUnit
-import yokiano.codecontroller.presentation.common.entities.CCGuiXYControl
+import yokiano.codecontroller.presentation.common.CCGuiSlider
+import yokiano.codecontroller.presentation.common.CCGuiToggle
+import yokiano.codecontroller.presentation.common.CCGuiUnit
+import yokiano.codecontroller.presentation.common.CCGuiXYControl
 
 class UnitAdapter {
 
@@ -30,7 +30,10 @@ class UnitAdapter {
         fun toCCUnit( tUnit : TUnit<*>) : CCGuiUnit {
             return when (tUnit) {
                 is TToggle -> {
-                    CCGuiToggle(tUnit.id,tUnit.initialValue).apply {
+                    CCGuiToggle(
+                        tUnit.id,
+                        tUnit.initialValue
+                    ).apply {
                         value = tUnit.valueProperty.value
                         state = tUnit.stateProperty.value
                     }
@@ -49,7 +52,10 @@ class UnitAdapter {
                         state = tUnit.stateProperty.value
                     }
                 }
-                else -> CCGuiToggle("Error with unit conversion. The type of the controller is unknown",false)
+                else -> CCGuiToggle(
+                    "Error with unit conversion. The type of the controller is unknown",
+                    false
+                )
             }
         }
     }

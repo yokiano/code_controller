@@ -1,7 +1,10 @@
 package yokiano.codecontroller.domain
 
 import GuiUnitsChannel
-import yokiano.codecontroller.presentation.common.entities.*
+import yokiano.codecontroller.presentation.common.CCGuiSlider
+import yokiano.codecontroller.presentation.common.CCGuiToggle
+import yokiano.codecontroller.presentation.common.CCGuiUnit
+import yokiano.codecontroller.presentation.common.CCGuiXYControl
 
 
 enum class CCType {

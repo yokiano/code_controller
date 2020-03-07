@@ -1,5 +1,5 @@
 import yokiano.codecontroller.domain.ScreenOrientation
-import yokiano.codecontroller.presentation.common.entities.CCGuiUnit
+import yokiano.codecontroller.presentation.common.CCGuiUnit
 
 interface GuiPresentationDriver {
     fun addUnit(ccUnit : CCGuiUnit)
