@@ -7,7 +7,7 @@ plugins {
     `maven-publish`
 }
 
-group = "yarden.mytools.codecontroller"
+group = "yokiano.codecontroller"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -42,7 +42,7 @@ tasks {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "yarden.mytools"
+            groupId = "yokiano"
             artifactId = "codecontroller"
             version = "1.0-SNAPSHOT"
 

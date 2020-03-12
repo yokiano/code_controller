@@ -1,0 +1,5 @@
+/build
+/media
+*.kt.bkp
+build
+media

@@ -4,7 +4,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import yarden.mytools.codecontroller.domain.*
+import yokiano.codecontroller.domain.*
 import java.time.format.DateTimeFormatter
 import kotlin.math.cos
 import kotlin.math.sin
@@ -20,7 +20,10 @@ fun main() {
 // When extending CCAware you have access to all controllers without referring to the CodeController object as seen below
 class MyClass2 : CCAware {
 
+
     fun go() {
+
+
         runBlocking {
             for (i in 0..100) {
                 val iSin = sin(i.toDouble() * 0.1)
@@ -46,6 +49,7 @@ class MyClass2 : CCAware {
 //                val vector3 = ccVec("vector3") { setRange(30.0, 30.0, maxRange, maxRange) }
 //                val vector4 = ccVec("vector4") { setRange(30.0, 30.0, maxRange, maxRange) }
 
+                delay(100)
             }
         }
     }

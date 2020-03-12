@@ -4,7 +4,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import yarden.mytools.codecontroller.domain.*
+import yokiano.codecontroller.domain.*
 import java.time.format.DateTimeFormatter
 import kotlin.math.sin
 
