@@ -1,5 +1,5 @@
 /build
 /media
+/conf
+/.gradle
 *.kt.bkp
-build
-media
