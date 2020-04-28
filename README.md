@@ -1,12 +1,17 @@
 # Code Controller
   
    
-Code Controller (aka CC) is an immediate plug & play GUI library that is mainly aimed for the development of creative and visual programs. The main focus of the project are ease of use and overhead zeroing while trying to (1) provide powerful tools to debug and interact with a live program, (2) minimizing software iterations and gui controls setup time, (3) be portable between different platforms and frameworks.
+Code Controller (aka CC) is an immediate plug & play GUI tool that is mainly aimed for the development of creative and visual programs. The main focus of the project are ease of use and overhead zeroing while trying to (1) provide powerful tools to debug and interact with a live program, (2) minimizing software iterations and gui controls setup time, (3) be portable between different platforms and frameworks.
 
-The project is still in development and will include additional features in the future. The core functionality will probably remain, although some major design changes and few bug fixes are still required.
-Any direct or indirect support and contribution will be appreciated. 
+The project is still in development and will include additional features in the future. The core functionality will probably remain, although some UI changes and few bug fixes are still required.
+Any direct or indirect support and contribution will be much appreciated. 
 
-An example of a fully equipped control panel. 
+**Notes**  
+**- The GUI elements are placed automatically in their dedicated panes. This is not intended to be an "end user" gui library but rather a quick and simple way to control and debug your program variables.**  
+**- The GUI controllers panel is opened as a separate window using an independent TornadoFX app. This way it doesn't matter what framework or platform you are using, as long as it's in kotlin/java.**  
+  
+  
+An example of a fully equipped control panel:
 
 
 **Core features overview:**
@@ -17,8 +22,9 @@ An example of a fully equipped control panel.
 1. Information pane - displays a dynamically updated strings (ccInfo). 
 1. Real time plotter (ccPlot).
 1. Local configuration - Save/Load values to/from a automatically created config file. Controllers are initialized with the previously saved value on startup. 
-1. Remove and Refactor - after you finish to use a control normally you would go back to the source code to remove the gui elelemnts declarations manually. Instead of doing so this feature will remove a controller from the gui panel and will replace the source code declaration of that controller automatically with the current controller value. Use with care.
-
+1. Remove and Refactor - after you finish to use a control normally you would go back to the source code to remove the gui elelemnts declarations manually. Instead of doing so this feature will remove a controller from the gui panel and will replace the source code declaration of that controller automatically with the current controller value. Use with care.  
+1. Fast resizing - The UI panel is designed for quick resizing and placement so you will spend less time dealing with layouting your windows and panes. 
+  
 
 Watch a 2 minutes show case video that explains most of what you need to know about CC:
 
@@ -27,7 +33,7 @@ Watch a 2 minutes show case video that explains most of what you need to know ab
 ## Installation via gradle:
 
 **Using gradle with kotlin script (build.gradle.kts file):**
-```
+```kotlin
 repositories {
 	// …
   jcenter()	// <- needed due to internal dependencies
@@ -41,7 +47,7 @@ dependencies {
 ```
  
 **Using gradle with groovy script (build.gradle file):**
-```
+```groovy
 repositories {
 	// …
   jcenter()	// <- needed due to internal dependencies
@@ -55,8 +61,8 @@ dependencies {
 ```  
 
 
-# Basic Usage:
-```
+## Basic Usage:
+```kotlin
 import yokiano.codecontroller.domain.*
 
 // EXAMPLE 1 - not in a class context
