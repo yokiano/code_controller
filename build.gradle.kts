@@ -1,32 +1,46 @@
-//val kodeinVersion = "6.4.0-dev+"
-val kodeinVersion = "6.5.1"
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.jfrog.bintray.gradle.BintrayExtension
+import org.gradle.api.publish.maven.MavenPom
+
+
+val kodeinVersion = "6.5.5"
 
 plugins {
     java
-    kotlin("jvm") version "1.3.61"
+    kotlin("jvm") version "1.3.72"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
     `maven-publish`
+    id("com.jfrog.bintray") version "1.8.4"
 }
 
-group = "yokiano.codecontroller"
-version = "1.0-SNAPSHOT"
+group = "yokiano"
+version = "0.0.1"
+val artifactID = "code-controller"
+
+val shadowJar: ShadowJar by tasks
+shadowJar.apply {
+    archiveBaseName.set(artifactID)
+}
+
 
 repositories {
     mavenCentral()
-    maven(url = "https://dl.bintray.com/kodein-framework/Kodein-DI")
+    jcenter()
 }
+
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
 
     // Kotlin Related
-    api("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.3.0")
-    api("io.github.microutils", "kotlin-logging", "1.7.6")
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.3.0")
+    implementation("io.github.microutils", "kotlin-logging", "1.7.6")
     // Kodein
-    api("org.kodein.di", "kodein-di-generic-jvm", kodeinVersion)
-    api("org.kodein.di", "kodein-di-framework-tornadofx-jvm", kodeinVersion)
+    implementation("org.kodein.di", "kodein-di-generic-jvm", kodeinVersion)
+    implementation("org.kodein.di", "kodein-di-framework-tornadofx-jvm", kodeinVersion)
     // TornadoFX
-    api("no.tornado", "tornadofx", "1.7.19")
-    api("no.tornado:tornadofx-controlsfx:0.1")
+    implementation("no.tornado", "tornadofx", "1.7.19")
+    implementation("no.tornado:tornadofx-controlsfx:0.1")
 }
 
 tasks {
@@ -39,14 +53,42 @@ tasks {
 }
 
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "yokiano"
-            artifactId = "codecontroller"
-            version = "1.0-SNAPSHOT"
-
-            from(components["java"])
+fun MavenPom.addDependencies() = withXml {
+    asNode().appendNode("dependencies").let { depNode ->
+        configurations.compile.get().allDependencies.forEach {
+            depNode.appendNode("dependency").apply {
+                appendNode("groupId", it.group)
+                appendNode("artifactId", it.name)
+                appendNode("version", it.version)
+            }
         }
     }
+}
+
+val publicationName = "mavenPub"
+publishing {
+    publications {
+        register(publicationName, MavenPublication::class) {
+            from(components["java"])
+            groupId = project.group.toString()
+            artifactId = artifactID
+            version = project.version.toString()
+            pom.addDependencies()
+        }
+    }
+}
+
+bintray {
+    user = "yokiano"
+    key = "683f6d442fa2213a6c5ce97b72e2247ab1d23453"
+    setPublications(publicationName)
+    pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
+        repo = "my-tools"
+        name = "code-controller"
+        userOrg = "yokiano"
+        vcsUrl = "https://github.com/yokiano/code_controller"
+        version(delegateClosureOf<BintrayExtension.VersionConfig> {
+            name = project.version.toString()
+        })
+    })
 }

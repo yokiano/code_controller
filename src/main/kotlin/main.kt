@@ -31,7 +31,7 @@ class MyClass : CCAware {
                     range = 30.0..100.0
                 } // few optional (but sometimes essential) configuration parameters are available in the configuration block.
 
-                val vector = ccVec("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
+                val vector = ccVec2("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
 
                 ccInfo("i", "$i")
 

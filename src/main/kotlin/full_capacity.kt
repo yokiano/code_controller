@@ -19,11 +19,7 @@ fun main() {
 
 // When extending CCAware you have access to all controllers without referring to the CodeController object as seen below
 class MyClass2 : CCAware {
-
-
     fun go() {
-
-
         runBlocking {
             for (i in 0..100) {
                 val iSin = sin(i.toDouble() * 0.1)
@@ -44,10 +40,10 @@ class MyClass2 : CCAware {
                 ccInfo("FPS", "${i}")
                 ccInfo("counter", "${i * 0.34}")
 
-                val vector1 = ccVec("vector1") { setRange(30.0, 30.0, 100.0, 100.0) }
-//                val vector2 = ccVec("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
-//                val vector3 = ccVec("vector3") { setRange(30.0, 30.0, maxRange, maxRange) }
-//                val vector4 = ccVec("vector4") { setRange(30.0, 30.0, maxRange, maxRange) }
+                val vector1 = ccVec2("vector1") { setRange(30.0, 30.0, 100.0, 100.0) }
+//                val vector2 = ccVec2("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
+//                val vector3 = ccVec2("vector3") { setRange(30.0, 30.0, maxRange, maxRange) }
+//                val vector4 = ccVec2("vector4") { setRange(30.0, 30.0, maxRange, maxRange) }
 
                 delay(100)
             }

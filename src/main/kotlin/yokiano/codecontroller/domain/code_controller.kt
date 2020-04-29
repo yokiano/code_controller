@@ -26,7 +26,6 @@ object CodeController : KodeinAware {
     // <<< Kodein configurations
     data class UnitKodeinParams(val type: CCType, val id: String)
 
-
     override val kodein = Kodein {
         installTornadoSource()
 
@@ -68,13 +67,14 @@ object CodeController : KodeinAware {
     // Kodein configurations >>>
 
     // <<< Properties declaration
-    private val eventsChannel: GuiEventsChannel by instance()
-    private val uiChannel: GuiUnitsChannel by instance()
-    private val guiStateController: GuiStateController by instance()
-    private val internalChannel: InternalChannel by instance()
+    private val eventsChannel: GuiEventsChannel by instance<GuiEventsChannel>()
+    private val uiChannel: GuiUnitsChannel by instance<GuiUnitsChannel>()
+    private val internalChannel: InternalChannel by instance<InternalChannel>()
+    private val infoLabelChannel: InfoLabelChannel by instance<InfoLabelChannel>()
 
-    private val plotter: CCPlotter by instance()
-    private val infoLabelChannel: InfoLabelChannel by instance()
+    private val guiStateController: GuiStateController by instance<GuiStateController>()
+
+    private val plotter: CCPlotter by instance<CCPlotter>()
 
     var controllerState: ControllerState = UNUSED
     private var callCounter = 0
@@ -173,7 +173,7 @@ object CodeController : KodeinAware {
                     changeFile(event.id, event.sourceToValueReplacement())
                 }
                 // This instance() call will fetch the (only) unit with the specified ID from the defined multiton in kodein.
-                val unit: CCUnit by kodein.instance(
+                val unit: CCUnit by instance(
                     arg = UnitKodeinParams(
                         type = ccType,
                         id = this.id
@@ -249,7 +249,7 @@ object CodeController : KodeinAware {
     }
 
     // ------ VECTOR ------ //                                                // ------ VECTOR ------ //                                                // ------ VECTOR ------ //
-    fun ccVec(
+    fun ccVec2(
         id: String,
         fallBack: Pair<Double, Double> = Pair(0.0, 0.0),
         initCode: CCVec.() -> Unit = {}
@@ -262,10 +262,10 @@ object CodeController : KodeinAware {
     }
 
     // ------ INFO ------ //                                                // ------ INFO ------ //                                                // ------ INFO ------ //
-    fun ccInfo(id: String, info: String, howMany: Double = 1.0) {
+    fun ccInfo(id: String, info: String, reduceCalls: Double = 1.0) {
         if (controllerState is PAUSED) return
 
-        if (Random.nextDouble() > howMany) {
+        if (Random.nextDouble() > reduceCalls) {
             return
         }
         infoLabelChannel.send(CCInfoDatum(id, info.cleanDecimal()))
@@ -275,10 +275,10 @@ object CodeController : KodeinAware {
 
     //   howOften - between 0.0..1.0, the higher the more dataPoints.
     // howMany - maximum number of data points in the plot
-    fun ccPlot(id: String, x: Double, y: Double, howOften: Double = 1.0, howMany: Int = Int.MAX_VALUE) {
+    fun ccPlot(id: String, x: Double, y: Double, reduceCalls: Double = 1.0, howMany: Int = Int.MAX_VALUE) {
         if (controllerState is PAUSED) return
 
-        if (Random.nextDouble() > howOften) {
+        if (Random.nextDouble() > reduceCalls) {
             return
         }
 
