@@ -11,7 +11,9 @@ Any direct or indirect support and contribution will be much appreciated.
 **- The GUI controllers panel is opened as a separate window using an independent TornadoFX app. This way it doesn't matter what framework or platform you are using, as long as it's in kotlin/java.**  
   
   
-An example of a fully equipped control panel:
+For more in-depth explanations refer to the [wiki page](https://github.com/yokiano/code_controller/wiki).  
+  
+**An example of a fully equipped control panel:**
 
 
 **Core features overview:**
@@ -21,8 +23,8 @@ An example of a fully equipped control panel:
    1. XY Controller (ccVec2)
 1. Information pane - displays a dynamically updated strings (ccInfo). 
 1. Real time plotter (ccPlot).
-1. Local configuration - Save/Load values to/from a automatically created config file. Controllers are initialized with the previously saved value on startup. 
-1. Remove and Refactor - after you finish to use a control normally you would go back to the source code to remove the gui elelemnts declarations manually. Instead of doing so this feature will remove a controller from the gui panel and will replace the source code declaration of that controller automatically with the current controller value. Use with care.  
+1. Value Registry - Save/Load values to/from a automatically created local file. Controllers are initialized with the previously saved value on startup. 
+1. Remove and Refactor - after you finish to use a control, normally you would go back to the source code to remove the gui elelemnts declarations manually. Instead of doing so this feature will remove a controller from the gui panel AND will automatically replace the source code declaration of that controller with the current controller value. Use with care.  
 1. Fast resizing - The UI panel is designed for quick resizing and placement so you will spend less time dealing with layouting your windows and panes. 
   
 
