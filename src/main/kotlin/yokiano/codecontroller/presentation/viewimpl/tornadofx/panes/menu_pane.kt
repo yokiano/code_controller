@@ -2,7 +2,6 @@ package yokiano.codecontroller.presentation.viewimpl.tornadofx.panes
 
 import javafx.geometry.Orientation
 import javafx.scene.paint.Color
-import javafx.stage.Screen
 import org.kodein.di.generic.instance
 import org.kodein.di.tornadofx.kodein
 import tornadofx.*
@@ -10,27 +9,33 @@ import yokiano.codecontroller.presentation.viewimpl.tornadofx.*
 
 object MenuPane : View() {
 
-    val driver: TornadoDriver by kodein().instance()
+    val driver: TornadoDriver by kodein().instance<TornadoDriver>()
 
     // --- MAIN MENU
-    override val root = vbox {
+    override val root = flowpane {
+
+        adjustButtonOrientation()
+
         style {
+            paddingTop = 8
+            paddingLeft = 3
             backgroundColor += Color(0.0, 0.0, 0.0, 0.3)
         }
 
-        // ON\OFF button.
+        // Power On/Off button.
         togglebutton("") {
+            tooltip("Enable / Disable Controllers")
             addClass(MyStyle.toggleButton)
             isSelected = true
-            updateToggleStyle(true)
+            updateToggleStyle(isSelected, MyStyle.powerButton_off, MyStyle.powerButton_on)
 
             selectedProperty().onChange {
                 driver.internalChannel.send(it)
-                updateToggleStyle(isSelected)
+                updateToggleStyle(isSelected, MyStyle.powerButton_off, MyStyle.powerButton_on)
             }
         }
 
-        // Currently used for reloading views
+        // Reloading Views - currently cause bugs
 /*
         button("") {
             addClass(MyStyle.hideConfig, MyStyle.hideConfigOff)
@@ -48,49 +53,55 @@ object MenuPane : View() {
         }
 */
 
-        // Button to disable the fast resizing feature. resizing through touching the dividers will still be possible though.
+        // Fast Resize Enable/Disable Button. (resizing through touching the dividers will still be possible even if fast resize is disabled)
         togglebutton("") {
+            tooltip("Enable / Disable Fast Resize")
             addClass(MyStyle.toggleButton)
-            isSelected = false
-            updateToggleStyle(false)
+            isSelected = true
+            updateToggleStyle(isSelected, MyStyle.fastResizeButton_on, MyStyle.fastResizeButton_off)
 
             selectedProperty().onChange {
-                driver.globalDisableFastResize = isSelected
-                updateToggleStyle(isSelected)
+                driver.globalIsFastResizeEnabled = isSelected
+                updateToggleStyle(isSelected, MyStyle.fastResizeButton_on, MyStyle.fastResizeButton_off)
             }
         }
 
-        // Button to switch from horizontal to vertical views.
+        // Orientation Button
         togglebutton("") {
+            tooltip("Change panel orientation")
             addClass(MyStyle.toggleButton)
-            isSelected = false
-            updateToggleStyle(false)
 
-            selectedProperty().onChange {
-                driver.screenOrientation = when(driver.mainView.splitpane.orientation) {
-                    Orientation.HORIZONTAL -> Orientation.VERTICAL
-                    Orientation.VERTICAL -> Orientation.HORIZONTAL
-                    null -> Orientation.HORIZONTAL
+            runLater {
+                isSelected = when (driver.screenOrientation) {
+                    Orientation.HORIZONTAL -> true
+                    Orientation.VERTICAL -> false
                 }
-                driver.mainView.splitpane.orientation = driver.screenOrientation
-
-                driver.activePanes.forEach {
-                    it.setup()
-                }
-
-                driver.currentScreenBounds.apply {
-                    val widthRate = primaryStage.width / width
-                    val heightRate = primaryStage.height / height
-                    primaryStage.width = heightRate * width
-                    primaryStage.height = widthRate * height
-
-                    val newY = (((primaryStage.x - minX) / (maxX - minX)) * height) + minY
-                    val newX = (((primaryStage.y - minY) / (maxY - minY)) * width) + minX
-                    primaryStage.x = newX.coerceIn(minX,maxX - primaryStage.width)
-                    primaryStage.y = newY.coerceIn(minY, maxY - primaryStage.height)
-
-                }
+                updateToggleStyle(
+                    isSelected,
+                    MyStyle.orientationButton_horizontal_on,
+                    MyStyle.orientationButton_vertical_on
+                )
             }
+
+            action {
+                updateToggleStyle(
+                    isSelected,
+                    MyStyle.orientationButton_horizontal_on,
+                    MyStyle.orientationButton_vertical_on
+                )
+                driver.flipOrientation()
+            }
+        }
+    }
+
+    fun adjustButtonOrientation() {
+        runLater {
+            root.orientation = when (driver.screenOrientation) {
+                Orientation.HORIZONTAL -> Orientation.VERTICAL
+                Orientation.VERTICAL -> Orientation.HORIZONTAL
+            }
+
+
         }
     }
 }

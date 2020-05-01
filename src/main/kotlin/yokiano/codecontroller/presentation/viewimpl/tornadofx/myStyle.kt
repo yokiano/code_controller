@@ -7,6 +7,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.OverrunStyle
 import javafx.scene.effect.DropShadow
 import javafx.scene.effect.InnerShadow
+import javafx.scene.layout.BackgroundSize
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javafx.scene.text.FontWeight
@@ -32,6 +33,14 @@ class MyStyle : Stylesheet() {
         val SEMI_OPAQUE = Color(0.3,0.3,0.3,0.3)
         val ALMOST_OPAQUE = Color(0.5,0.5,0.5,0.3)
         val ALMOST_TRANSPARENT = Color(0.2,0.2,0.2,0.3)
+
+        // Main Menu
+        val powerButton_on by cssclass()
+        val powerButton_off by cssclass()
+        val orientationButton_vertical_on by cssclass()
+        val orientationButton_horizontal_on by cssclass()
+        val fastResizeButton_on by cssclass()
+        val fastResizeButton_off by cssclass()
 
         // Config View
         val configButton by cssclass()
@@ -119,17 +128,30 @@ class MyStyle : Stylesheet() {
         }
 
         // ------ MAIN MENU ------ //
-        hideConfig {
-            backgroundColor += Color.TRANSPARENT
-            textOverrun = OverrunStyle.WORD_ELLIPSIS
-        }
-        hideConfigOn {
-            graphic = javaClass.getResource("/main_menu/hide_config_controls_on.png").toURI()
 
+        // Orientation Button
+        powerButton_on {
+            graphic = javaClass.getResource("/main_menu/power_on.png").toURI()
         }
-        Companion.hideConfigOff {
-            graphic = javaClass.getResource("/main_menu/hide_config_controls_off.png").toURI()
+        powerButton_off {
+            graphic = javaClass.getResource("/main_menu/power_off.png").toURI()
         }
+
+        orientationButton_vertical_on {
+            graphic = javaClass.getResource("/main_menu/vertical_on.png").toURI()
+        }
+        orientationButton_horizontal_on {
+            graphic = javaClass.getResource("/main_menu/horizontal_on.png").toURI()
+        }
+        // Fast resize button
+        fastResizeButton_on {
+            graphic = javaClass.getResource("/main_menu/fast_resize_on.png").toURI()
+        }
+        Companion.fastResizeButton_off {
+            graphic = javaClass.getResource("/main_menu/fast_resize_off.png").toURI()
+        }
+
+
 
         // ------ LABELS ------ //
         infoPane {
@@ -184,6 +206,7 @@ class MyStyle : Stylesheet() {
             thumb {
                 val uri = javaClass.getResource("/controls/slider/hthumb.png").toURI()
                 backgroundImage += uri
+                backgroundSize += BackgroundSize(1.0,1.0,true ,true, true,false)
                 prefWidth = 29.px
                 prefHeight = 14.px
                 effect = DropShadow(3.0, Color.BEIGE)
@@ -227,10 +250,10 @@ class MyStyle : Stylesheet() {
             textOverrun = OverrunStyle.WORD_ELLIPSIS
         }
         toggleButtonOn {
-            graphic = javaClass.getResource("/controls/toggle/on.png").toURI()
+            graphic = javaClass.getResource("/controls/toggle/toggle_on.png").toURI()
         }
         toggleButtonOff {
-            graphic = javaClass.getResource("/controls/toggle/off.png").toURI()
+            graphic = javaClass.getResource("/controls/toggle/toggle_off.png").toURI()
         }
 
         // ------ PLOTS ------ //

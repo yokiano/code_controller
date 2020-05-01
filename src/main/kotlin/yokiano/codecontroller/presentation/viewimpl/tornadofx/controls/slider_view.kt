@@ -15,7 +15,7 @@ import yokiano.codecontroller.presentation.viewimpl.tornadofx.TornadoDriver
 
 class SliderView(val tUnit: TSlider) : ControlView(tUnit) {
 
-    val driver: TornadoDriver by kodein().instance()
+    val driver: TornadoDriver by kodein().instance<TornadoDriver>()
 
     override val control = slider(tUnit.range.start, tUnit.range.endInclusive, tUnit.initialValue) {
         addClass(MyStyle.sliderStyle)

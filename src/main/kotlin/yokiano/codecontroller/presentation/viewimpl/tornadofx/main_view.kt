@@ -4,30 +4,35 @@ import javafx.geometry.Orientation
 import javafx.scene.control.Button
 import javafx.scene.control.SplitPane
 import javafx.scene.control.ToggleButton
+import javafx.scene.layout.BorderPane
 import javafx.scene.paint.Color
 import org.kodein.di.generic.instance
 import org.kodein.di.tornadofx.kodein
 import tornadofx.*
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.panes.*
 
-class MainView2() : View() {
+class MainView() : View() {
 
-    private val driver: TornadoDriver by kodein().instance()
+    private val driver: TornadoDriver by kodein().instance<TornadoDriver>()
 
     val splitpane: SplitPane by lazy { splitpane() }
+    lateinit var borderPane: BorderPane
+
 
     // TODO - hide on creation and show when the controls are added in real time.
-    // TODO - Add plotPane
-
-
     override val root = stackpane {
 
-        borderpane {
+        borderPane = borderpane {
             addClass(MyStyle.mainView)
-
-            left {
-                MenuPane.root.attachTo(this)
+            when (driver.screenOrientation) {
+                Orientation.HORIZONTAL -> {
+                    left = MenuPane.root
+                }
+                Orientation.VERTICAL -> {
+                    top = MenuPane.root
+                }
             }
+
             center {
 
                 squeezebox {
@@ -64,8 +69,6 @@ class MainView2() : View() {
                 }
                 widthProperty().bind(widthBinding)
                 heightProperty().bind(heightBinding)
-
-
             }
         }
 
@@ -99,7 +102,7 @@ class MainView2() : View() {
     // Adding a list of panes to the split view item list and hides the panes if requestex. the panes will be shown again only after they are in use.
 }
 
-fun SplitPane.addCCPanes(vararg panes: ResponsivePane, atIndex : Int = -1) {
+fun SplitPane.addCCPanes(vararg panes: ResponsivePane, atIndex: Int = -1) {
     for (p in panes) {
         if (atIndex >= 0) {
             items.add(atIndex, p.root)
@@ -110,13 +113,17 @@ fun SplitPane.addCCPanes(vararg panes: ResponsivePane, atIndex : Int = -1) {
 }
 
 
-fun ToggleButton.updateToggleStyle(value: Boolean) {
+fun ToggleButton.updateToggleStyle(
+    value: Boolean,
+    onStyle: CssRule = MyStyle.toggleButtonOn,
+    offStyle: CssRule = MyStyle.toggleButtonOff
+) {
     if (value) {
-        removeClass(MyStyle.toggleButtonOff)
-        addClass(MyStyle.toggleButtonOn)
+        removeClass(offStyle)
+        addClass(onStyle)
     } else {
-        removeClass(MyStyle.toggleButtonOn)
-        addClass(MyStyle.toggleButtonOff)
+        removeClass(onStyle)
+        addClass(offStyle)
     }
 }
 

@@ -20,19 +20,19 @@ import kotlin.reflect.jvm.jvmName
 
 abstract class ResponsivePane() : View() {
     // TODO - make the panes singletons/multitons instead instantiating them like now.
-    val driver: TornadoDriver by kodein().instance()
+    val driver: TornadoDriver by kodein().instance<TornadoDriver>()
     abstract val type: PaneType
     abstract val draggable: Node
 
-    var hidden = false
+    private var hidden = false
 
-    val indexInSplitPane: Int
+    private val indexInSplitPane: Int
         get() {
             return driver.activePanes.indexOf(this)
         }
 
-    var disableFastResize = false
-    val contextMenu: ContextMenu by lazy { contextmenu() }
+    var isFastResizeEnabled = true
+    private val contextMenu: ContextMenu by lazy { contextmenu() }
     abstract val paneRoot: Node
 
     override val root = vbox {
@@ -48,10 +48,10 @@ abstract class ResponsivePane() : View() {
     }
 
     // Needed for resizing panes with mouse drag event.
-    var lastMouseX = 0.0 to 0.0
-    var lastMouseY = 0.0 to 0.0
-    var dividerToDrag = 0
-    var shouldShowContextMenu = true
+    private var lastMouseX = 0.0 to 0.0
+    private var lastMouseY = 0.0 to 0.0
+    private var dividerToDrag = 0
+    private var shouldShowContextMenu = true
 
     init {
         runLater { setup() }
@@ -63,7 +63,7 @@ abstract class ResponsivePane() : View() {
     }
 
 
-    fun showHidePanes(pane: ResponsivePane) {
+    private fun showHidePanes(pane: ResponsivePane) {
         pane.run {
             if (this.hidden) {
                 driver.mainView.splitpane.addCCPanes(this, atIndex = this.indexInSplitPane)
@@ -74,12 +74,12 @@ abstract class ResponsivePane() : View() {
         }
     }
 
-    fun hidePane(pane: ResponsivePane) {
+    private fun hidePane(pane: ResponsivePane) {
         driver.mainView.splitpane.items.remove(pane.root)
         pane.hidden = true
     }
 
-    fun setRightClick(node: Node) {
+    private fun setRightClick(node: Node) {
         node.setOnContextMenuRequested { event ->
             if (shouldShowContextMenu) {
                 contextMenu.apply {
@@ -114,7 +114,7 @@ abstract class ResponsivePane() : View() {
 
     }
 
-    fun setMouseEvents(node: Node) {
+    private fun setMouseEvents(node: Node) {
         node.apply {
 
             // --- For Fast Resize and Fast Move mechanisms
@@ -139,10 +139,17 @@ abstract class ResponsivePane() : View() {
             lastMouseX = screenX to sceneX
             lastMouseY = screenY to sceneY
 
-
             val halfWay = when (driver.screenOrientation) {
                 Orientation.HORIZONTAL -> boundsInLocal.width / 2.0
-                Orientation.VERTICAL -> boundsInLocal.height / 2.0
+                Orientation.VERTICAL -> {
+                    val scroll = this@ResponsivePane.paneRoot
+                    if (scroll is ScrollPane) {
+                        scroll.viewportBounds.height / 2.0
+                    } else {
+                        boundsInLocal.height / 2.0
+                    }
+                }
+//                Orientation.VERTICAL -> boundsInLocal.height / 2.0
             }
 
             dividerToDrag = when (driver.screenOrientation) {
@@ -170,7 +177,7 @@ abstract class ResponsivePane() : View() {
 
     private fun handleMouseDragged(event: MouseEvent) {
 
-        if (driver.globalDisableFastResize || disableFastResize) return
+        if (!driver.globalIsFastResizeEnabled || !isFastResizeEnabled) return
 
         when (event.button) {
             PRIMARY -> fastPaneResize(event, dividerToDrag)
@@ -188,7 +195,7 @@ abstract class ResponsivePane() : View() {
             false // this is to make sure the context menu will not popup when dragging with right mouse button.
     }
 
-    fun updateWindowConfig() {
+    private fun updateWindowConfig() {
         with(WindowConfig.config) {
             primaryStage.apply {
                 set("x" to x)
@@ -227,14 +234,13 @@ abstract class ResponsivePane() : View() {
 
     private fun fastPaneResize(event: MouseEvent, dividerIndex: Int) {
 
-
         val progress = if (driver.screenOrientation == Orientation.HORIZONTAL) {
             (event.sceneX - lastMouseX.second).mapTo(0.0, driver.mainView.splitpane.width, 0.0, 1.0)
         } else {
             (event.sceneY - lastMouseY.second).mapTo(0.0, driver.mainView.splitpane.height, 0.0, 1.0)
         }
 
-        // Moving the divider according to the mouse movement. attempting to adjust the most left and most right edges (which do not exist) will simply return and do nothing.
+        // Moving the divider according to the mouse movement. attempting to adjust the most left and most right edges (which do not exist) will cause panel resize.
         driver.mainView.splitpane.apply {
             val lastPosition = dividerPositions.getOrElse(dividerIndex) {
                 fastResize(event)
@@ -242,12 +248,6 @@ abstract class ResponsivePane() : View() {
             }
             setDividerPosition(dividerToDrag, lastPosition + progress)
 
-/*
-            when (driver.screenOrientation) {
-                Orientation.HORIZONTAL -> fastResize(event, resizeWidth = false)
-                Orientation.VERTICAL -> fastResize(event, resizeHeight = false)
-            }
-*/
 
         }
     }
@@ -262,7 +262,7 @@ abstract class ResponsivePane() : View() {
         primaryStage.y += progressY
     }
 
-    fun updateLastMousePoint(event: MouseEvent) {
+    private fun updateLastMousePoint(event: MouseEvent) {
         lastMouseX = event.screenX to event.sceneX
         lastMouseY = event.screenY to event.sceneY
     }

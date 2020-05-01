@@ -16,26 +16,27 @@ import tornadofx.*
 import yokiano.codecontroller.domain.*
 import yokiano.codecontroller.presentation.common.CCGuiUnit
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.panes.*
+import java.awt.Menu
 import kotlin.reflect.full.createInstance
 
 @Suppress("MemberVisibilityCanBePrivate")
 class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentationDriver, KodeinAware {
 
-    val tornadoApp: TornadoApp by instance()
+    val tornadoApp: TornadoApp by instance<TornadoApp>()
 
     val activePanes = ArrayList<ResponsivePane>()
 
     val unitsList = UnitsListViewModel(UnitList())
-    private val eventsChannel: GuiEventsChannel by instance()
-    val internalChannel: InternalChannel by instance()
+    private val eventsChannel: GuiEventsChannel by instance<GuiEventsChannel>()
+    val internalChannel: InternalChannel by instance<InternalChannel>()
 
     val plotter = Plotter()
 
-    val mainView by lazy { find(MainView2::class) }
+    val mainView by lazy { find(MainView::class) }
 
     val infoLabelList = ArrayList<TInfoLabel>()
 
-    var globalDisableFastResize = false
+    var globalIsFastResizeEnabled = true
 
     val primaryScreenBounds: Rectangle2D
         get() = Screen.getPrimary().visualBounds
@@ -251,6 +252,43 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
         }
     }
 
+    fun flipOrientation() {
+        screenOrientation = when (screenOrientation) {
+            Orientation.HORIZONTAL -> Orientation.VERTICAL
+            Orientation.VERTICAL -> Orientation.HORIZONTAL
+        }
+
+        mainView.splitpane.orientation = screenOrientation
+
+        activePanes.forEach {
+            it.setup()
+        }
+
+        currentScreenBounds.apply {
+            val widthRate = MenuPane.primaryStage.width / width
+            val heightRate = MenuPane.primaryStage.height / height
+            MenuPane.primaryStage.width = (heightRate * width).coerceAtMost(maxX)
+            MenuPane.primaryStage.height = (widthRate * height).coerceAtMost(maxY)
+
+            val newY = (((MenuPane.primaryStage.x - minX) / (maxX - minX)) * height) + minY
+            val newX = (((MenuPane.primaryStage.y - minY) / (maxY - minY)) * width) + minX
+            MenuPane.primaryStage.x = newX.coerceIn(minX, maxX - MenuPane.primaryStage.width)
+            MenuPane.primaryStage.y = newY.coerceIn(minY, maxY - MenuPane.primaryStage.height)
+
+        }
+
+        MenuPane.adjustButtonOrientation()
+        mainView.borderPane.children.remove(MenuPane.root)
+        when (screenOrientation) { // (The new orientation)
+            Orientation.HORIZONTAL -> {
+                mainView.borderPane.left = MenuPane.root
+            }
+            Orientation.VERTICAL -> {
+                mainView.borderPane.top = MenuPane.root
+            }
+
+        }
+    }
 }
 
 fun ArrayList<ResponsivePane>.sortPanes() {
