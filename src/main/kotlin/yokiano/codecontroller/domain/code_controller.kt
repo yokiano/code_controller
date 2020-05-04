@@ -67,7 +67,7 @@ object CodeController : KodeinAware {
     // Kodein configurations >>>
 
     // <<< Properties declaration
-    private val eventsChannel: GuiEventsChannel by instance<GuiEventsChannel>()
+    private val valueEventsChannel: GuiEventsChannel by instance<GuiEventsChannel>()
     private val uiChannel: GuiUnitsChannel by instance<GuiUnitsChannel>()
     private val internalChannel: InternalChannel by instance<InternalChannel>()
     private val infoLabelChannel: InfoLabelChannel by instance<InfoLabelChannel>()
@@ -113,8 +113,9 @@ object CodeController : KodeinAware {
 
     }
 
-    fun changeFile(id: String, stringReplacement: String) {
-        // TODO -- recursive file change
+
+    fun refactorDeclaration(id: String, stringReplacement: String) {
+        // TODO -- recursive file search
         val file = File("src/main/kotlin/main.kt")
 
         val tempFile = createTempFile()
@@ -166,21 +167,21 @@ object CodeController : KodeinAware {
 
     private suspend fun eventsConsumer() {
         // The for loop will consume each event once it arrives and will never finish.
-        for (event in eventsChannel.channel) {
+        for (event in valueEventsChannel.channel) {
             event.run {
                 if (event.state == CCUnitState.DEAD) {
                     println("Changing file for ${event.id}")
-                    changeFile(event.id, event.sourceToValueReplacement())
-                }
-                // This instance() call will fetch the (only) unit with the specified ID from the defined multiton in kodein.
-                val unit: CCUnit by instance(
-                    arg = UnitKodeinParams(
-                        type = ccType,
-                        id = this.id
+                    refactorDeclaration(event.id, event.sourceToValueReplacement())
+                } else {
+                    // This instance() call will fetch the (only) unit with the specified ID from the defined multiton in kodein.
+                    val unit: CCUnit by instance(
+                        arg = UnitKodeinParams(
+                            type = ccType,
+                            id = this.id
+                        )
                     )
-                )
-
-                unit.updateValue(event.value)
+                    unit.updateValue(event.value)
+                }
             }
         }
     }

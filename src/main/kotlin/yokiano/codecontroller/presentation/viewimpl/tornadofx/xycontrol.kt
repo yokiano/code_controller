@@ -3,31 +3,38 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.control.Control
+
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
 import tornadofx.*
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.MyStyle
+import yokiano.codecontroller.presentation.viewimpl.tornadofx.controls.XYControlView
+import javafx.scene.input.MouseButton.*
+import javafx.scene.input.MouseEvent
 
-class XYControl(val id_: String, val range: Pair<XYPoint, XYPoint>, valueP: SimpleObjectProperty<XYPoint>) : View() {
+
+class XYControl(
+    val parentView: XYControlView,
+    val range: Pair<XYPoint, XYPoint>,
+    valueP: SimpleObjectProperty<XYPoint>
+) : View() {
 
     val pointerProperty = SimpleObjectProperty<XYPoint>(valueP.value)
     var pointer: XYPoint by pointerProperty
 
-    private val dimensions = 150.0
+
+    private val dimensions = 100.0
 
     val internalX = SimpleDoubleProperty(fromValuetoPixel(valueP.value.x, valueP.value.y).first)
     val internalY = SimpleDoubleProperty(fromValuetoPixel(valueP.value.x, valueP.value.y).second)
 
     val valueLabel = SimpleStringProperty("(${"%.2f".format(pointer.x)},${"%.2f".format(pointer.y)})")
 
-    lateinit var configBox: HBox
     lateinit var rect: Rectangle
 
     override val root = createController()
-
-//    val controller = createController()
 
     init {
         pointerProperty.bindBidirectional(valueP)
@@ -38,13 +45,14 @@ class XYControl(val id_: String, val range: Pair<XYPoint, XYPoint>, valueP: Simp
                 val convertedToPixels = fromValuetoPixel(it.x, it.y)
                 internalX.value = convertedToPixels.first
                 internalY.value = convertedToPixels.second
-                valueLabel.value = "(${"%.2f".format(convertedToPixels.first)},${"%.2f".format(convertedToPixels.second)})"
+                valueLabel.value =
+                    "(${"%.2f".format(convertedToPixels.first)},${"%.2f".format(convertedToPixels.second)})"
             }
         }
     }
 
     fun createController() = stackpane {
-        paddingAll = 15.0
+        alignment = Pos.CENTER
         group {
             rect = rectangle {
                 stroke = Color.BLANCHEDALMOND
@@ -55,26 +63,33 @@ class XYControl(val id_: String, val range: Pair<XYPoint, XYPoint>, valueP: Simp
                 arcWidth = 10.0
                 arcHeight = 10.0
 
-
                 setOnMouseDragged {
                     it.apply {
-                        updatePointer(x, y)
+                        if (!isRightClick(this)) {
+                            updatePointer(x, y)
+                        }
                     }
                 }
                 setOnTouchMoved {
-                    it.touchPoint.apply {
-                        updatePointer(x, y)
+
+                    it.apply {
+                        if (touchCount <= 1) {
+                            updatePointer(touchPoint.x, touchPoint.y)
+                        }
                     }
                 }
                 val draggedEvent = onMouseDragged
                 val touchEvent = onTouchMoved
                 setOnMouseClicked {
-                    updatePointer(it.x, it.y)
+                    it.apply {
+                        if (!isRightClick(this)) {
+                            updatePointer(x, y)
+                        }
+                    }
                 }
 
 
                 // ------ CHILDREN ------ //                                                // ------ CHILDREN ------ //
-
                 circle {
                     fill = Color.WHITE
                     centerXProperty().bindBidirectional(internalX)
@@ -113,8 +128,18 @@ class XYControl(val id_: String, val range: Pair<XYPoint, XYPoint>, valueP: Simp
     }
 
 
+    fun isRightClick(event: MouseEvent): Boolean {
+        return when (event.button) {
+            PRIMARY -> false
+            SECONDARY -> true
+            MIDDLE -> false
+            NONE -> false
+            null -> false
+        }
+    }
 
     fun updatePointer(x: Double, y: Double) {
+
         fromPixelToValue(x, y).run {
             pointer.x = first
             pointer.y = second
@@ -123,6 +148,11 @@ class XYControl(val id_: String, val range: Pair<XYPoint, XYPoint>, valueP: Simp
 
         }
         valueLabel.value = "(${"%.2f".format(pointer.x)},${"%.2f".format(pointer.y)})"
+
+
+        if (parentView.contextMenu.isShowing) {
+            parentView.contextMenu.hide()
+        }
     }
 
 /*    fun attachConfigButtons(cv: ConfigView<XYPoint>): ConfigView<XYPoint> {
@@ -142,8 +172,8 @@ class XYControl(val id_: String, val range: Pair<XYPoint, XYPoint>, valueP: Simp
     private fun fromValuetoPixel(x: Double, y: Double): Pair<Double, Double> {
 //        val nx = x.mapTo(range.first.x, range.second.x, 0.0, 150.0)
 //        val ny = y.mapTo(range.first.y, range.second.y, 0.0, 150.0)
-        val nx = x.mapTo(range.first.x, range.second.x, 0.0, dimensions).coerceIn(0.0,dimensions)
-        val ny = y.mapTo(range.first.y, range.second.y, 0.0, dimensions).coerceIn(0.0,dimensions)
+        val nx = x.mapTo(range.first.x, range.second.x, 0.0, dimensions).coerceIn(0.0, dimensions)
+        val ny = y.mapTo(range.first.y, range.second.y, 0.0, dimensions).coerceIn(0.0, dimensions)
         return (nx to ny)
     }
 }

@@ -13,11 +13,11 @@ class PlotPane() : ResponsivePane() {
 
     override val type = PaneType.Plot
 
+    override val validServiceBarFeatures = arrayOf(false,true) // Only text resize
 
     override var draggable : Node = root // Giving initial value as the initialization is happening only after a line is added.
 
     override val paneRoot = vbox {
-
         val seriesList = ArrayList<XYChart.Series<Number, Number>>()
         if (driver.plotter.visible) {
             val xAxis = NumberAxis().apply { tickLabelFill = MyStyle.textColor }

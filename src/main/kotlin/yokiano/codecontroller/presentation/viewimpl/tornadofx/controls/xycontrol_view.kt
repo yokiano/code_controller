@@ -1,10 +1,12 @@
 package yokiano.codecontroller.presentation.viewimpl.tornadofx.controls
 
 import XYControl
+import javafx.beans.property.SimpleDoubleProperty
 
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.*
 import javafx.geometry.Pos
 import javafx.scene.Node
+import javafx.scene.input.MouseButton
 import org.kodein.di.generic.instance
 import org.kodein.di.tornadofx.kodein
 import tornadofx.*
@@ -14,9 +16,18 @@ class XYControlView(private val tUnit: TXYControl, val parentPane: ResponsivePan
 
     val driver: TornadoDriver by kodein().instance<TornadoDriver>()
 
-    val xyControlObject = XYControl(tUnit.id,tUnit.range,tUnit.valueProperty)
+    val xyControlObject = XYControl(this,tUnit.range,tUnit.valueProperty)
     override val control = xyControlObject.root
 
+
+/*
+    override fun bindScale(property: SimpleDoubleProperty) {
+        property.onChange {
+            root.scale(driver.globalParams.controlScalingAnimationDuration, Point2D(it))
+//            control.scaleX = it
+        }
+    }
+*/
     override val root = vbox {
         alignment = Pos.CENTER
 
@@ -30,7 +41,6 @@ class XYControlView(private val tUnit: TXYControl, val parentPane: ResponsivePan
                 label(tUnit.id)
                 label("${xyControlObject.valueLabel}") {
                     textProperty().bindBidirectional(xyControlObject.valueLabel)
-                    paddingBottom = -14.0
                 }
             }
         }

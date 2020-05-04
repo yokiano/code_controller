@@ -7,15 +7,15 @@ import yokiano.codecontroller.presentation.viewimpl.tornadofx.TornadoDriver
 
 class GuiStateController(override val kodein: Kodein) : KodeinAware {
 
-    private val unitsChannel: GuiUnitsChannel by instance()
-    private val eventsChannel: GuiEventsChannel by instance()
+    private val unitsChannel: GuiUnitsChannel by instance<GuiUnitsChannel>()
+    private val eventsChannel: GuiEventsChannel by instance<GuiEventsChannel>()
 
     private val guiUnits: ArrayList<CCGuiUnit> = ArrayList()
 
-    private val presentationDriver: TornadoDriver by instance()
+    private val presentationDriver: TornadoDriver by instance<TornadoDriver>()
 
-    private val plotterChannel: PlotterChannel by instance()
-    private val infoLabelChannel: InfoLabelChannel by instance()
+    private val plotterChannel: PlotterChannel by instance<PlotterChannel>()
+    private val infoLabelChannel: InfoLabelChannel by instance<InfoLabelChannel>()
 
     init {
         // Define the action for each of the data channels

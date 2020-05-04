@@ -1,6 +1,8 @@
 package yokiano.codecontroller.presentation.viewimpl.tornadofx.panes
 
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.geometry.Orientation
+import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.Node
 import javafx.scene.control.ContextMenu
@@ -8,39 +10,67 @@ import javafx.scene.control.ScrollPane
 import javafx.scene.input.MouseButton.*
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Priority
+import javafx.scene.paint.Color
 import mapTo
 import org.kodein.di.generic.instance
 import org.kodein.di.tornadofx.kodein
 import tornadofx.*
-import yokiano.codecontroller.presentation.viewimpl.tornadofx.PaneType
-import yokiano.codecontroller.presentation.viewimpl.tornadofx.TornadoDriver
-import yokiano.codecontroller.presentation.viewimpl.tornadofx.WindowConfig
-import yokiano.codecontroller.presentation.viewimpl.tornadofx.addCCPanes
+import yokiano.codecontroller.presentation.viewimpl.tornadofx.*
 import kotlin.reflect.jvm.jvmName
 
 abstract class ResponsivePane() : View() {
     // TODO - make the panes singletons/multitons instead instantiating them like now.
-    val driver: TornadoDriver by kodein().instance<TornadoDriver>()
-    abstract val type: PaneType
-    abstract val draggable: Node
 
+    // --- DEPENDENCIES ---
+    val driver: TornadoDriver by kodein().instance<TornadoDriver>()
+
+    // --- INTERNAL PROPERTIES ---
+    abstract val type: PaneType
+    abstract val draggable: Node // supports the fast resize feature.
     private var hidden = false
 
+    // --- HELPER PROPERTIES ---
     private val indexInSplitPane: Int
         get() {
             return driver.activePanes.indexOf(this)
         }
 
+    // --- SERVICE BAR RELATED ---
+    open val validServiceBarFeatures: Array<Boolean> = Array(ServiceBar.Companion.Features.values().size) { true }
+    val controlScale = SimpleDoubleProperty(1.0)
+    val textScale = SimpleDoubleProperty(1.0)
+    val serviceBar: ServiceBar by lazy { ServiceBar(controlScale, textScale, validServiceBarFeatures) }
+
     var isFastResizeEnabled = true
-    private val contextMenu: ContextMenu by lazy { contextmenu() }
+    val contextMenu: ContextMenu by lazy { contextmenu() }
     abstract val paneRoot: Node
 
-    override val root = vbox {
+    // Memo - stackpane was wrapped with vbox. probably doesn't matter.
+    override val root = stackpane {
+        vgrow = Priority.ALWAYS
 
-        stackpane {
-            vgrow = Priority.ALWAYS
-            runLater {
-                paneRoot.attachTo(this)
+        alignment = Pos.BOTTOM_CENTER
+        runLater {
+            paneRoot.attachTo(this)
+            paneRoot.addClass(MyStyle.responsivePane)
+
+            serviceBar.root.attachTo(this)
+
+            // Burger Button for serviceBar
+            button {
+                style {
+                    graphic = javaClass.getResource("/service_bar/burger_icon.png").toURI()
+                    backgroundColor += Color.TRANSPARENT
+                }
+                this.setOnMouseEntered {
+                    serviceBar.root.show()
+                    this.hide()
+                }
+                serviceBar.root.setOnMouseExited {
+                    this.show()
+                    serviceBar.root.hide()
+                }
+
             }
         }
 
@@ -54,14 +84,16 @@ abstract class ResponsivePane() : View() {
     private var shouldShowContextMenu = true
 
     init {
-        runLater { setup() }
+        runLater {
+            setup()
+        }
     }
 
     fun setup() {
         setMouseEvents(root)
         setMouseEvents(draggable)
+        setTextScaleHandler()
     }
-
 
     private fun showHidePanes(pane: ResponsivePane) {
         pane.run {
@@ -149,7 +181,6 @@ abstract class ResponsivePane() : View() {
                         boundsInLocal.height / 2.0
                     }
                 }
-//                Orientation.VERTICAL -> boundsInLocal.height / 2.0
             }
 
             dividerToDrag = when (driver.screenOrientation) {
@@ -208,27 +239,54 @@ abstract class ResponsivePane() : View() {
         }
     }
 
-    private fun fastResize(event: MouseEvent, resizeHeight: Boolean = true, resizeWidth: Boolean = true) {
+    private fun fastResize(
+        event: MouseEvent,
+        resizeHeight: Boolean = true,
+        resizeWidth: Boolean = true,
+        fixedDividers: Boolean = false
+    ) {
         val progressX = event.screenX - lastMouseX.first
         val progressY = event.screenY - lastMouseY.first
 
-
-        if (resizeHeight) {
-            if (event.sceneY > primaryStage.height / 2.0) {
-                primaryStage.height = (primaryStage.height + progressY)
-            } else {
-                primaryStage.height = (primaryStage.height - progressY)
-                primaryStage.y += progressY
+        with(primaryStage) {
+            if (resizeHeight) {
+                if (event.sceneY > height / 2.0) {
+                    height = (height + progressY)
+                } else {
+                    height = (height - progressY)
+                    y += progressY
+                }
             }
-        }
 
-        if (resizeWidth) {
-            if (event.sceneX > primaryStage.width / 2.0) {
-                primaryStage.width = (primaryStage.width + progressX)
-            } else {
-                primaryStage.width = (primaryStage.width - progressX)
-                primaryStage.x += progressX
+            if (resizeWidth) {
+                val isRightEdge = (event.sceneX > width / 2.0)
+                if (fixedDividers) {
+                    val oldWidth = driver.mainView.splitpane.width
+                    with(driver.mainView.splitpane) {
+//                        println("Old width = ${oldWidth}, current width = ${width}")
+                        dividers.forEachIndexed { index, divider ->
+                            val distance = divider.position * oldWidth
+                            val newPosition = if (isRightEdge) {
+                                distance / (oldWidth + progressX)
+                            } else {
+                                (distance - progressX) / (oldWidth - progressX)
+                            }
+                            setDividerPosition(index, newPosition)
+                        }
+                    }
+                }
+
+
+                if (isRightEdge) {
+                    width = (width + progressX)
+                } else {
+                    width = (width - progressX)
+                    x += progressX
+                }
+
+
             }
+
         }
     }
 
@@ -242,8 +300,10 @@ abstract class ResponsivePane() : View() {
 
         // Moving the divider according to the mouse movement. attempting to adjust the most left and most right edges (which do not exist) will cause panel resize.
         driver.mainView.splitpane.apply {
+
             val lastPosition = dividerPositions.getOrElse(dividerIndex) {
-                fastResize(event)
+                // In case the most left/right edges are subject to change
+                fastResize(event, resizeHeight = false, fixedDividers = true)
                 return
             }
             setDividerPosition(dividerToDrag, lastPosition + progress)
@@ -291,6 +351,21 @@ abstract class ResponsivePane() : View() {
                 }
                 if (it.pickResult.intersectedNode::class.jvmName.contains(scrollSkinString)) {
                     root.cursor = Cursor.DEFAULT
+                }
+            }
+        }
+    }
+
+    open fun setTextScaleHandler() {
+        textScale.onChange {
+            val labelsAndTextFields = ArrayList<Node>()
+            labelsAndTextFields.addAll(root.lookupAll(".label"))
+            labelsAndTextFields.addAll(root.lookupAll(".text-field"))
+//            labelsAndTextFields.addAll(root.lookupAll("Text")) // <-- works for the plot numbers, but it is overwritten by plot behavior and flickers
+            val newScale = it
+            labelsAndTextFields.forEach {
+                it.style(true) {
+                    fontSize = Dimension(MyStyle.defaultTextSize * newScale, Dimension.LinearUnits.px)
                 }
             }
         }

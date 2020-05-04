@@ -9,6 +9,7 @@ import javafx.geometry.Rectangle2D
 import javafx.stage.Screen
 import javafx.stage.Stage
 import javafx.stage.StageStyle
+import javafx.util.Duration
 import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.generic.instance
@@ -22,6 +23,10 @@ import kotlin.reflect.full.createInstance
 @Suppress("MemberVisibilityCanBePrivate")
 class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentationDriver, KodeinAware {
 
+    data class GlobalParams(
+        val controlScalingAnimationDuration : Duration = 50.millis
+    )
+    val globalParams = GlobalParams()
     val tornadoApp: TornadoApp by instance<TornadoApp>()
 
     val activePanes = ArrayList<ResponsivePane>()

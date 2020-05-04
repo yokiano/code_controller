@@ -5,14 +5,6 @@ import yokiano.codecontroller.presentation.viewimpl.tornadofx.ControllersConfig
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.TUnit
 import java.lang.Exception
 
-/*
-open class Savable<T>(id: String, val type: TType) {
-
-    val valueToSave = SimpleObjectProperty<T>()
-    val configView = ConfigView(id,this)
-}
-*/
-
 class ConfigView<T>(private val unit: TUnit<T>)  {
 
     private val globalConf = ControllersConfig.config

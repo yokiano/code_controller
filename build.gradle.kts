@@ -41,6 +41,10 @@ dependencies {
     // TornadoFX
     implementation("no.tornado", "tornadofx", "1.7.19")
     implementation("no.tornado:tornadofx-controlsfx:0.1")
+
+    // java-diff-utils
+    implementation("io.github.java-diff-utils", "java-diff-utils", "4.7")
+
 }
 
 tasks {

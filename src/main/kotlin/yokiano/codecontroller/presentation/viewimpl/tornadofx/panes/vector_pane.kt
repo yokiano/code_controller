@@ -1,17 +1,12 @@
 package yokiano.codecontroller.presentation.viewimpl.tornadofx.panes
 
-import XYControl
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.ScrollPane
 import javafx.scene.layout.Priority
-import org.kodein.di.generic.instance
-import org.kodein.di.tornadofx.kodein
 import tornadofx.*
-import yokiano.codecontroller.presentation.viewimpl.tornadofx.MyStyle
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.PaneType
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.TXYControl
-import yokiano.codecontroller.presentation.viewimpl.tornadofx.TornadoDriver
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.controls.XYControlView
 
 class VectorPane : ResponsivePane() {
@@ -34,8 +29,10 @@ class VectorPane : ResponsivePane() {
                 it.item is TXYControl
             }.toObservable()) { unitVM ->
                 val unit = unitVM.item as TXYControl
-                val xyControl = XYControlView(unit,this@VectorPane)
-                xyControl.root.attachTo(this)
+                XYControlView(unit, this@VectorPane).run {
+                    setControlScaleHandler(controlScale)
+                    root.attachTo(this@flowpane)
+                }
 
             }
         }

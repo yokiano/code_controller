@@ -7,18 +7,17 @@ import tornadofx.*
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.MyStyle
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.PaneType
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.TornadoDriver
-
+import yokiano.codecontroller.presentation.viewimpl.tornadofx.panes.ServiceBar.Companion.Features
 class InfoPane : ResponsivePane() {
 
     override val type = PaneType.Info
     override lateinit var draggable: Node
 
+    override val validServiceBarFeatures = arrayOf(false,true) // Only text resize
+
     override val paneRoot = vbox {
         draggable = this
         addClass(MyStyle.infoPane)
-//        prefWidth = primaryStage.width * 0.2
-        paddingVertical = 20.0
-        paddingHorizontal = 10.0
         bindChildren(driver.infoLabelList.asObservable()) { infoLabel ->
             borderpane {
                 left {

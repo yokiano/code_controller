@@ -41,8 +41,8 @@ class MyClass2 : CCAware {
                 ccInfo("counter", "${i * 0.34}")
 
                 val vector1 = ccVec2("vector1") { setRange(30.0, 30.0, 100.0, 100.0) }
-//                val vector2 = ccVec2("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
-//                val vector3 = ccVec2("vector3") { setRange(30.0, 30.0, maxRange, maxRange) }
+                val vector2 = ccVec2("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
+                val vector3 = ccVec2("vector3") { setRange(30.0, 30.0, maxRange, maxRange) }
 //                val vector4 = ccVec2("vector4") { setRange(30.0, 30.0, maxRange, maxRange) }
 
                 delay(100)

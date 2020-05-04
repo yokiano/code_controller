@@ -43,15 +43,18 @@ class MyStyle : Stylesheet() {
         val fastResizeButton_off by cssclass()
 
         // Config View
-        val configButton by cssclass()
-        val saveButton by cssclass()
-        val loadButton by cssclass()
-        val dismissButton by cssclass()
-        val deleteButton by cssclass()
-        val hideConfig by cssclass()
         val hideConfigOn by cssclass()
         val hideConfigOff by cssclass()
 
+        // Responsive Pane
+        val responsivePane by cssclass()
+
+        // Service Bar
+        val serviceBarButton by cssclass()
+        val textZoomButton by cssclass()
+        val zoomButtonHover by cssclass()
+        val zoomButtonMinus by cssclass()
+        val zoomButtonPlus by cssclass()
 
         // Info label
         val infoPane by cssclass()
@@ -75,17 +78,27 @@ class MyStyle : Stylesheet() {
         //Plots
         val lineChart by cssclass()
         val plotLine by cssclass()
-    }
 
-    init {
-
+        val defaultTextSize = 10.0
         val defaultTextStyle_ = mixin {
             textFill = textColor
-            fontSize = 10.px
+            fontSize = Dimension(defaultTextSize, Dimension.LinearUnits.px)
             textAlignment = TextAlignment.CENTER
             fontWeight = FontWeight.MEDIUM
             wrapText = true
         }
+
+
+        // Parameters
+        val serviceBarHeight = 24.px
+
+    }
+
+
+
+    init {
+
+
 
         text {
             +defaultTextStyle_
@@ -152,12 +165,34 @@ class MyStyle : Stylesheet() {
         }
 
 
+        // ------ RESPONSIVE PANE ------ //
+        responsivePane {
+            padding = box(0.px, 0.px, serviceBarHeight, 0.px)
+        }
+
+        // ------ SERVICE BAR ------ //
+        zoomButtonHover {
+            +defaultTextStyle_
+            backgroundColor += c("#5d5d5d66")
+        }
+        serviceBarButton {
+            +defaultTextStyle_
+            backgroundColor += Color.TRANSPARENT
+            maxHeight = serviceBarHeight
+        }
+        zoomButtonPlus {
+            graphic = javaClass.getResource("/service_bar/plus.png").toURI()
+        }
+        zoomButtonMinus {
+            graphic = javaClass.getResource("/service_bar/minus.png").toURI()
+        }
 
         // ------ LABELS ------ //
         infoPane {
             //            borderColor += box(Color.BLANCHEDALMOND)
 //            backgroundColor += Color(1.0,0.0,0.0,0.2)
             backgroundColor += Color.web("313131", 0.4)
+            padding = box(5.px,5.px, serviceBarHeight,5.px)
         }
 
         // -------------- GENERAL PANE ATTRIBUTES (SCROLL PANE / SPLIT PANE) --------------
@@ -202,7 +237,7 @@ class MyStyle : Stylesheet() {
 
         // -------------- SLIDER --------------
 
-        slider {
+        sliderStyle {
             thumb {
                 val uri = javaClass.getResource("/controls/slider/hthumb.png").toURI()
                 backgroundImage += uri
@@ -223,10 +258,6 @@ class MyStyle : Stylesheet() {
             prefWidth = 100.px
             backgroundColor += Color.TRANSPARENT
             alignment = Pos.CENTER
-
-        }
-
-        sliderLabel {
 
         }
 

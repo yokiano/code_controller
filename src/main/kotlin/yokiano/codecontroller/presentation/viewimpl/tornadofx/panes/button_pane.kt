@@ -1,14 +1,10 @@
 package yokiano.codecontroller.presentation.viewimpl.tornadofx.panes
 
-import XYControl
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
 import javafx.scene.Node
-import javafx.scene.Parent
 import javafx.scene.control.ScrollPane
 import javafx.scene.layout.Priority
-import org.kodein.di.generic.instance
-import org.kodein.di.tornadofx.kodein
 import tornadofx.*
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.*
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.controls.ToggleView
@@ -35,7 +31,10 @@ class ButtonPane : ResponsivePane() {
             bindChildren(driver.unitsList.listVM.value.filter { it.item is TToggle }.toObservable()) { unitVM ->
                 when (val unit = unitVM.item) {
                     is TToggle -> {
-                        ToggleView(unit).root
+                        ToggleView(unit).run {
+                            setControlScaleHandler(controlScale)
+                            root
+                        }
                     }
                     else -> {
                         label("Unrecognized control unit")

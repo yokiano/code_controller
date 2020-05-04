@@ -77,6 +77,10 @@ class MainView() : View() {
 
     fun addInfoPane() {
         driver.activePanes.apply {
+
+            if (size <= 0) {
+                return
+            }
             if (first() is InfoPane) {
                 removeAt(0)
                 add(0, InfoPane())

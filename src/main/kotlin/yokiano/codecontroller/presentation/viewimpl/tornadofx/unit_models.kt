@@ -27,7 +27,7 @@ class Plotter : Controller() {
 
     val maxDataPoints = 250
     fun addPlotLine(plotLine: PlotLine) {
-        val driver: TornadoDriver by kodein().instance()
+        val driver: TornadoDriver by kodein().instance<TornadoDriver>()
 
         if (lines.isEmpty()) { // if true this is the first plot line - need to create and show the plot pane
             driver.apply {
@@ -92,7 +92,6 @@ interface TUnit<T> {
         println("Dismissing $id")
 
         stateProperty.value = CCUnitState.DEAD // stateProperty is observable to detect the dismiss event .
-
     }
 
 }
@@ -172,7 +171,7 @@ class PlotLine(val id: String, override val kodein: Kodein) : KodeinAware {
     val dataPointListProperty = SimpleListProperty<Vector2D>(FXCollections.observableArrayList())
     val dataPointsList by dataPointListProperty
 
-    val tornadoDriver: TornadoDriver by instance()
+    val tornadoDriver: TornadoDriver by instance<TornadoDriver>()
 
     var state = CCUnitState.NEW
     fun add(vec: Vector2D) {
@@ -197,25 +196,5 @@ sealed class PaneType(var ordinal: Int) {
     object Button : PaneType(3)
     object Plot : PaneType(4)
 }
-/*
-sealed class PaneType(var ordinal: Int, var width: Double) {
 
-    object Menu : PaneType(0, PaneWidth.NA)
-    object Info : PaneType(1, 0.15) {
-        fun somethig() {
-            println()
-        }
-    }
-    object Vector : PaneType(2, )
-    object Slider : PaneType(3)
-    object Button : PaneType(4)
-    object Plot : PaneType(5)
-
-    companion object PaneWidth {
-        val NA = 0.0
-        val START = 0.0
-        val END = 1.0
-    }
-}
-*/
 
