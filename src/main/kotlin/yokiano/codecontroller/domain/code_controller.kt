@@ -113,7 +113,6 @@ object CodeController : KodeinAware {
 
     }
 
-
     fun refactorDeclaration(id: String, stringReplacement: String) {
         // TODO -- recursive file search
         val file = File("src/main/kotlin/main.kt")
@@ -171,7 +170,7 @@ object CodeController : KodeinAware {
             event.run {
                 if (event.state == CCUnitState.DEAD) {
                     println("Changing file for ${event.id}")
-                    refactorDeclaration(event.id, event.sourceToValueReplacement())
+//                    refactorDeclaration(event.id, event.stringifiedValue())
                 } else {
                     // This instance() call will fetch the (only) unit with the specified ID from the defined multiton in kodein.
                     val unit: CCUnit by instance(

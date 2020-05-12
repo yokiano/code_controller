@@ -2,6 +2,7 @@ package yokiano.codecontroller.presentation.viewimpl.tornadofx
 
 import ConfigView
 import XYPoint
+import cleanDecimal
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -94,6 +95,9 @@ interface TUnit<T> {
         stateProperty.value = CCUnitState.DEAD // stateProperty is observable to detect the dismiss event .
     }
 
+    // ------ Refactoring related
+    fun stringifiedValue() : String
+    fun getDeclarationString() : String
 }
 
 class TSlider(
@@ -119,7 +123,13 @@ class TSlider(
         return jsonObject
     }
 
+    override fun stringifiedValue() : String {
+        return "$value".cleanDecimal()
+    }
 
+    override fun getDeclarationString(): String {
+        return "ccDouble"
+    }
 }
 
 class TToggle(override val id: String, override val initialValue: Boolean = false) : TUnit<Boolean> {
@@ -135,6 +145,14 @@ class TToggle(override val id: String, override val initialValue: Boolean = fals
     override fun convertToJson(): JsonObject {
         val jsonObject = Json.createObjectBuilder().add("value", value).build()
         return jsonObject
+    }
+
+    override fun stringifiedValue(): String {
+        return "$value"
+    }
+
+    override fun getDeclarationString(): String {
+        return "ccBool"
     }
 }
 
@@ -165,6 +183,16 @@ class TXYControl(
         )
             .build()
     }
+
+    override fun stringifiedValue(): String {
+        return "Pair(${value.x},${value.y})"
+    }
+
+    override fun getDeclarationString(): String {
+        return "ccVec2"
+    }
+
+
 }
 
 class PlotLine(val id: String, override val kodein: Kodein) : KodeinAware {

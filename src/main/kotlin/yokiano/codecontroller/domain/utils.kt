@@ -44,7 +44,7 @@ fun <T,R> Channel<T>.reactToChannelOn(receiver : R, op: R.(element: T) -> Unit) 
     }
 }
 
-fun String.cleanDecimal() : String {
+fun String.cleanDecimal(digits: Int = 3) : String {
     if (!this.contains(Regex("^[0-9]+\\.[0-9]+"))) {
         return this
     }
@@ -54,4 +54,18 @@ fun String.cleanDecimal() : String {
         return this
     }
     return this.take(dotPlace + 3)
+}
+
+
+// Note - if collection size is 1 this function will return 0 always.
+fun Int.progressCyclic(collection: Collection<*>) : Int {
+    if (collection.size <= 0) {
+        return -1
+    }
+
+    if (this >= collection.size - 1) {
+        return 0
+    }
+
+    return (this + 1)
 }

@@ -2,7 +2,6 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.jfrog.bintray.gradle.BintrayExtension
 import org.gradle.api.publish.maven.MavenPom
 
-
 val kodeinVersion = "6.5.5"
 
 plugins {
@@ -11,6 +10,8 @@ plugins {
     id("com.github.johnrengelman.shadow") version "5.2.0"
     `maven-publish`
     id("com.jfrog.bintray") version "1.8.4"
+    application
+    id("org.openjfx.javafxplugin") version "0.0.8"
 }
 
 group = "yokiano"
@@ -22,12 +23,15 @@ shadowJar.apply {
     archiveBaseName.set(artifactID)
 }
 
-
 repositories {
     mavenCentral()
     jcenter()
 }
 
+javafx {
+    version = "11.0.2"
+    modules = listOf("javafx.controls")
+}
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))

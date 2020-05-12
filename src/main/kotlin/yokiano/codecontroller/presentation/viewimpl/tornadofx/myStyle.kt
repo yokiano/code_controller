@@ -21,18 +21,17 @@ class MyStyle : Stylesheet() {
     val bg by cssproperty<MultiValue<Paint>>("-fx-background;")
 
     companion object {
-        val mainView by cssclass()
+        val ccWindow by cssclass()
         val controllersFlowpane by cssclass()
         val root by cssclass()
 
 
-
         // Helper Values
 //        val textColor = Color.GRAY
-        val textColor = Color.BLANCHEDALMOND
-        val SEMI_OPAQUE = Color(0.3,0.3,0.3,0.3)
-        val ALMOST_OPAQUE = Color(0.5,0.5,0.5,0.3)
-        val ALMOST_TRANSPARENT = Color(0.2,0.2,0.2,0.3)
+                val textColor = Color.BLANCHEDALMOND
+        val SEMI_OPAQUE = Color(0.3, 0.3, 0.3, 0.3)
+        val ALMOST_OPAQUE = Color(0.5, 0.5, 0.5, 0.3)
+        val ALMOST_TRANSPARENT = Color(0.2, 0.2, 0.2, 0.3)
 
         // Main Menu
         val powerButton_on by cssclass()
@@ -45,6 +44,11 @@ class MyStyle : Stylesheet() {
         // Config View
         val hideConfigOn by cssclass()
         val hideConfigOff by cssclass()
+
+        // Refactoring View
+        val refactoring_view by cssclass()
+        val taskProgress by cssclass()
+
 
         // Responsive Pane
         val responsivePane by cssclass()
@@ -80,35 +84,43 @@ class MyStyle : Stylesheet() {
         val plotLine by cssclass()
 
         val defaultTextSize = 10.0
-        val defaultTextStyle_ = mixin {
+        val defaultTextStyle_std = mixin {
             textFill = textColor
             fontSize = Dimension(defaultTextSize, Dimension.LinearUnits.px)
-            textAlignment = TextAlignment.CENTER
+//            textAlignment = TextAlignment.CENTER
             fontWeight = FontWeight.MEDIUM
             wrapText = true
+        }
+
+        val largerTextSize = 13.0
+        val defaultTextStyle_larger = mixin {
+            textFill = textColor
+            fontSize = Dimension(largerTextSize, Dimension.LinearUnits.px)
+//            textAlignment = TextAlignment.CENTER
+            fontWeight = FontWeight.MEDIUM
+//            wrapText = true
         }
 
 
         // Parameters
         val serviceBarHeight = 24.px
+        val refactorViewBorderColor = box(c("#444444"))
 
     }
-
 
 
     init {
 
 
-
+/*
         text {
-            +defaultTextStyle_
+            +defaultTextStyle_std
         }
+*/
         label {
-            +defaultTextStyle_
+            +defaultTextStyle_std
         }
-        contextMenu {
-            backgroundColor += c("#222222")
-        }
+
 
         // for DEBUG
         // -------------- LAYOUT --------------
@@ -133,15 +145,14 @@ class MyStyle : Stylesheet() {
             alternativeRowFillVisible = true
         }
 
-        mainView {
-            //            backgroundColor += c("#5d5d5d")
+        ccWindow {
             backgroundImage += javaClass.getResource("/main_view/background/black_paper.png").toURI()
 //            backgroundSize += BackgroundSize(400.0, 400.0, false, false, true, false)
 //            unsafe("-fx-background-size", "auto")
         }
 
         // ------ MAIN MENU ------ //
-
+        //<editor-fold desc="Main Menu>>>>>>>>>>>">
         // Orientation Button
         powerButton_on {
             graphic = javaClass.getResource("/main_menu/power_on.png").toURI()
@@ -163,20 +174,82 @@ class MyStyle : Stylesheet() {
         Companion.fastResizeButton_off {
             graphic = javaClass.getResource("/main_menu/fast_resize_off.png").toURI()
         }
+        //</editor-fold>
+
+        // -------------- CONTECT MENU --------------
+        contextMenu {
+            backgroundColor += c("#222222")
+        }
+
+        refactoring_view {
+            text {
+                +defaultTextStyle_larger
+            }
+
+            textArea {
+
+/*
+                disabled {
+                }
+*/
+                +defaultTextStyle_larger
+                alignment = Pos.TOP_LEFT
+                borderColor += MyStyle.refactorViewBorderColor
+                backgroundColor += Color.TRANSPARENT
+                content {
+                    backgroundColor += Color.TRANSPARENT
+
+                }
+
+                corner {
+                    backgroundColor += Color.TRANSPARENT
+                }
+            }
 
 
+            padding = box(30.px, 20.px, 20.px, 20.px)
+
+            button {
+                backgroundColor += ALMOST_TRANSPARENT
+                borderColor += refactorViewBorderColor
+                +defaultTextStyle_std
+
+                and(hover) {
+                    backgroundColor += ALMOST_OPAQUE
+                }
+
+                and(pressed) {
+                    backgroundColor += ALMOST_TRANSPARENT
+                }
+            }
+        }
+
+        taskProgress {
+
+            track {
+                backgroundColor += Color.TRANSPARENT
+            }
+            accentColor = c("#00ff0022")
+            backgroundColor += Color.TRANSPARENT
+        }
+
+
+        // ========================================================================================================================================================================
+        // ========================================== PANES ====================================================================================================================
+        // ========================================================================================================================================================================
         // ------ RESPONSIVE PANE ------ //
         responsivePane {
             padding = box(0.px, 0.px, serviceBarHeight, 0.px)
         }
 
         // ------ SERVICE BAR ------ //
+        //<editor-fold desc="Service Bar >>>>>>>>>">
         zoomButtonHover {
-            +defaultTextStyle_
+            +defaultTextStyle_std
             backgroundColor += c("#5d5d5d66")
         }
         serviceBarButton {
-            +defaultTextStyle_
+            +defaultTextStyle_std
             backgroundColor += Color.TRANSPARENT
             maxHeight = serviceBarHeight
         }
@@ -186,16 +259,20 @@ class MyStyle : Stylesheet() {
         zoomButtonMinus {
             graphic = javaClass.getResource("/service_bar/minus.png").toURI()
         }
+        //</editor-fold>
 
-        // ------ LABELS ------ //
+        // ------ INFO PANE ------ //
+        //<editor-fold desc="Info Pane >>>>>">
         infoPane {
             //            borderColor += box(Color.BLANCHEDALMOND)
 //            backgroundColor += Color(1.0,0.0,0.0,0.2)
             backgroundColor += Color.web("313131", 0.4)
-            padding = box(5.px,5.px, serviceBarHeight,5.px)
+            padding = box(5.px, 5.px, serviceBarHeight, 5.px)
         }
+        //</editor-fold>-
 
         // -------------- GENERAL PANE ATTRIBUTES (SCROLL PANE / SPLIT PANE) --------------
+        //<editor-fold desc="Scroll and Split Panes >>>>>>>>>>>>>>>>">
         scrollPane {
             unsafe("-fx-background", raw("transparent"))
             unsafe("-fx-background-color", raw("transparent"))
@@ -215,7 +292,7 @@ class MyStyle : Stylesheet() {
                 backgroundColor += ALMOST_TRANSPARENT
             }
 
-            incrementArrow and incrementButton and decrementArrow and decrementButton  {
+            incrementArrow and incrementButton and decrementArrow and decrementButton {
 //                visibility = FXVisibility.HIDDEN
             }
         }
@@ -233,15 +310,20 @@ class MyStyle : Stylesheet() {
         splitPaneDivider {
             prefWidth = 1.px
         }
+        //</editor-fold>
+        // ========================================================================================================================================================================
 
 
+        // ========================================================================================================================================================================
+        // ========================================== CONTROLS ====================================================================================================================
+        // ========================================================================================================================================================================
         // -------------- SLIDER --------------
-
+        //<editor-fold desc="Slider >>>>>>>>>>>>>">
         sliderStyle {
             thumb {
                 val uri = javaClass.getResource("/controls/slider/hthumb.png").toURI()
                 backgroundImage += uri
-                backgroundSize += BackgroundSize(1.0,1.0,true ,true, true,false)
+                backgroundSize += BackgroundSize(1.0, 1.0, true, true, true, false)
                 prefWidth = 29.px
                 prefHeight = 14.px
                 effect = DropShadow(3.0, Color.BEIGE)
@@ -254,7 +336,7 @@ class MyStyle : Stylesheet() {
             }
         }
         sliderTextField {
-            +defaultTextStyle_
+            +defaultTextStyle_std
             prefWidth = 100.px
             backgroundColor += Color.TRANSPARENT
             alignment = Pos.CENTER
@@ -269,9 +351,10 @@ class MyStyle : Stylesheet() {
 //                backgroundImage += javaClass.getResource("/controllers/button/pressed.png").toURI()
 //            }
 //        }
-
+        //</editor-fold>
 
         // -------------- TOGGLE BUTTON --------------\
+        //<editor-fold desc="Toggle >>>>>>>>>>>>>>>">
         label {
         }
         toggleLabel {
@@ -286,8 +369,10 @@ class MyStyle : Stylesheet() {
         toggleButtonOff {
             graphic = javaClass.getResource("/controls/toggle/toggle_off.png").toURI()
         }
+        //</editor-fold>
 
         // ------ PLOTS ------ //
+        //<editor-fold desc="Plot Pane >>>>>>>>>>>">
         lineChart {
             //            backgroundColor += Color.WHITE
 //            textFill = Color.BLACK
@@ -303,16 +388,16 @@ class MyStyle : Stylesheet() {
         chartLegend {
             backgroundColor += Color.TRANSPARENT
             orientation = Orientation.VERTICAL
-                chartLineSymbol {
-                    visibility = FXVisibility.VISIBLE
+            chartLineSymbol {
+                visibility = FXVisibility.VISIBLE
 //                    backgroundColor = bgc.value
 //                    unsafe("-fx-background-color", raw("-fx-background-color"))
-    //                baseColor = Color.BLACK
+                //                baseColor = Color.BLACK
 //                    println("a = ${a}")
-                }
+            }
 
             label {
-                +defaultTextStyle_
+                +defaultTextStyle_std
                 backgroundColor += Color.TRANSPARENT
                 chartLegendSymbol {
 //                    backgroundColor += Color.RED
@@ -333,7 +418,8 @@ class MyStyle : Stylesheet() {
             visibility = FXVisibility.COLLAPSE
 
         }
-
+        //</editor-fold>
+        // ========================================================================================================================================================================
 
     }
 

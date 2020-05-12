@@ -101,6 +101,7 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
                     }
                 }
 
+//                initStyle(StageStyle.DECORATED)
                 initStyle(StageStyle.UNDECORATED)
             }
             tornadoApp.start(stage)
@@ -123,7 +124,6 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
                         CCUnitState.DEAD -> {
                             println("DEAD detected on ${tUnit.id}")
                             eventsChannel.send(UnitAdapter.toCCUnit(tUnit))
-
                             removeUnit(tUnitVM)
                         }
                         else -> {

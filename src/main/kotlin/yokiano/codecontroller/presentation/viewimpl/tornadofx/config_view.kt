@@ -1,7 +1,10 @@
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.Control
+import javafx.stage.Modality
+import javafx.stage.StageStyle
 import tornadofx.*
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.ControllersConfig
+import yokiano.codecontroller.presentation.viewimpl.tornadofx.RefactoringHandler
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.TUnit
 import java.lang.Exception
 
@@ -30,6 +33,9 @@ class ConfigView<T>(private val unit: TUnit<T>)  {
             }
         }
         item("Remove and Refactor").action {
+
+            RefactoringHandler(unit).openModal(stageStyle = StageStyle.DECORATED, block = true,resizable = true)
+/*
             unit.dismiss()
 
             // Clearing config file after disposal.
@@ -37,6 +43,7 @@ class ConfigView<T>(private val unit: TUnit<T>)  {
                 remove(keyString)
                 save()
             }
+*/
         }
 
     }

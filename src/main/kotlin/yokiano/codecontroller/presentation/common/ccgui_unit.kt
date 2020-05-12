@@ -11,7 +11,6 @@ interface CCGuiUnit {
     val default : Any
     val state : CCUnitState
 
-    fun sourceToValueReplacement() : String
 }
 
 // TODO - add spinner control (similar to JavaFX's spinner control. good for integers mainly.
@@ -29,9 +28,7 @@ data class CCGuiSlider(override val id: String) :
     override var state = CCUnitState.LIVE
     var range: ClosedFloatingPointRange<Double> = (0.0).rangeTo(default)
 
-    override fun sourceToValueReplacement() : String {
-        return "$value".cleanDecimal()
-    }
+
 }
 
 class CCGuiToggle(override val id: String,default: Boolean) :
@@ -45,9 +42,7 @@ class CCGuiToggle(override val id: String,default: Boolean) :
     override val ccType = CCType.BOOL
     override var state = CCUnitState.LIVE
 
-    override fun sourceToValueReplacement(): String {
-        return "$value"
-    }
+
 }
 
 class CCGuiXYControl(override val id: String) :
@@ -63,8 +58,6 @@ class CCGuiXYControl(override val id: String) :
 
     var range =  Pair(Pair(0.0,0.0),Pair(1.0,1.0))
 
-    override fun sourceToValueReplacement(): String {
-        return "Pair(${value.first},${value.second})"
-    }
+
 
 }

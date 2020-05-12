@@ -23,7 +23,7 @@ class MainView() : View() {
     override val root = stackpane {
 
         borderPane = borderpane {
-            addClass(MyStyle.mainView)
+            addClass(MyStyle.ccWindow)
             when (driver.screenOrientation) {
                 Orientation.HORIZONTAL -> {
                     left = MenuPane.root
