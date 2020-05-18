@@ -58,7 +58,7 @@ class MainView() : View() {
                 isMouseTransparent = true
                 fill = Color.TRANSPARENT
                 strokeWidth = 1.0
-                stroke = MyStyle.textColor
+                stroke = MyStyle.defaultTextColor
                 x = 2.0
                 y = 2.0
                 val widthBinding = doubleBinding(primaryStage.widthProperty(), widthProperty()) {

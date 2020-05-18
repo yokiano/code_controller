@@ -17,7 +17,7 @@ class ToggleView(private val tUnit: TToggle) : ControlView(tUnit) {
     val driver: TornadoDriver by kodein().instance<TornadoDriver>()
 
     override val control = ToggleButton().apply {
-        addClass(MyStyle.toggleButton)
+addClass(MyStyle.ccToggleButton)
         isSelected = tUnit.initialValue
         updateToggleStyle(tUnit.valueProperty.value)
 

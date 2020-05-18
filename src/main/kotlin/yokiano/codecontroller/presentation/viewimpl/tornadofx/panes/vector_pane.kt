@@ -19,6 +19,7 @@ class VectorPane : ResponsivePane() {
         hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
         fixScrollerMouseEvents(this)
         flowpane {
+
             draggable = this
             prefWidthProperty().bind(this@scrollpane.widthProperty())
             alignment = Pos.CENTER
@@ -33,11 +34,9 @@ class VectorPane : ResponsivePane() {
                     setControlScaleHandler(controlScale)
                     root.attachTo(this@flowpane)
                 }
-
             }
         }
     }
-
 }
 
 

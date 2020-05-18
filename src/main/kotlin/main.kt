@@ -32,7 +32,7 @@ class MyClass : CCAware {
                 } // few optional (but sometimes essential) configuration parameters are available in the configuration block.
 
                 val vector = ccVec2("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
-
+                ccDouble("Slider2")
                 ccInfo("i", "$i")
 
                 delay(100)

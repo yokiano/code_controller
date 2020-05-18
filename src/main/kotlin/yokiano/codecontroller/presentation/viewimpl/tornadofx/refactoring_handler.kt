@@ -1,53 +1,78 @@
 package yokiano.codecontroller.presentation.viewimpl.tornadofx
 
+import com.github.difflib.DiffUtils
+import com.github.difflib.patch.PatchFailedException
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.geometry.Orientation
+import javafx.concurrent.Task
 import javafx.geometry.Pos
-import javafx.scene.control.Button
-import javafx.scene.control.TextArea
+import javafx.scene.control.*
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
+import javafx.scene.paint.Color
 import javafx.scene.text.FontPosture
+import javafx.stage.DirectoryChooser
 import org.kodein.di.generic.instance
 import org.kodein.di.tornadofx.kodein
 import progressCyclic
 import tornadofx.*
+import tornadofx.Stylesheet.Companion.hover
+import yokiano.codecontroller.domain.CCUnitState
+import java.awt.Desktop
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-data class MatchOccurrence(val origFile: File, val revisedFile: File, val range: IntRange, var dirty: Boolean = false)
+data class MatchOccurrence(
+    val origFile: File,
+    val revisedFile: File,
+    val range: IntRange,
+    var wasEditedManually: Boolean = false
+)
+
+class SearchTargetPath(val folder: File) {
+    lateinit var searchTask: Task<Unit>
+    val taskStatus = TaskStatus()
+
+    fun isTaskInitialized() = this::searchTask.isInitialized
+}
+
 class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
     val driver: TornadoDriver by kodein().instance<TornadoDriver>()
 
-    // ------ File System related
-    val rootProjectFolder = File("./")
-    val supportedExtensions = arrayOf("kt")
-
-
-    val taskStatus = TaskStatus()
-
     val occurrencesList = SimpleListProperty(ArrayList<MatchOccurrence>().asObservable())
     var currentOccurrenceIndex = SimpleIntegerProperty(0)
-    fun currentOccurrence(): MatchOccurrence {
-        return occurrencesList.getOrElse(currentOccurrenceIndex.value) {
-            println("Returned dummy for index ${currentOccurrenceIndex.value}")
-            MatchOccurrence(createTempFile(), createTempFile(), 0..1) // dummy
-        }
+    fun currentOccurrence(): MatchOccurrence? {
+        return occurrencesList.getOrNull(currentOccurrenceIndex.value)
     }
 
     val totalOccurrences = SimpleIntegerProperty(0).apply {
         bind(occurrencesList.sizeProperty())
     }
-    val approvedChanges = ArrayList<MatchOccurrence>()
+
+    val approvedChanges = SimpleListProperty(ArrayList<MatchOccurrence>().asObservable())
+    val dismissedChanges = SimpleListProperty(ArrayList<MatchOccurrence>().asObservable())
 
     // ------ diff pane
     val leftDiffPaneContent = SimpleStringProperty("")
     val rightDiffPaneContent = SimpleStringProperty("")
     lateinit var leftTextArea: TextArea
     lateinit var rightTextArea: TextArea
-    val fileNameLabelStr = SimpleStringProperty("")
+    lateinit var editButton: ToggleButton
+    lateinit var commentsCheckbox: CheckBox
+    val fileNameForNoMatch = "Couldn't find a match"
+    val fileNameLabelStr = SimpleStringProperty(fileNameForNoMatch)
+    val buttonsThatShouldDisable = ArrayList<Control>()
+
+    // ------ Search Path Pane
+    val supportedExtensions = arrayOf("kt")
+    val searchTargetPathList = SimpleListProperty(ArrayList<SearchTargetPath>().asObservable()).apply {
+//        runLater {
+        this.add(SearchTargetPath(File("./")))
+//        }
+    }
 
     init {
         startRefactorOperation()
@@ -56,16 +81,18 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
     // ------ Params
     override val root: BorderPane = borderpane {
         title = "Refactor Declaration"
-//        vgrow = Priority.ALWAYS
+        vgrow = Priority.ALWAYS
         addClass(MyStyle.ccWindow, MyStyle.refactoring_view)
         prefWidth = driver.primaryScreenBounds.width * 0.7
         prefHeight = driver.primaryScreenBounds.height * 0.4
+
         runLater {
             scene.window.centerOnScreen()
+            currentStage?.minHeight = this.boundsInParent.height + 100.0
         }
 
         top {
-            vbox {                                                                                              // TOP WRAPPER
+            vbox(3.0) {                                                                                              // TOP WRAPPER
                 borderpane {                                                                            // HEAD LINE / TITLE + MATCH COUNT
                     opacity = 0.7
 //                    paddingBottom = 2.0
@@ -82,8 +109,29 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                             style {
                                 fontStyle = FontPosture.ITALIC
                             }
-                            label(totalOccurrences)
-                            label(" Matches")
+                            label() {
+                                paddingRight = 20.0
+                                isVisible = false
+
+                                val binding = stringBinding(approvedChanges.sizeProperty()) {
+                                    if (this.value > 0) {
+                                        (this@label as Label).isVisible = true
+                                    }
+                                    "${this.value} Approved"
+                                }
+                                bind(binding)
+                            }
+                            label() {
+                                val binding = integerBinding(
+                                    totalOccurrences,
+                                    dismissedChanges.sizeProperty(),
+                                    approvedChanges.sizeProperty()
+                                ) {
+                                    this.value + dismissedChanges.size + approvedChanges.size
+                                }
+                                bind(binding)
+                            }
+                            label(" Total Matches")
                         }
                     }
                 }
@@ -93,49 +141,86 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                             borderColor += MyStyle.refactorViewBorderColor
                         }
                         hgrow = Priority.ALWAYS
-                        borderpane {                                                    // FILE NAME + (CURRENT REFACTOR / TOTAL REFACTOR LINES)
+
+                        borderpane {                                                             //before after row
+                            paddingHorizontal = 400.0
                             style {
 //                                opacity = 0.8
                                 backgroundColor += MyStyle.ALMOST_TRANSPARENT
                             }
                             left {
-                                paddingAll = 4.0
-                                label(fileNameLabelStr)
+                                label("Before")
+                            }
+                            center {                                            // The file name and file counter
+                                hbox(20.0) {
+                                    alignment = Pos.CENTER
+                                    paddingAll = 4.0
+                                    label(fileNameLabelStr) {
+                                        tooltip {
+                                            style {
+                                                fontScale = 1.5
+                                            }
+                                            setOnShowing {
+                                                text = currentOccurrence()?.origFile?.absolutePath ?: ""
+                                            }
+                                        }
+                                    }
+
+
+                                    hbox {                                      // File Counter
+                                        label {
+                                            bind(integerBinding(currentOccurrenceIndex, totalOccurrences) {
+                                                if (totalOccurrences.value > 0) {
+                                                    value + 1
+                                                } else {
+                                                    0
+                                                }
+                                            })
+
+                                        }
+                                        label(" / ")
+                                        label(totalOccurrences)
+                                    }
+
+                                }
                             }
                             right {
-                                hbox {
-                                    label() {
-                                        bind(integerBinding(currentOccurrenceIndex) { value + 1 })
-                                    }
-                                    label(" / ")
-                                    label(totalOccurrences)
+                                label("After")
+                            }
+
+                            children.forEach {
+                                it.style {
+                                    opacity = 0.7
+                                    fontStyle = FontPosture.ITALIC
                                 }
                             }
                         }
                         hbox {                                                                              // DIFF
                             hgrow = Priority.ALWAYS
+                            runLater {
+                                minHeight = this@borderpane.height * 0.45
+                            }
                             textarea(leftDiffPaneContent) {
+                                addClass(MyStyle.leftTextArea)
                                 leftTextArea = this
-//                                vgrow = Priority.ALWAYS
-                                isEditable = false
-                                isDisable = true
-                                isWrapText = false
-                                this.isFocusTraversable = false
-
-                                runLater {
-                                    maxHeight = this@borderpane.height * 0.6
-                                    opacity = 1.0
-                                }
                             }
                             textarea(rightDiffPaneContent) {
+                                addClass(MyStyle.rightTextArea)
                                 rightTextArea = this
-//                                vgrow = Priority.ALWAYS
-                                isEditable = false
-                                isDisable = true
-                                isWrapText = false
-                                runLater {
-                                    maxHeight = this@borderpane.height * 0.6
-                                    opacity = 1.0
+                            }
+
+                            children.forEach {
+                                (it as TextArea).apply {
+                                    vgrow = Priority.ALWAYS
+                                    hgrow = Priority.ALWAYS
+                                    isEditable = false
+                                    isDisable = true
+                                    isWrapText = false
+
+                                    runLater {
+                                        maxHeight = this@borderpane.height * 0.6
+                                        opacity = 1.0
+                                    }
                                 }
                             }
                             setOnScroll {
@@ -152,15 +237,17 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                             }
                         }
                     }
-                    vbox(2.0) {                                                                              // BUTTONS
+                    vbox(3.0) {                                                                              // BUTTONS
                         paddingLeft = 5.0
+
                         button("Approve") {
+                            buttonsThatShouldDisable.add(this)
+                            shortcut("Ctrl+Shift+A")
                             action {
-                                currentOccurrence().apply {
-                                    if (dirty) {
+                                currentOccurrence()?.apply {
+                                    if (wasEditedManually) {
                                         revisedFile.writeText(rightDiffPaneContent.value)
                                     }
-
                                     approvedChanges.add(this)
                                     occurrencesList.remove(this)
                                     displayNextDiff()
@@ -168,157 +255,234 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                                 }
                             }
                         }
-                        button("Approve All") {
-                            approvedChanges.addAll(occurrencesList)
-                            occurrencesList.clear()
+                        val approveAllButton = button("Approve All") {
+                            buttonsThatShouldDisable.add(this)
+                            shortcut("Ctrl+Shift+Alt+A")
+                            action {
+                                approvedChanges.addAll(occurrencesList)
+                                occurrencesList.clear()
+                                displayNextDiff()
+                            }
                         }
-                        button("Next") {
+                        val nextButton = button("Next") {
+                            buttonsThatShouldDisable.add(this)
                             action {
                                 displayNextDiff()
                             }
                         }
-                        button("Dissmis") {
+                        val dismissButton = button("Dismiss") {
+                            buttonsThatShouldDisable.add(this)
                             action {
-                                occurrencesList.removeAt(currentOccurrenceIndex.value)
-                                displayNextDiff()
-                            }
-
-                        }
-                        button("Edit") {
-                            action {
-                                currentOccurrence().dirty = true
-                                rightTextArea.isDisable = false
-                                rightTextArea.isEditable = true
+                                currentOccurrence()?.apply {
+                                    dismissedChanges.add(this)
+                                    occurrencesList.remove(this)
+                                    displayNextDiff()
+                                }
                             }
                         }
-                        button("Open File") {
+                        editButton = togglebutton("Edit", selectFirst = false) {
+                            buttonsThatShouldDisable.add(this)
+                            selectedProperty().onChange {
+                                setEditable(it)
+                            }
+                        }
+                        val openFileButton = button("Open File") {
+                            buttonsThatShouldDisable.add(this)
+                            action {
+                                if (!Desktop.isDesktopSupported()) {
+                                    return@action
+                                }
+                                currentOccurrence()?.let {
+                                    Desktop.getDesktop().open(it.origFile)
+                                }
+                            }
                         }
 
                         minWidth = Region.USE_PREF_SIZE
                         runLater {
                             children.forEach {
-                                (it as Button).minWidth = this.width
-
+                                when (it) {
+                                    is ButtonBase -> {
+                                        it.minWidth = this.width
+                                        it.isDisable = true
+                                    }
+                                    else -> {
+                                    }
+                                }
                             }
                         }
                     }
                 }
+                commentsCheckbox = checkbox("Exclude comments") {
+
+                    isSelected = false
+                    tooltip("Selecting this will skip declarations that are commented. May cause performance degradation.")
+                }
             }
         }
 
-        center {
+        center {                                    // ------ Search Target Paths
+            vgrow = Priority.NEVER
+            lateinit var listView: ListView<SearchTargetPath>
             // --- Search Paths
             vbox {
                 paddingTop = 30.0
                 paddingBottom = 2.0
                 label("Search Paths:") {
-                    alignment = Pos.TOP_LEFT
+                    style {
+                        fontStyle = FontPosture.ITALIC
+                        alignment = Pos.TOP_LEFT
+                        opacity = 0.7
+                    }
                 }
 
                 hbox {
-                    hgrow = Priority.ALWAYS
-                    // ------ PathBox
-                    scrollpane {
-                        hgrow = Priority.ALWAYS
-//                            vgrow = Priority.ALWAYS
+                    listView = listview(searchTargetPathList) {
                         style {
                             borderColor += MyStyle.refactorViewBorderColor
                         }
-                        stackpane {
-                            alignment = Pos.CENTER_LEFT
-                            val pathLabel = label {
-                                val absPath = rootProjectFolder.absolutePath
-                                val charLimit = 100
-                                text = if (absPath.length > charLimit) {
-                                    "..." + absPath.takeLast(charLimit)
-                                } else {
-                                    absPath
+                        runLater {
+                            prefWidthProperty().bind((this@hbox).widthProperty())
+                        }
+                        addClass(MyStyle.pathListView)
+                        cellFormat {
+                            graphic = stackpane {
+                                alignment = Pos.CENTER_LEFT
+                                val pathLabel = label {
+                                    text = it.folder.absolutePath
                                 }
-                            }
-                            progressbar(taskStatus.progress) {
-                                prefWidthProperty().bind(doubleBinding(pathLabel.widthProperty()) { value * 1.05 })
-                                prefHeightProperty().bind(
-                                    doubleBinding(
-                                        pathLabel.heightProperty()
-                                    ) { value * 1.2 })
-                                stackpaneConstraints {
-                                    marginLeft = -3.0
+                                progressbar(it.taskStatus.progress) {
+                                    isMouseTransparent = true
+                                    prefWidthProperty().bind(doubleBinding(pathLabel.widthProperty()) { value * 1.05 })
+                                    prefHeightProperty().bind(
+                                        doubleBinding(
+                                            pathLabel.heightProperty()
+                                        ) { value * 1.2 })
+                                    stackpaneConstraints {
+                                        marginLeft = -3.0
+                                    }
+                                    addClass(MyStyle.taskProgress)
+                                    hgrow = Priority.ALWAYS
+                                    tooltip(it.folder.absolutePath)
                                 }
-                                addClass(MyStyle.taskProgress)
-                                hgrow = Priority.ALWAYS
-                                tooltip(rootProjectFolder.absolutePath)
                             }
                         }
                     }
-                    flowpane {
-                        orientation = Orientation.VERTICAL
+                    vbox(3.0) {
                         paddingLeft = 5.0
-                        button("+")
-                        button("-")
-                        button("refresh")
+                        button("+") {
+                            action {
+                                DirectoryChooser().apply {
+                                    initialDirectory = File("./")
+                                    showDialog(currentWindow)?.let {
+                                        searchTargetPathList.add(SearchTargetPath(it))
+                                    }
+                                }
+                            }
+                        }
+                        button("-") {
+                            action {
+                                listView.selectedItem?.let {
+                                    searchTargetPathList.remove(it)
+                                }
+                            }
+                        }
+
+                        button("Refresh\nResults") {
+                            action {
+                                startRefactorOperation()
+                            }
+                        }
+                        minHeight = Region.USE_PREF_SIZE
+                        minWidth = Region.USE_PREF_SIZE
+
+                        runLater {
+                            children.forEach {
+                                if (it is Button) {
+                                    it.minWidth = this.width
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
+
         bottom {
             hbox(2.0) {
+                paddingTop = 40.0
                 alignment = Pos.BASELINE_RIGHT
                 button("Apply") {
-
+                    shortcut("Ctrl+Shift+S")
                     action {
-
-                        occurrencesList.forEach {
-
-                            val backupFile = File("${it.origFile.parentFile}/ccBackup/${it.origFile.name}.bkp").apply {
-                                mkdirs()
+                        approvedChanges.groupBy { it.origFile }.entries.forEach { entry -> // Will traverse each group
+                            val localTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dMy_Hmss"))
+                            val backupFile =
+                                File("${entry.key.parentFile}/ccBackup/${entry.key.name}.bkp.${localTime}").apply {
+                                    mkdirs()
+                                }
+                            check(entry.key.copyTo(backupFile, true).exists()) {
+                                "Couldn't Backup ${entry.key.name}."
                             }
 
-                            check(it.origFile.copyTo(backupFile, true).exists()) {
-                                "Couldn't Backup ${it.origFile.name}."
-                            } // Should throw exception in case couldn't backup.
-
-                            check(it.revisedFile.copyTo(it.origFile, true).exists()) {
-                                "Failed to overwrite file."
-                            }
-
-//                            check(it.origFile.delete() && it.revisedFile.renameTo(file)) { "failed to replace file" }
-//                            it.origFile.
-
+                            applyChangesToFile(entry)
                         }
 
+                        runLater {
+                            close()
+                            unit.stateProperty.value = CCUnitState.DEAD
+                        }
                     }
                 }
                 button("Cancel") {
-                    val file = File("src/main/kotlin/refactor_test.kt")
-                    file.writeText("ASDFG")
-
-//                    close()
+                    action {
+                        cancelSearchTasks()
+                        close()
+                    }
                 }
             }
         }
     }
 
-    private fun startRefactorOperation() {
+    private fun initComponents() {
+        currentOccurrenceIndex.value = 0
+        fileNameLabelStr.value = fileNameForNoMatch
+        cancelSearchTasks()
+        occurrencesList.clear()
+        approvedChanges.clear()
+        dismissedChanges.clear()
+        leftDiffPaneContent.value = ""
+        rightDiffPaneContent.value = ""
+    }
 
+    private fun startRefactorOperation() {
+        initComponents()
         var isFirst = true
-        val task = runAsync(taskStatus) {
-            val numOfFiles = File("./").walk().filter { it.extension in supportedExtensions }.count()
-            File("./").walk().filter { it.extension in supportedExtensions }.forEachIndexed() { index, file ->
-//                println("it.name = ${file.name}")
-                updateProgress(index.toLong(), numOfFiles.toLong())
-                updateMessage("Finished $index files out of $numOfFiles")
-                isFirst = matchRegex(file, isFirst)
+        searchTargetPathList.forEach { path ->
+            path.searchTask = runAsync(path.taskStatus) {
+
+                val numOfFiles = path.folder.walk().filter { it.extension in supportedExtensions }
+                    .count() // Needed for the progress bar calculation
+                if (numOfFiles > 0) {
+                    path.folder.walk().filter { it.extension in supportedExtensions }.forEachIndexed() { index, file ->
+                        updateProgress(index.toLong(), numOfFiles.toLong())
+//                        updateMessage("Finished $index files out of $numOfFiles") // might be good later to give status on search progression with numbers.
+                        isFirst = matchRegex(file, isFirst)
+                    }
+                } else {
+                    updateProgress(1, 1)
+                }
+            } ui {
             }
-        } ui {
-            println("Finished File Scan")
         }
     }
 
     private fun matchRegex(originalFile: File, isFirst: Boolean): Boolean {
         var isChanged = false
 
-        val localList = ArrayList<MatchOccurrence>() // workAround as the global list can be modified only from FX thread.
+        val localList =
+            ArrayList<MatchOccurrence>() // workAround as the global list can be modified only from FX thread.
 /*
         val regexPattern =
             Regex("""(\w+\.)?(${unit.getDeclarationString()})\((?:[^()]|(\3))*\) *(\{(?:[^{}]++|(\4))*\})?""")
@@ -329,22 +493,36 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
 
         // TODO - disregard comments? https://stackoverflow.com/questions/14975737/regular-expression-to-remove-comment
         // TODO - add button to mark the diff again after focus is lost.
+        val originalFileText = originalFile.readText().replace("\r", "")
 
-        regexPattern.findAll(originalFile.readText()).let { // Will create a sequence with all the matches in the file.
-            it.forEach { matchResult ->
+
+        val commentsMatches = if (commentsCheckbox.isSelected) {
+            Regex("""((/\*(.|[\r\n])*?\*/)|[\s\t]*\/\/.*)""").findAll(originalFileText)
+        } else {
+            emptySequence()
+        }
+
+        regexPattern.findAll(originalFileText).let { // Will create a sequence with all the matches in the file.
+            it.forEach mr@{ matchResult ->
                 regexID.find(matchResult.value)?.let { // Will match the controller for the specific ID
+
+                    commentsMatches.forEach { commentMatch -> // Return if the match is inside a comment. will skip if checkbox is not selected.
+                        if (matchResult.range.first in commentMatch.range && matchResult.range.last in commentMatch.range) {
+                            return@mr
+                        }
+                    }
+
                     isChanged = true
                     val revisedFile = createTempFile()
                     revisedFile.writeText(
-                        originalFile.readText().replaceRange(matchResult.range, unit.stringifiedValue())
+                        originalFileText.replaceRange(matchResult.range, unit.stringifiedValue())
                     )
-                    runLater {
-                        MatchOccurrence(originalFile, revisedFile, matchResult.range).apply {
-                            localList.add(this)
+                    MatchOccurrence(originalFile, revisedFile, matchResult.range).apply {
+                        localList.add(this)
+                        runLater {
                             occurrencesList.add(this)
                         }
                     }
-//                    occurrenceList.add(MatchOccurrence(originalFile, revisedFile, matchResult.range))
                 }
             }
         }
@@ -384,45 +562,62 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
     fun displayDiff(
         orig: File,
         revised: File,
-        range: IntRange
+        range: IntRange,
+        isEmpty: Boolean = false
     ) {
 
         runLater {
-            selectTextInArea(orig, range, leftTextArea, leftDiffPaneContent)
+            selectTextInArea(orig.readText(), range, leftTextArea, leftDiffPaneContent)
             selectTextInArea(
-                revised,
+                revised.readText(),
                 IntRange(range.first, range.first + unit.stringifiedValue().length),
                 rightTextArea,
                 rightDiffPaneContent
             )
 
-            fileNameLabelStr.value = orig.name
+            if (!isEmpty) {
+                fileNameLabelStr.value = orig.name
+                enableButtons()
+            } else {
+                fileNameLabelStr.value = fileNameForNoMatch
+                disableButtons()
+            }
         }
 
-        runLater(100.millis) {
-            leftTextArea.scrollTop += 60.0
-            rightTextArea.scrollTop += 60.0
-        }
+
     }
 
-    fun displayNextDiff() {
+    fun displayNextDiff(): Boolean {
         currentOccurrenceIndex.value = currentOccurrenceIndex.value.progressCyclic(occurrencesList)
-        val occ = occurrencesList.getOrElse(currentOccurrenceIndex.value) {
-
-            MatchOccurrence(createTempFile(), createTempFile(), 0..1) // Dummy object
-        }
-        occ.apply {
-            displayDiff(origFile, revisedFile, range)
-        }
+        setEditable(false)
+        currentOccurrence()?.let {
+            displayDiff(it.origFile, it.revisedFile, it.range)
+            return true
+        } ?: displayDiff(createTempFile(), createTempFile(), 0..1, true)
+        return false
     }
 
-    fun selectTextInArea(file: File, range: IntRange, textArea: TextArea, textContent: SimpleStringProperty) {
+    private fun selectTextInArea(
+        fileText: String,
+        range: IntRange,
+        textArea: TextArea,
+        textContent: SimpleStringProperty
+    ) {
+        textArea.scrollTop = 0.0
+        textContent.value = ""
+        textContent.value = fileText
+        textArea.selectRange(range.first, range.last + 1)
+        runLater(100.millis) {
+            textArea.scrollTop += textArea.height * 0.5
+        }
+/*
+
+        // currently depracated because decided to remove CR ("\r") chars before arriving here.
         var chars = 0
         var linesUntilMatch = -1
         var linesOfMatch = 1
-        textContent.value = ""
-        file.readLines().forEachIndexed { index, s ->
-            chars += s.length + 2
+        fileText.readLines().forEachIndexed { index, s ->
+            chars += s.length
             if (chars >= range.first && linesUntilMatch < 0) {
                 linesUntilMatch = index + 1
             }
@@ -430,60 +625,125 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                 linesOfMatch++
             }
             textContent.value += s + "\n"
-        }
-
-        val selectionStart = range.first - linesUntilMatch
-        val selectionEnd = range.last - linesUntilMatch - (linesOfMatch - 3)
-        textArea.selectRange(selectionStart, selectionEnd)
-    }
-
-/*
-    fun displayDiff(orig: File, revised: File, range: IntRange) {
-        var tempOrig = ""
-        var tempRevised = ""
-
-        val oldTag = "&&&&&&"
-        val newTag = "%%%%%%"
-        runLater {
-            val diffGenerator = DiffRowGenerator.create()
-//                .showInlineDiffs(true)
-//                .inlineDiffByWord(true)
-                .oldTag { _: Boolean? -> oldTag }
-                .newTag { _: Boolean? -> newTag }
-                .build()
-            val rows = diffGenerator.generateDiffRows(
-                orig.readLines(),
-                revised.readLines()
-            )
-
-            rows.forEachIndexed { i, diffLine ->
-                tempOrig += (diffLine.oldLine + "\n")
-                tempRevised += (diffLine.newLine + "\n")
-//                tempOrig += ("$i\t" + diffLine.oldLine + "\n")
-//                tempRevised += ("$i\t" + diffLine.newLine + "\n")
-            }
-
-            selectChangedLines(oldTag, leftDiffPaneContent, tempOrig, leftTextArea)
-            selectChangedLines(newTag, rightDiffPaneContent, tempRevised, rightTextArea)
-        }
-    }
-*/
 
 
-/*    fun selectChangedLines(tag: String, textAreaContent: SimpleStringProperty, text: String, textArea: TextArea) {
-        val indexStart = text.indexOf(tag)
-        val indexEnd = text.indexOf(tag, indexStart + 1)
-//        val newText = text.replace(tag, "")
-//        textAreaContent.value = newText
-        textAreaContent.value = text
-        textArea.selectRange(indexStart, indexEnd - tag.length)
-
-        runLater(50.millis) {
-            textArea.scrollTop += 80.0
-        }
-
-    }
+//        val selectionStart = range.first
+//        val selectionEnd = range.last + 1
+//        val selectionStart = range.first - linesUntilMatch
+//        val selectionEnd = range.last - linesUntilMatch - (linesOfMatch - 3)
+//        textArea.selectRange(selectionStart, selectionEnd)
 
  */
+    }
+
+    fun setEditable(isEditable: Boolean) {
+        currentOccurrence()?.let {
+            it.wasEditedManually = isEditable
+            rightTextArea.isDisable = !isEditable
+            rightTextArea.isEditable = isEditable
+        }
+        fun setDefStyle() {
+            editButton.style {
+                borderColor += MyStyle.refactorViewBorderColor
+
+                backgroundColor += if (isEditable) {
+                    c("#00aa0088")
+                } else {
+                    MyStyle.ALMOST_TRANSPARENT
+                }
+            }
+        }
+        setDefStyle()
+
+        editButton.setOnMouseEntered {
+            editButton.style {
+                backgroundColor += if (isEditable) {
+                    c("#00aa00dd")
+                } else {
+                    MyStyle.ALMOST_OPAQUE
+                }
+            }
+        }
+
+        editButton.setOnMouseExited {
+            setDefStyle()
+        }
+
+    }
+
+    fun cancelSearchTasks() {
+        searchTargetPathList.forEach {
+            if (it.isTaskInitialized()) {
+                it.searchTask.cancel()
+            }
+        }
+    }
+
+    fun disableButtons() {
+        buttonsThatShouldDisable.forEach {
+            it.isDisable = true
+        }
+    }
+
+    fun enableButtons() {
+        buttonsThatShouldDisable.forEach {
+            it.isDisable = false
+        }
+
+    }
+
+    private fun applyChangesToFile(entry: Map.Entry<File, List<MatchOccurrence>>) {
+        val origLines = entry.key.readLines()
+        var newLines = entry.key.readLines()
+        entry.value.forEach {
+            val diff = DiffUtils.diff(origLines, it.revisedFile.readLines())
+            try {
+                newLines = diff.applyTo(newLines)
+            } catch (e: PatchFailedException) {
+                println("Failed to apply patches for  \'${entry.key.absolutePath}\', aborting changes. ${e.message}")
+                return@forEach
+            }
+        }
+        entry.key.writeText(newLines.joinToString(System.lineSeparator()))
+    }
+
+
 }
 
+/*
+class SearchablePathFragment : ListCellFragment<SearchTargetPath>() {
+
+
+    init {
+        println("INITING CELL. item = ${item}")
+    }
+
+    override val root = stackpane {
+        alignment = Pos.CENTER_LEFT
+        val pathLabel = label {
+            runLater {
+                item?.let {
+                    println("Setting text = ${it.folder.name}")
+//                    text = it.folder.absolutePath.putDotsAfter(100)
+                    text = "textyyy"
+                }
+            }
+        }
+*/
+/*        progressbar(taskStatus.progress) {
+            prefWidthProperty().bind(doubleBinding(pathLabel.widthProperty()) { value * 1.05 })
+            prefHeightProperty().bind(
+                doubleBinding(
+                    pathLabel.heightProperty()
+                ) { value * 1.2 })
+            stackpaneConstraints {
+                marginLeft = -3.0
+            }
+            addClass(MyStyle.taskProgress)
+            hgrow = Priority.ALWAYS
+            tooltip(rootProjectFolder.absolutePath)
+        }*//*
+
+    }
+}
+*/

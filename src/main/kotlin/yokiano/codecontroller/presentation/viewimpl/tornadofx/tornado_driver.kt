@@ -122,7 +122,6 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
                 tUnit.stateProperty.onChange {
                     when (it) {
                         CCUnitState.DEAD -> {
-                            println("DEAD detected on ${tUnit.id}")
                             eventsChannel.send(UnitAdapter.toCCUnit(tUnit))
                             removeUnit(tUnitVM)
                         }

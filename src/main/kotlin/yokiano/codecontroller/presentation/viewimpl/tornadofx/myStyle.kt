@@ -11,7 +11,6 @@ import javafx.scene.layout.BackgroundSize
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javafx.scene.text.FontWeight
-import javafx.scene.text.TextAlignment
 import tornadofx.*
 
 class MyStyle : Stylesheet() {
@@ -28,7 +27,7 @@ class MyStyle : Stylesheet() {
 
         // Helper Values
 //        val textColor = Color.GRAY
-                val textColor = Color.BLANCHEDALMOND
+        val defaultTextColor = Color.BLANCHEDALMOND
         val SEMI_OPAQUE = Color(0.3, 0.3, 0.3, 0.3)
         val ALMOST_OPAQUE = Color(0.5, 0.5, 0.5, 0.3)
         val ALMOST_TRANSPARENT = Color(0.2, 0.2, 0.2, 0.3)
@@ -48,7 +47,9 @@ class MyStyle : Stylesheet() {
         // Refactoring View
         val refactoring_view by cssclass()
         val taskProgress by cssclass()
-
+        val leftTextArea by cssclass()
+        val rightTextArea by cssclass()
+        val pathListView by cssclass()
 
         // Responsive Pane
         val responsivePane by cssclass()
@@ -66,7 +67,7 @@ class MyStyle : Stylesheet() {
         // Toggle
         val toggleLabel by cssclass()
         val togglesVBox by cssclass()
-        val toggleButton by cssclass()
+        val ccToggleButton by cssclass()
         val toggleButtonOn by cssclass()
         val toggleButtonOff by cssclass()
 
@@ -85,7 +86,7 @@ class MyStyle : Stylesheet() {
 
         val defaultTextSize = 10.0
         val defaultTextStyle_std = mixin {
-            textFill = textColor
+            textFill = defaultTextColor
             fontSize = Dimension(defaultTextSize, Dimension.LinearUnits.px)
 //            textAlignment = TextAlignment.CENTER
             fontWeight = FontWeight.MEDIUM
@@ -94,7 +95,7 @@ class MyStyle : Stylesheet() {
 
         val largerTextSize = 13.0
         val defaultTextStyle_larger = mixin {
-            textFill = textColor
+            textFill = defaultTextColor
             fontSize = Dimension(largerTextSize, Dimension.LinearUnits.px)
 //            textAlignment = TextAlignment.CENTER
             fontWeight = FontWeight.MEDIUM
@@ -176,40 +177,50 @@ class MyStyle : Stylesheet() {
         }
         //</editor-fold>
 
-        // -------------- CONTECT MENU --------------
+        // -------------- CONTEXT MENU --------------
         contextMenu {
             backgroundColor += c("#222222")
         }
 
+
+        // -------------- REFACTORING VIEW --------------
+        //<editor-fold desc="REFACTORING VIEW>>>>>>>>>>>>">
+
+
         refactoring_view {
+            padding = box(30.px, 20.px, 20.px, 20.px)
+
             text {
                 +defaultTextStyle_larger
             }
 
-            textArea {
+            corner {
+                backgroundColor += Color.TRANSPARENT
+            }
 
-/*
-                disabled {
-                }
-*/
-                +defaultTextStyle_larger
+            textArea {
+                textFill = Color.WHITE
+                fontSize = (defaultTextSize * 1.3).px
                 alignment = Pos.TOP_LEFT
-                borderColor += MyStyle.refactorViewBorderColor
+                borderColor += refactorViewBorderColor
                 backgroundColor += Color.TRANSPARENT
                 content {
                     backgroundColor += Color.TRANSPARENT
 
                 }
 
-                corner {
-                    backgroundColor += Color.TRANSPARENT
-                }
             }
 
+            rightTextArea {
+                highlightFill = c("#00aa0088")
+                highlightTextFill = defaultTextColor
+            }
+            leftTextArea {
+                highlightFill = c("#aa000088")
+                highlightTextFill = defaultTextColor
+            }
 
-            padding = box(30.px, 20.px, 20.px, 20.px)
-
-            button {
+            val buttonMixin = mixin {
                 backgroundColor += ALMOST_TRANSPARENT
                 borderColor += refactorViewBorderColor
                 +defaultTextStyle_std
@@ -222,6 +233,28 @@ class MyStyle : Stylesheet() {
                     backgroundColor += ALMOST_TRANSPARENT
                 }
             }
+            button {
+                +buttonMixin
+            }
+            toggleButton {
+                +buttonMixin
+            }
+
+        }
+
+        pathListView {
+            backgroundColor += Color.TRANSPARENT
+
+            listCell {
+                backgroundColor += Color.TRANSPARENT
+                and(selected) {
+                    backgroundColor += ALMOST_OPAQUE
+                }
+            }
+
+            thumb {
+                backgroundColor += SEMI_OPAQUE
+            }
         }
 
         taskProgress {
@@ -232,6 +265,15 @@ class MyStyle : Stylesheet() {
             accentColor = c("#00ff0022")
             backgroundColor += Color.TRANSPARENT
         }
+
+        checkBox {
+            +defaultTextStyle_std
+            box {
+                backgroundColor += Color.TRANSPARENT
+                borderColor += refactorViewBorderColor
+            }
+        }
+        //</editor-fold>
 
 
         // ========================================================================================================================================================================
@@ -282,11 +324,6 @@ class MyStyle : Stylesheet() {
 
             thumb {
                 backgroundColor += SEMI_OPAQUE
-
-                hover {
-//                    backgroundColor += ALMOST_OPAQUE
-                }
-
             }
             track {
                 backgroundColor += ALMOST_TRANSPARENT
@@ -359,7 +396,7 @@ class MyStyle : Stylesheet() {
         }
         toggleLabel {
         }
-        toggleButton {
+        ccToggleButton {
             backgroundColor += Color.TRANSPARENT
             textOverrun = OverrunStyle.WORD_ELLIPSIS
         }

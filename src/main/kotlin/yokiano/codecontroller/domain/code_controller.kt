@@ -109,59 +109,6 @@ object CodeController : KodeinAware {
                 delay(1000)
             }
         }
-
-
-    }
-
-    fun refactorDeclaration(id: String, stringReplacement: String) {
-        // TODO -- recursive file search
-        val file = File("src/main/kotlin/main.kt")
-
-        val tempFile = createTempFile()
-        // REGEX --- (controller\.)?cc[A-Za-z]{1,10}(\((?:[^()]++|(?2))*\)) (\{(?:[^{}]++|(?3))*\})
-        val regexID = Regex(""""$id"""")
-        val regexReplace = Regex("""(controller\.)?(cc[A-Za-z]{1,10})(\((?:[^()]++|(\3))*\)) (\{(?:[^{}]++|(\4))*\})""")
-        var changedOccurrences = 0
-        tempFile.printWriter().use { writer ->
-            file.forEachLine { line ->
-                val newLine = regexReplace.find(line)?.let {
-                    // Not null means we have a match
-                    val ccType = it.groupValues[2]
-                    println("it.groupValues = ${it.groupValues}")
-                    if (ccType == "ccToggleCode") {
-                        println("Replaced with ${it.groupValues[5]}")
-                        line.replace(regexReplace, "run ${it.groupValues[5]}")
-                    } else {
-                        line.replace(regexReplace, stringReplacement)
-                    }
-                } ?: line // if regex was not matched leave the line as is
-
-                writer.println(
-                    when {
-                        regexID.containsMatchIn(line) && !regexID.containsMatchIn(newLine) -> { // entering here means the 'replace' operation was successful
-                            changedOccurrences++
-                            newLine
-                        }
-                        else -> {
-                            line
-                        }
-                    }
-                )
-            }
-        }
-
-        if (changedOccurrences > 0) {
-            println("Replaced $changedOccurrences occurrences of the controller source code representation")
-        } else {
-            println("Couldn't replace the source code representation for controller $id. If the controller ID is not hard-coded replace manually.")
-        }
-
-        val backupFile = File("${file.parentFile}/ccBackup/${file.name}.bkp").apply {
-            mkdirs()
-        }
-
-        check(file.copyTo(backupFile, true).exists()) { " Couldn't back-up the original file. aborting" }
-        check(file.delete() && tempFile.renameTo(file)) { "failed to replace file" }
     }
 
     private suspend fun eventsConsumer() {
@@ -170,7 +117,7 @@ object CodeController : KodeinAware {
             event.run {
                 if (event.state == CCUnitState.DEAD) {
                     println("Changing file for ${event.id}")
-//                    refactorDeclaration(event.id, event.stringifiedValue())
+
                 } else {
                     // This instance() call will fetch the (only) unit with the specified ID from the defined multiton in kodein.
                     val unit: CCUnit by instance(

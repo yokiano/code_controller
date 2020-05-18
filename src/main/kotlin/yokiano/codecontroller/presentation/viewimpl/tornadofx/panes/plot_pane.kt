@@ -1,7 +1,6 @@
 package yokiano.codecontroller.presentation.viewimpl.tornadofx.panes
 
 import javafx.scene.Node
-import javafx.scene.Parent
 import javafx.scene.chart.NumberAxis
 import javafx.scene.chart.XYChart
 import javafx.scene.layout.Priority
@@ -20,8 +19,8 @@ class PlotPane() : ResponsivePane() {
     override val paneRoot = vbox {
         val seriesList = ArrayList<XYChart.Series<Number, Number>>()
         if (driver.plotter.visible) {
-            val xAxis = NumberAxis().apply { tickLabelFill = MyStyle.textColor }
-            val yAxis = NumberAxis().apply { tickLabelFill = MyStyle.textColor }
+            val xAxis = NumberAxis().apply { tickLabelFill = MyStyle.defaultTextColor }
+            val yAxis = NumberAxis().apply { tickLabelFill = MyStyle.defaultTextColor }
 
             linechart("Plotter", xAxis, yAxis) {
                 addClass(MyStyle.lineChart)

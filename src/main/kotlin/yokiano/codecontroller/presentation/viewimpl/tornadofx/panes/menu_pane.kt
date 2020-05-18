@@ -25,7 +25,7 @@ object MenuPane : View() {
         // Power On/Off button.
         togglebutton("") {
             tooltip("Enable / Disable Controllers")
-            addClass(MyStyle.toggleButton)
+            addClass(MyStyle.ccToggleButton)
             isSelected = true
             updateToggleStyle(isSelected, MyStyle.powerButton_off, MyStyle.powerButton_on)
 
@@ -56,7 +56,7 @@ object MenuPane : View() {
         // Fast Resize Enable/Disable Button. (resizing through touching the dividers will still be possible even if fast resize is disabled)
         togglebutton("") {
             tooltip("Enable / Disable Fast Resize")
-            addClass(MyStyle.toggleButton)
+            addClass(MyStyle.ccToggleButton)
             isSelected = true
             updateToggleStyle(isSelected, MyStyle.fastResizeButton_on, MyStyle.fastResizeButton_off)
 
@@ -69,7 +69,7 @@ object MenuPane : View() {
         // Orientation Button
         togglebutton("") {
             tooltip("Change panel orientation")
-            addClass(MyStyle.toggleButton)
+            addClass(MyStyle.ccToggleButton)
 
             runLater {
                 isSelected = when (driver.screenOrientation) {
