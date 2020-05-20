@@ -24,15 +24,15 @@ object MenuPane : View() {
 
         // Power On/Off button.
         togglebutton("") {
-            tooltip("Enable / Disable Controllers")
             addClass(MyStyle.ccToggleButton)
             isSelected = true
-            updateToggleStyle(isSelected, MyStyle.powerButton_off, MyStyle.powerButton_on)
+            updateToggleStyle(isSelected,  MyStyle.powerButton_on, MyStyle.powerButton_off)
 
             selectedProperty().onChange {
                 driver.internalChannel.send(it)
-                updateToggleStyle(isSelected, MyStyle.powerButton_off, MyStyle.powerButton_on)
+                updateToggleStyle(isSelected,  MyStyle.powerButton_on, MyStyle.powerButton_off)
             }
+            tooltip("Enable / Disable Controllers")
         }
 
         // Reloading Views - currently cause bugs

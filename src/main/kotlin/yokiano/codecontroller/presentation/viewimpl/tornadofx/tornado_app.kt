@@ -17,7 +17,7 @@ class TornadoApp(override val kodein: Kodein) : App(MainView::class, MyStyle::cl
 object ControllersConfig : View() {
     override val root = borderpane { }
 }
-// Dummy view to have a configuration file for window dimensions and position.
-object WindowConfig : View() {
+// Dummy view to have a configuration file for general preferences (window dimensions, refactoring options, etc.)
+object GeneralConfig : View() {
     override val root = borderpane { }
 }

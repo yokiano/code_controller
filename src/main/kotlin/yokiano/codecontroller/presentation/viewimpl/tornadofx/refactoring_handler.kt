@@ -1,3 +1,5 @@
+@file:Suppress("RegExpRedundantEscape")
+
 package yokiano.codecontroller.presentation.viewimpl.tornadofx
 
 import com.github.difflib.DiffUtils
@@ -11,14 +13,13 @@ import javafx.scene.control.*
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
-import javafx.scene.paint.Color
 import javafx.scene.text.FontPosture
+import javafx.scene.text.FontWeight
 import javafx.stage.DirectoryChooser
 import org.kodein.di.generic.instance
 import org.kodein.di.tornadofx.kodein
 import progressCyclic
 import tornadofx.*
-import tornadofx.Stylesheet.Companion.hover
 import yokiano.codecontroller.domain.CCUnitState
 import java.awt.Desktop
 import java.io.File
@@ -42,43 +43,43 @@ class SearchTargetPath(val folder: File) {
 class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
     val driver: TornadoDriver by kodein().instance<TornadoDriver>()
 
-    val occurrencesList = SimpleListProperty(ArrayList<MatchOccurrence>().asObservable())
-    var currentOccurrenceIndex = SimpleIntegerProperty(0)
-    fun currentOccurrence(): MatchOccurrence? {
+    private val occurrencesList = SimpleListProperty(ArrayList<MatchOccurrence>().asObservable())
+    private var currentOccurrenceIndex = SimpleIntegerProperty(0)
+    private fun currentOccurrence(): MatchOccurrence? {
         return occurrencesList.getOrNull(currentOccurrenceIndex.value)
     }
 
-    val totalOccurrences = SimpleIntegerProperty(0).apply {
+    private val totalOccurrences = SimpleIntegerProperty(0).apply {
         bind(occurrencesList.sizeProperty())
     }
 
-    val approvedChanges = SimpleListProperty(ArrayList<MatchOccurrence>().asObservable())
-    val dismissedChanges = SimpleListProperty(ArrayList<MatchOccurrence>().asObservable())
+    private val approvedChanges = SimpleListProperty(ArrayList<MatchOccurrence>().asObservable())
+    private val dismissedChanges = SimpleListProperty(ArrayList<MatchOccurrence>().asObservable())
 
     // ------ diff pane
-    val leftDiffPaneContent = SimpleStringProperty("")
-    val rightDiffPaneContent = SimpleStringProperty("")
-    lateinit var leftTextArea: TextArea
-    lateinit var rightTextArea: TextArea
-    lateinit var editButton: ToggleButton
-    lateinit var commentsCheckbox: CheckBox
-    val fileNameForNoMatch = "Couldn't find a match"
-    val fileNameLabelStr = SimpleStringProperty(fileNameForNoMatch)
-    val buttonsThatShouldDisable = ArrayList<Control>()
+    private val leftDiffPaneContent = SimpleStringProperty("")
+    private val rightDiffPaneContent = SimpleStringProperty("")
+    private lateinit var leftTextArea: TextArea
+    private lateinit var rightTextArea: TextArea
+    private lateinit var editButton: ToggleButton
+    private lateinit var commentsCheckbox: CheckBox
+    private val fileNameForNoMatch = "Couldn't find a match"
+    private val fileNameLabelStr = SimpleStringProperty(fileNameForNoMatch)
+    private val buttonsThatShouldDisable = ArrayList<Control>()
 
     // ------ Search Path Pane
-    val supportedExtensions = arrayOf("kt")
-    val searchTargetPathList = SimpleListProperty(ArrayList<SearchTargetPath>().asObservable()).apply {
-//        runLater {
-        this.add(SearchTargetPath(File("./")))
-//        }
-    }
+    private val supportedExtensions = arrayOf("kt")
+    private val searchTargetPathList = SimpleListProperty(ArrayList<SearchTargetPath>().asObservable())
 
     init {
+        loadPreferences()
         startRefactorOperation()
     }
 
     // ------ Params
+    val BACKUP_CYCLIC_LIMIT = 10
+
+
     override val root: BorderPane = borderpane {
         title = "Refactor Declaration"
         vgrow = Priority.ALWAYS
@@ -109,18 +110,7 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                             style {
                                 fontStyle = FontPosture.ITALIC
                             }
-                            label() {
-                                paddingRight = 20.0
-                                isVisible = false
 
-                                val binding = stringBinding(approvedChanges.sizeProperty()) {
-                                    if (this.value > 0) {
-                                        (this@label as Label).isVisible = true
-                                    }
-                                    "${this.value} Approved"
-                                }
-                                bind(binding)
-                            }
                             label() {
                                 val binding = integerBinding(
                                     totalOccurrences,
@@ -254,8 +244,9 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
 
                                 }
                             }
+                            tooltip("Approve the current refactoring suggestion.\nCtrl+Shift+Alt+A")
                         }
-                        val approveAllButton = button("Approve All") {
+                        button("Approve All") {
                             buttonsThatShouldDisable.add(this)
                             shortcut("Ctrl+Shift+Alt+A")
                             action {
@@ -263,14 +254,16 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                                 occurrencesList.clear()
                                 displayNextDiff()
                             }
+                            tooltip("Approve ALL refactoring suggestions.\nWARNING - Perform with care.\nCtrl+Shift+Alt+A")
                         }
-                        val nextButton = button("Next") {
+                        button("Next") {
                             buttonsThatShouldDisable.add(this)
                             action {
                                 displayNextDiff()
                             }
+                            tooltip("Display the next refatoring suggestion")
                         }
-                        val dismissButton = button("Dismiss") {
+                        button("Dismiss") {
                             buttonsThatShouldDisable.add(this)
                             action {
                                 currentOccurrence()?.apply {
@@ -279,14 +272,16 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                                     displayNextDiff()
                                 }
                             }
+                            tooltip("Dismiss the current refactoring suggestion")
                         }
                         editButton = togglebutton("Edit", selectFirst = false) {
                             buttonsThatShouldDisable.add(this)
                             selectedProperty().onChange {
                                 setEditable(it)
                             }
+                            tooltip("Edit the right side according to what it should be")
                         }
-                        val openFileButton = button("Open File") {
+                        button("Open File") {
                             buttonsThatShouldDisable.add(this)
                             action {
                                 if (!Desktop.isDesktopSupported()) {
@@ -296,6 +291,7 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                                     Desktop.getDesktop().open(it.origFile)
                                 }
                             }
+                            tooltip("Open the displayed file in the OS default text editor")
                         }
 
                         minWidth = Region.USE_PREF_SIZE
@@ -316,7 +312,7 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                 commentsCheckbox = checkbox("Exclude comments") {
 
                     isSelected = false
-                    tooltip("Selecting this will skip declarations that are commented. May cause performance degradation.")
+                    tooltip("Selecting this will skip declarations that are commented.")
                 }
             }
         }
@@ -350,6 +346,7 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                                 alignment = Pos.CENTER_LEFT
                                 val pathLabel = label {
                                     text = it.folder.absolutePath
+                                    tooltip(it.folder.absolutePath)
                                 }
                                 progressbar(it.taskStatus.progress) {
                                     isMouseTransparent = true
@@ -362,8 +359,6 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                                         marginLeft = -3.0
                                     }
                                     addClass(MyStyle.taskProgress)
-                                    hgrow = Priority.ALWAYS
-                                    tooltip(it.folder.absolutePath)
                                 }
                             }
                         }
@@ -379,19 +374,23 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                                     }
                                 }
                             }
+                            tooltip("Add a search target folder")
                         }
                         button("-") {
                             action {
-                                listView.selectedItem?.let {
-                                    searchTargetPathList.remove(it)
+                                listView.selectionModel.selectedIndices.forEach {
+                                    searchTargetPathList.removeAt(it)
+                                    listView.selectionModel.select(if (it <= 0) 0 else it - 1)
                                 }
                             }
+                            tooltip("Remove the selected search target folder")
                         }
 
                         button("Refresh\nResults") {
                             action {
                                 startRefactorOperation()
                             }
+                            tooltip("Refresh the matching results.\nWill reset the currently approved changes")
                         }
                         minHeight = Region.USE_PREF_SIZE
                         minWidth = Region.USE_PREF_SIZE
@@ -413,27 +412,45 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
             hbox(2.0) {
                 paddingTop = 40.0
                 alignment = Pos.BASELINE_RIGHT
-                button("Apply") {
+                label() {
+                    paddingRight = 10.0
+                    isVisible = false
+                    style {
+                        textFill = c("#00ff00aa")
+                        fontWeight = FontWeight.BOLD
+                        fontStyle = FontPosture.ITALIC
+                    }
+                    val binding = stringBinding(approvedChanges.sizeProperty()) {
+                        if (this.value > 0) {
+                            this@label.isVisible = true
+                        }
+                        "${this.value} Changes Approved"
+                    }
+                    bind(binding)
+                }
+                button("Remove and Refactor") {
+                    addClass(MyStyle.greenButton)
                     shortcut("Ctrl+Shift+S")
                     action {
-                        approvedChanges.groupBy { it.origFile }.entries.forEach { entry -> // Will traverse each group
-                            val localTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dMy_Hmss"))
-                            val backupFile =
-                                File("${entry.key.parentFile}/ccBackup/${entry.key.name}.bkp.${localTime}").apply {
-                                    mkdirs()
-                                }
-                            check(entry.key.copyTo(backupFile, true).exists()) {
-                                "Couldn't Backup ${entry.key.name}."
-                            }
-
-                            applyChangesToFile(entry)
-                        }
-
+                        applyApprovedChanges()
                         runLater {
+                            savePreferences()
                             close()
                             unit.stateProperty.value = CCUnitState.DEAD
                         }
                     }
+                    tooltip("Apply the approved refactor changes,\nand remove the control from the controls panel\nCtrl+Shift+S")
+                }
+                button("Refactor") {
+                    shortcut("Ctrl+Shift+Alt+S")
+                    action {
+                        applyApprovedChanges()
+                        runLater {
+                            savePreferences()
+                            close()
+                        }
+                    }
+                    tooltip("Apply the approved refactor changes\nCtrl+Shift+Alt+S")
                 }
                 button("Cancel") {
                     action {
@@ -459,17 +476,20 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
     private fun startRefactorOperation() {
         initComponents()
         var isFirst = true
-        searchTargetPathList.forEach { path ->
-            path.searchTask = runAsync(path.taskStatus) {
+        searchTargetPathList.forEach { searchTarget ->
+            searchTarget.searchTask = runAsync(searchTarget.taskStatus) {
 
-                val numOfFiles = path.folder.walk().filter { it.extension in supportedExtensions }
+                val numOfFiles = searchTarget.folder.walk().filter { it.extension in supportedExtensions }
                     .count() // Needed for the progress bar calculation
                 if (numOfFiles > 0) {
-                    path.folder.walk().filter { it.extension in supportedExtensions }.forEachIndexed() { index, file ->
-                        updateProgress(index.toLong(), numOfFiles.toLong())
+                    searchTarget.folder.walk().filter { it.extension in supportedExtensions }
+                        .forEachIndexed() { index, file ->
+                            runLater {
+                                updateProgress(index.toLong(), numOfFiles.toLong())
+                            }
 //                        updateMessage("Finished $index files out of $numOfFiles") // might be good later to give status on search progression with numbers.
-                        isFirst = matchRegex(file, isFirst)
-                    }
+                            isFirst = matchRegex(file, isFirst)
+                        }
                 } else {
                     updateProgress(1, 1)
                 }
@@ -495,9 +515,8 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
         // TODO - add button to mark the diff again after focus is lost.
         val originalFileText = originalFile.readText().replace("\r", "")
 
-
         val commentsMatches = if (commentsCheckbox.isSelected) {
-            Regex("""((/\*(.|[\r\n])*?\*/)|[\s\t]*\/\/.*)""").findAll(originalFileText)
+            Regex("""((/\*(.|[\r\n])*?\*/)|[\s\t]*//.*)""").findAll(originalFileText)
         } else {
             emptySequence()
         }
@@ -547,19 +566,17 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
         }
 */
 
-        if (isChanged) {
-            if (isFirst && localList.size > 0) {
-                localList.first().apply {
-                    displayDiff(this.origFile, this.revisedFile, this.range)
-                }
-                return false
+        if (isChanged && isFirst && localList.size > 0) {
+            localList.first().apply {
+                displayDiff(this.origFile, this.revisedFile, this.range)
             }
+            return false
         }
         return true
     }
 
 
-    fun displayDiff(
+    private fun displayDiff(
         orig: File,
         revised: File,
         range: IntRange,
@@ -587,7 +604,7 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
 
     }
 
-    fun displayNextDiff(): Boolean {
+    private fun displayNextDiff(): Boolean {
         currentOccurrenceIndex.value = currentOccurrenceIndex.value.progressCyclic(occurrencesList)
         setEditable(false)
         currentOccurrence()?.let {
@@ -636,7 +653,7 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
  */
     }
 
-    fun setEditable(isEditable: Boolean) {
+    private fun setEditable(isEditable: Boolean) {
         currentOccurrence()?.let {
             it.wasEditedManually = isEditable
             rightTextArea.isDisable = !isEditable
@@ -647,7 +664,7 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                 borderColor += MyStyle.refactorViewBorderColor
 
                 backgroundColor += if (isEditable) {
-                    c("#00aa0088")
+                    c("#00aa0044")
                 } else {
                     MyStyle.ALMOST_TRANSPARENT
                 }
@@ -658,7 +675,7 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
         editButton.setOnMouseEntered {
             editButton.style {
                 backgroundColor += if (isEditable) {
-                    c("#00aa00dd")
+                    c("#00aa0088")
                 } else {
                     MyStyle.ALMOST_OPAQUE
                 }
@@ -671,7 +688,7 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
 
     }
 
-    fun cancelSearchTasks() {
+    private fun cancelSearchTasks() {
         searchTargetPathList.forEach {
             if (it.isTaskInitialized()) {
                 it.searchTask.cancel()
@@ -679,17 +696,59 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
         }
     }
 
-    fun disableButtons() {
+    private fun disableButtons() {
         buttonsThatShouldDisable.forEach {
             it.isDisable = true
         }
     }
 
-    fun enableButtons() {
+    private fun enableButtons() {
         buttonsThatShouldDisable.forEach {
             it.isDisable = false
         }
 
+    }
+
+    // Returns false if backup wasn't successful.
+    private fun backupFile(file: File): Boolean {
+        val localTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yMd_Hmss"))
+
+        try {
+            val backupFile =
+                File("${file.parentFile}/ccBackup/${file.name}.bkp.${localTime}").apply {
+                    mkdirs()
+                }
+            if (!file.copyTo(backupFile, true).exists()) {
+                println("Couldn't Backup ${file.name}. Skipping changes for this file.")
+                return false
+            }
+
+            val fileLists = backupFile.parentFile.listFiles()?.filter { it.name.startsWith("${file.name}.bkp.") }?.sorted() ?: return false
+            if (fileLists.size > BACKUP_CYCLIC_LIMIT) {
+                val deletedFileName = fileLists.first().absolutePath
+                if (fileLists.first().delete()) {
+                    println("Discovered more than $BACKUP_CYCLIC_LIMIT backups for the same file. Deleting the oldest one - $deletedFileName")
+                } else {
+                    println("Discovered more than $BACKUP_CYCLIC_LIMIT backups for the same file but failed to delete the oldest one.")
+                }
+            }
+
+            return true
+        } catch (e: Exception) {
+            println("Error in backup operation - ${e.message}")
+            return false
+        }
+    }
+
+    private fun applyApprovedChanges() {
+        approvedChanges.groupBy { it.origFile }.entries.forEach { entry -> // Will traverse each group
+            if (!backupFile(entry.key)) {
+                println("Couldn't backup")
+                return@forEach
+            }
+
+            applyChangesToFile(entry)
+        }
     }
 
     private fun applyChangesToFile(entry: Map.Entry<File, List<MatchOccurrence>>) {
@@ -707,8 +766,78 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
         entry.key.writeText(newLines.joinToString(System.lineSeparator()))
     }
 
+    private fun loadPreferences() {
+        with(GeneralConfig.config) {
+            ConfigEntry::class.sealedSubclasses.forEach {
+                applyConfigObj(this, it.objectInstance)
+            }
+        }
+    }
+
+    private fun applyConfigObj(config: ConfigProperties, entry: ConfigEntry?) {
+        with(config) {
+            when (entry) {
+                ConfigEntry.ExcludeComments -> {
+                    runLater {
+                        commentsCheckbox.isSelected = boolean(entry.key)?.run { this } ?: false
+                    }
+                }
+                ConfigEntry.SearchPathTargetList -> {
+                    val reducedList = jsonArray(entry.key)?.mapNotNull { jsonVal ->
+                        File(jsonVal.toString().removePrefix("\"").removeSuffix("\"")).let {
+                            if (it.exists()) {
+                                SearchTargetPath(it)
+                            } else {
+                                null
+                            }
+                        }
+                    } ?: return
+
+                    if (reducedList.isNotEmpty()) {
+                        searchTargetPathList.clear()
+                        searchTargetPathList.addAll(reducedList)
+                    } else {
+                        searchTargetPathList.add(SearchTargetPath(File("./")))
+                    }
+                }
+                null -> {
+                    println("Config Entry is null. not performing any operation.")
+                }
+            }
+        }
+    }
+
+    private fun savePreferences() {
+        with(GeneralConfig.config) {
+            ConfigEntry::class.sealedSubclasses.forEach {
+                val key = it.objectInstance?.key ?: return@forEach
+                val value = configEntryToObj(it.objectInstance)?.run {
+                    this
+                } ?: return@forEach
+                set(key to value)
+            }
+            save()
+        }
+    }
+
+    private fun configEntryToObj(entry: ConfigEntry?): Any? {
+        return when (entry) {
+            ConfigEntry.ExcludeComments -> commentsCheckbox.isSelected
+            ConfigEntry.SearchPathTargetList -> searchTargetPathList.map { "\"${it.folder.invariantSeparatorsPath}\"" }
+            null -> null
+        }
+    }
+
+
+    sealed class ConfigEntry(var key: String) {
+        object ExcludeComments : ConfigEntry("exclude_comments")
+        object SearchPathTargetList : ConfigEntry("search_path_targets")
+
+    }
+
 
 }
+
 
 /*
 class SearchablePathFragment : ListCellFragment<SearchTargetPath>() {

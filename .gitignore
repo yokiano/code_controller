@@ -1,5 +1,6 @@
 /build
 /media
 /conf
-/.gradle
-*.kt.bkp
+*.kt.bkp.*
+/.gradle/
+/.idea/

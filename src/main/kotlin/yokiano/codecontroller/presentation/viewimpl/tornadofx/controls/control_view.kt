@@ -24,16 +24,19 @@ abstract class ControlView(val unit: TUnit<*>) : View() {
         val animationDuration = 70.millis
         val originalBounds by lazy { control.boundsInLocal }
 
-        property.onChange {
+        property.onChange { newScale ->
 
             if (control is Control) {
-                (control as Control).prefHeightProperty().animate(originalBounds.height * it, animationDuration)
-                (control as Control).prefWidthProperty().animate(originalBounds.width * it, animationDuration)
+                (control as Control).prefHeightProperty().animate(originalBounds.height * newScale, animationDuration)
+                (control as Control).prefWidthProperty().animate(originalBounds.width * newScale, animationDuration)
             } else if (control is Pane) {
-                (control as Pane).prefHeightProperty().animate(originalBounds.height * it, animationDuration)
-                (control as Pane).prefWidthProperty().animate(originalBounds.width * it, animationDuration)
+                (control as Pane).prefHeightProperty().animate(originalBounds.height * newScale, animationDuration)
+                (control as Pane).prefWidthProperty().animate(originalBounds.width * newScale, animationDuration)
             }
-            control.scale(80.millis, Point2D(it))
+            control.scale(80.millis, Point2D(newScale)) {
+                node.translateY = -(node.boundsInLocal.height*(1-newScale))/2
+                println("node.translateY = ${node.translateY}")
+            }
             root.layout()
             root.applyCss()
         }

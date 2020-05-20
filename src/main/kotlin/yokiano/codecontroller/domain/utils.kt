@@ -44,15 +44,18 @@ fun <T, R> Channel<T>.reactToChannelOn(receiver: R, op: R.(element: T) -> Unit) 
 }
 
 fun String.cleanDecimal(digits: Int = 3): String {
+/*
     if (!this.contains(Regex("^[0-9]+\\.[0-9]+"))) {
         return this
     }
+*/
+    this.toBigDecimalOrNull() ?: return this  // will return string as is if it's not a valid number.
 
     val dotPlace = this.indexOf(".")
     if (dotPlace < 1) {
         return this
     }
-    return this.take(dotPlace + 3)
+    return this.take(dotPlace + digits)
 }
 
 

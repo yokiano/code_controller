@@ -30,7 +30,7 @@ class XYControlView(private val tUnit: TXYControl, val parentPane: ResponsivePan
 */
     override val root = vbox {
         alignment = Pos.CENTER
-        paddingAll = 10.0
+        paddingAll = 5.0
 
         disablePaneResizeOnDrag()
 

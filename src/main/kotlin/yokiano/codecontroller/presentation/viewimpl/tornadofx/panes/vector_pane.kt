@@ -19,13 +19,12 @@ class VectorPane : ResponsivePane() {
         hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
         fixScrollerMouseEvents(this)
         flowpane {
-
             draggable = this
             prefWidthProperty().bind(this@scrollpane.widthProperty())
             alignment = Pos.CENTER
             hgrow = Priority.ALWAYS; vgrow = Priority.ALWAYS
 
-            paddingAll = 20.0
+            paddingAll = 10.0
             bindChildren(driver.unitsList.listVM.value.filter {
                 it.item is TXYControl
             }.toObservable()) { unitVM ->

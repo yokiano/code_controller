@@ -22,20 +22,15 @@ fun main() {
 class MyClass2 : CCAware {
     fun go() {
         runBlocking {
-            for (i in 0..100) {
+            for (i in 0..1000) {
                 val iSin = sin(i.toDouble() * 0.1)
                 val iCos = cos(i.toDouble() * 0.1)
-/*
                 ccPlot("my sin", i.toDouble(), iSin)
                 ccPlot("my cos", i.toDouble(), iCos)
-                /*val temp= "aaa"*/
-*/
 
                 val maxRange = ccDouble("Slider1") {
                     range = 30.0..100.0
                 } // few optional (but sometimes essential) configuration parameters are available in the configuration block.
-                val test = ccDouble("Slider1") { range = 20.0..25.0}
-
                 ccDouble("Slider2")
 //                ccDouble("Slider4") { range = 0.0..3.0 }
                 ccDouble("Slider4") { range = (0.0..3.0).apply {  } }
@@ -46,13 +41,9 @@ class MyClass2 : CCAware {
                 ccInfo("counter", "${i * 0.34}")
                 val vector2 = ccVec2("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
 //                val vector3 = ccVec2("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
+//                val vector4 = ccVec2("vector4") { setRange(30.0, 30.0, maxRange, maxRange) }
 
-/*
-                val vector3 = ccVec2("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
-                val vector4 = ccVec2("vector4") { setRange(30.0, 30.0, maxRange, maxRange) }
-*/
-
-                delay(100)
+                delay(500)
             }
         }
     }

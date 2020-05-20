@@ -17,7 +17,6 @@ import tornadofx.*
 import yokiano.codecontroller.domain.*
 import yokiano.codecontroller.presentation.common.CCGuiUnit
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.panes.*
-import java.awt.Menu
 import kotlin.reflect.full.createInstance
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -91,7 +90,7 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
 
                 // Change position and dimensions according to saved config.
                 runLater {
-                    with(WindowConfig.config) {
+                    with(GeneralConfig.config) {
                         x = double("x", x)
                         y = double("y", y)
                         width = double("width", width)
@@ -101,8 +100,8 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
                     }
                 }
 
-//                initStyle(StageStyle.DECORATED)
-                initStyle(StageStyle.UNDECORATED)
+                initStyle(StageStyle.DECORATED)
+//                initStyle(StageStyle.UNDECORATED)
             }
             tornadoApp.start(stage)
         }
@@ -135,14 +134,14 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
             }
         }
         tUnit.configView.loadFromConfigFile()
-        reloadViews()
+//        reloadViews()
     }
 
     fun removeUnit(tUnit: TUnitViewModel<out Any?>) {
         removePaneIfNeeded(tUnit.item)
         unitsList.item.list.remove(tUnit)
 
-        reloadViews()
+//        reloadViews()
     }
 
     fun addPaneIfNeeded(tUnit: TUnit<*>) {

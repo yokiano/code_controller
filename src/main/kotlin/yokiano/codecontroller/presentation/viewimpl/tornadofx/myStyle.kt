@@ -20,6 +20,7 @@ class MyStyle : Stylesheet() {
     val bg by cssproperty<MultiValue<Paint>>("-fx-background;")
 
     companion object {
+
         val ccWindow by cssclass()
         val controllersFlowpane by cssclass()
         val root by cssclass()
@@ -50,6 +51,7 @@ class MyStyle : Stylesheet() {
         val leftTextArea by cssclass()
         val rightTextArea by cssclass()
         val pathListView by cssclass()
+        val greenButton by cssclass()
 
         // Responsive Pane
         val responsivePane by cssclass()
@@ -236,10 +238,24 @@ class MyStyle : Stylesheet() {
             button {
                 +buttonMixin
             }
+
+
+            greenButton {
+                backgroundColor += c("#00aa0044")
+
+
+                and(hover) {
+                    backgroundColor += c("#00aa0033")
+                }
+            }
+
             toggleButton {
                 +buttonMixin
             }
 
+            tooltip {
+                fontSize = (defaultTextSize * 1.2).px
+            }
         }
 
         pathListView {
@@ -258,7 +274,6 @@ class MyStyle : Stylesheet() {
         }
 
         taskProgress {
-
             track {
                 backgroundColor += Color.TRANSPARENT
             }
@@ -273,6 +288,7 @@ class MyStyle : Stylesheet() {
                 borderColor += refactorViewBorderColor
             }
         }
+
         //</editor-fold>
 
 
@@ -374,9 +390,9 @@ class MyStyle : Stylesheet() {
         }
         sliderTextField {
             +defaultTextStyle_std
-            prefWidth = 100.px
-            backgroundColor += Color.TRANSPARENT
-            alignment = Pos.CENTER
+            backgroundColor += ALMOST_TRANSPARENT
+//            backgroundColor += Color.TRANSPARENT
+            alignment = Pos.CENTER_RIGHT
 
         }
 

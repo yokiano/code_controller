@@ -227,7 +227,7 @@ abstract class ResponsivePane() : View() {
     }
 
     private fun updateWindowConfig() {
-        with(WindowConfig.config) {
+        with(GeneralConfig.config) {
             primaryStage.apply {
                 set("x" to x)
                 set("y" to y)
@@ -276,17 +276,13 @@ abstract class ResponsivePane() : View() {
                     }
                 }
 
-
                 if (isRightEdge) {
                     width = (width + progressX)
                 } else {
                     width = (width - progressX)
                     x += progressX
                 }
-
-
             }
-
         }
     }
 

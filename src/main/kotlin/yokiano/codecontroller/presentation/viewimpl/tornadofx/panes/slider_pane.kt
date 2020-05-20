@@ -31,7 +31,7 @@ class SliderPane : ResponsivePane() {
                 draggable = this
                 prefWidthProperty().bind(this@scrollpane.widthProperty())
                 alignment = Pos.CENTER
-                paddingAll = 20
+                paddingAll = 10.0
                 hgrow = Priority.ALWAYS
 
                 bindChildren(driver.unitsList.listVM.value.filter { it.item is TSlider }.asObservable()) { unitVM ->

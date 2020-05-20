@@ -2,9 +2,7 @@ import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
-import javafx.scene.control.Control
 
-import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
@@ -39,7 +37,6 @@ class XYControl(
     init {
         pointerProperty.bindBidirectional(valueP)
 
-
         pointerProperty.onChange {
             it?.let {
                 val convertedToPixels = fromValuetoPixel(it.x, it.y)
@@ -51,8 +48,9 @@ class XYControl(
         }
     }
 
-    fun createController() = stackpane {
-        alignment = Pos.CENTER
+
+    private fun createController() = stackpane {
+        alignment = Pos.TOP_CENTER
         group {
             rect = rectangle {
                 stroke = Color.BLANCHEDALMOND
@@ -178,10 +176,9 @@ class XYControl(
     }
 }
 
-class XYPoint(x_: Double, y_: Double) {
-    val xProperty = SimpleDoubleProperty(x_)
-    val yProperty = SimpleDoubleProperty(y_)
+class XYPoint(xP: Double, yP: Double) {
+    val xProperty = SimpleDoubleProperty(xP)
+    val yProperty = SimpleDoubleProperty(yP)
     var x: Double by xProperty
     var y: Double by yProperty
-
 }
