@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "yokiano"
-version = "0.0.5"
+version = "0.0.6"
 val artifactID = "code-controller"
 
 val shadowJar: ShadowJar by tasks

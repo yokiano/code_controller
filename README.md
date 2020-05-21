@@ -29,7 +29,10 @@ For more in-depth explanations refer to the [wiki page](https://github.com/yokia
 1. Fast resizing - The UI panel is designed for quick resizing and placement so you will spend less time dealing with layouting your windows and panes. 
   
 
-**Watch a 2 minutes show case video which explains most of what you need to know about CC:**
+**Watch a short video which explains most of what you need to know about CC:**
+https://youtu.be/P5TAE4VMvz0
+
+
 
 
 

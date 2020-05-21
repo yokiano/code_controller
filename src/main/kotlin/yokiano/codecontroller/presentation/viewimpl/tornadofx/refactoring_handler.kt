@@ -780,6 +780,8 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                     }
                 }
                 ConfigEntry.SearchPathTargetList -> {
+
+
                     val reducedList = jsonArray(entry.key)?.mapNotNull { jsonVal ->
                         File(jsonVal.toString().removePrefix("\"").removeSuffix("\"")).let {
                             if (it.exists()) {
@@ -788,10 +790,10 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                                 null
                             }
                         }
-                    } ?: return
+                    } ?: listOf(SearchTargetPath(File("./")))
 
+                    searchTargetPathList.clear()
                     if (reducedList.isNotEmpty()) {
-                        searchTargetPathList.clear()
                         searchTargetPathList.addAll(reducedList)
                     } else {
                         searchTargetPathList.add(SearchTargetPath(File("./")))

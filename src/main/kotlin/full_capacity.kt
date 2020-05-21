@@ -28,7 +28,7 @@ class MyClass2 : CCAware {
                     range = 30.0..100.0
                 } // few optional (but sometimes essential) configuration parameters are available in the configuration block.
                 ccDouble("Slider2",3.0,1.0..12.0)
-                ccDouble("Slider3") { range = (0.0..3.0).apply {  } }
+//                ccDouble("Slider3") { range = (0.0..3.0).apply {  } }
 
                 ccInfo("AB", "${i * 20.5}")
                 ccInfo("information", "${i - 200}")

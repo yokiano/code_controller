@@ -31,5 +31,5 @@ fun CCAware.ccVec2(
 fun CCAware.ccPlot(id: String, x: Double, y: Double, howOften: Double = 1.0, howMany: Int = Int.MAX_VALUE) =
     CodeController.ccPlot(id, x, y, howOften, howMany)
 
-fun CCAware.ccInfo(id: String, info: String, howMany: Double = 1.0) = CodeController.ccInfo(id, info, howMany)
+fun CCAware.ccInfo(id: String, info: String, reduceCalls: Double = 1.0) = CodeController.ccInfo(id, info, reduceCalls)
 

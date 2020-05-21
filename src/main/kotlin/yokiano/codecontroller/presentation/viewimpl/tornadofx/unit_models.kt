@@ -185,7 +185,7 @@ class TXYControl(
     }
 
     override fun stringifiedValue(): String {
-        return "Pair(${value.x},${value.y})"
+        return "Pair(${value.x.toString().cleanDecimal()},${value.y.toString().cleanDecimal()})"
     }
 
     override fun getDeclarationString(): String {

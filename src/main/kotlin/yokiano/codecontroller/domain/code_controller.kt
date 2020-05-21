@@ -19,7 +19,6 @@ import yokiano.codecontroller.presentation.viewimpl.tornadofx.PlotLine
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.TInfoLabel
 import kotlin.random.Random
 
-@ExperimentalCoroutinesApi
 object CodeController : KodeinAware {
 
     // <<< Kodein configurations
@@ -98,7 +97,6 @@ object CodeController : KodeinAware {
         GlobalScope.launch {
             eventsConsumer()
         }
-
 
         // launch a timer event to report usage statistics
         GlobalScope.launch {

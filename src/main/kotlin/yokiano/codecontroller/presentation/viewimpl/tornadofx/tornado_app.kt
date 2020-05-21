@@ -7,8 +7,7 @@ import tornadofx.*
 
 class TornadoApp(override val kodein: Kodein) : App(MainView::class, MyStyle::class), KodeinAware {
     init {
-
-        reloadStylesheetsOnFocus()
+//        reloadStylesheetsOnFocus()
 //        reloadViewsOnFocus()
     }
 }
