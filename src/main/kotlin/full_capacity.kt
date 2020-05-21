@@ -1,19 +1,15 @@
 @file:Suppress("EXPERIMENTAL_API_USAGE", "UNUSED_VARIABLE")
 
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import yokiano.codecontroller.domain.*
-import java.time.format.DateTimeFormatter
 import kotlin.math.cos
 import kotlin.math.sin
 
 fun main() {
-    CodeController.ccToggleCode("Toggle1") {}
-    CodeController.ccToggleCode("Toggle2") {}
-    CodeController.ccToggleCode("Toggle3") {}
-    CodeController.ccBool("Toggle4") {}
+    CodeController.ccBool("Toggle1") {}
+    CodeController.ccBool("Toggle2") {}
+    CodeController.ccBool("Toggle3") {}
     Pair(0.0,0.0)
     MyClass2().go()
 }
@@ -31,17 +27,15 @@ class MyClass2 : CCAware {
                 val maxRange = ccDouble("Slider1") {
                     range = 30.0..100.0
                 } // few optional (but sometimes essential) configuration parameters are available in the configuration block.
-                ccDouble("Slider2")
-//                ccDouble("Slider4") { range = 0.0..3.0 }
-                ccDouble("Slider4") { range = (0.0..3.0).apply {  } }
+                ccDouble("Slider2",3.0,1.0..12.0)
+                ccDouble("Slider3") { range = (0.0..3.0).apply {  } }
 
                 ccInfo("AB", "${i * 20.5}")
                 ccInfo("information", "${i - 200}")
                 ccInfo("FPS", "${i}")
                 ccInfo("counter", "${i * 0.34}")
-                val vector2 = ccVec2("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
-//                val vector3 = ccVec2("vector2") { setRange(30.0, 30.0, maxRange, maxRange) }
-//                val vector4 = ccVec2("vector4") { setRange(30.0, 30.0, maxRange, maxRange) }
+                val vector2 = ccVec2("XY Control1") { setRange(30.0, 30.0, 70.0, 70.0) }
+                val vector3 = ccVec2("XY Control2") { setRange(30.0, 30.0, maxRange, maxRange) }
 
                 delay(500)
             }

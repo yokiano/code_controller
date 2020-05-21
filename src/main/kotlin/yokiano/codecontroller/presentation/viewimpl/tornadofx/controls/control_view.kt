@@ -35,7 +35,6 @@ abstract class ControlView(val unit: TUnit<*>) : View() {
             }
             control.scale(80.millis, Point2D(newScale)) {
                 node.translateY = -(node.boundsInLocal.height*(1-newScale))/2
-                println("node.translateY = ${node.translateY}")
             }
             root.layout()
             root.applyCss()

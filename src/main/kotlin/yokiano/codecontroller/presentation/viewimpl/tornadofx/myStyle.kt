@@ -158,24 +158,24 @@ class MyStyle : Stylesheet() {
         //<editor-fold desc="Main Menu>>>>>>>>>>>">
         // Orientation Button
         powerButton_on {
-            graphic = javaClass.getResource("/main_menu/power_on.png").toURI()
+            graphic = javaClass.getResource("/main_menu/30px/power_on.png").toURI()
         }
         powerButton_off {
-            graphic = javaClass.getResource("/main_menu/power_off.png").toURI()
+            graphic = javaClass.getResource("/main_menu/30px/power_off.png").toURI()
         }
 
         orientationButton_vertical_on {
-            graphic = javaClass.getResource("/main_menu/vertical_on.png").toURI()
+            graphic = javaClass.getResource("/main_menu/30px/vertical_on.png").toURI()
         }
         orientationButton_horizontal_on {
-            graphic = javaClass.getResource("/main_menu/horizontal_on.png").toURI()
+            graphic = javaClass.getResource("/main_menu/30px/horizontal_on.png").toURI()
         }
         // Fast resize button
         fastResizeButton_on {
-            graphic = javaClass.getResource("/main_menu/fast_resize_on.png").toURI()
+            graphic = javaClass.getResource("/main_menu/30px/fast_resize_on.png").toURI()
         }
         Companion.fastResizeButton_off {
-            graphic = javaClass.getResource("/main_menu/fast_resize_off.png").toURI()
+            graphic = javaClass.getResource("/main_menu/30px/fast_resize_off.png").toURI()
         }
         //</editor-fold>
 

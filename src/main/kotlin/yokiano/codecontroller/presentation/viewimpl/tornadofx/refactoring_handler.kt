@@ -231,6 +231,7 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                         paddingLeft = 5.0
 
                         button("Approve") {
+                            addClass(MyStyle.greenButton)
                             buttonsThatShouldDisable.add(this)
                             shortcut("Ctrl+Shift+A")
                             action {
@@ -244,7 +245,7 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
 
                                 }
                             }
-                            tooltip("Approve the current refactoring suggestion.\nCtrl+Shift+Alt+A")
+                            tooltip("Approve the current refactoring suggestion.\n(Ctrl+Shift+A)")
                         }
                         button("Approve All") {
                             buttonsThatShouldDisable.add(this)
@@ -254,7 +255,7 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                                 occurrencesList.clear()
                                 displayNextDiff()
                             }
-                            tooltip("Approve ALL refactoring suggestions.\nWARNING - Perform with care.\nCtrl+Shift+Alt+A")
+                            tooltip("Approve ALL refactoring suggestions.\nWARNING - Perform with care.\n(Ctrl+Shift+Alt+A)")
                         }
                         button("Next") {
                             buttonsThatShouldDisable.add(this)
@@ -414,16 +415,12 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                 alignment = Pos.BASELINE_RIGHT
                 label() {
                     paddingRight = 10.0
-                    isVisible = false
                     style {
-                        textFill = c("#00ff00aa")
+                        textFill = c("#00aa00aa")
                         fontWeight = FontWeight.BOLD
                         fontStyle = FontPosture.ITALIC
                     }
                     val binding = stringBinding(approvedChanges.sizeProperty()) {
-                        if (this.value > 0) {
-                            this@label.isVisible = true
-                        }
                         "${this.value} Changes Approved"
                     }
                     bind(binding)
@@ -439,7 +436,7 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                             unit.stateProperty.value = CCUnitState.DEAD
                         }
                     }
-                    tooltip("Apply the approved refactor changes,\nand remove the control from the controls panel\nCtrl+Shift+S")
+                    tooltip("Apply the approved refactor changes,\nand remove the control from the controls panel\n(Ctrl+Shift+S)")
                 }
                 button("Refactor") {
                     shortcut("Ctrl+Shift+Alt+S")
@@ -450,7 +447,7 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                             close()
                         }
                     }
-                    tooltip("Apply the approved refactor changes\nCtrl+Shift+Alt+S")
+                    tooltip("Apply the approved refactor changes\n(Ctrl+Shift+Alt+S)")
                 }
                 button("Cancel") {
                     action {

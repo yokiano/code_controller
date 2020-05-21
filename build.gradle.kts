@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "yokiano"
-version = "0.0.1"
+version = "0.0.5"
 val artifactID = "code-controller"
 
 val shadowJar: ShadowJar by tasks
@@ -58,8 +58,12 @@ tasks {
     compileTestKotlin {
         kotlinOptions.jvmTarget = "1.8"
     }
-}
 
+}
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
 
 fun MavenPom.addDependencies() = withXml {
     asNode().appendNode("dependencies").let { depNode ->
@@ -81,14 +85,14 @@ publishing {
             groupId = project.group.toString()
             artifactId = artifactID
             version = project.version.toString()
-            pom.addDependencies()
+//            pom.addDependencies()
         }
     }
 }
 
 bintray {
-    user = "yokiano"
-    key = "683f6d442fa2213a6c5ce97b72e2247ab1d23453"
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_API_KEY")
     setPublications(publicationName)
     pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
         repo = "my-tools"

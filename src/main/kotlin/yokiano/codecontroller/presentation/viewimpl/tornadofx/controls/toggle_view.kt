@@ -8,6 +8,7 @@ import javafx.scene.control.Control
 import javafx.scene.control.ToggleButton
 import javafx.scene.control.Tooltip
 import javafx.scene.layout.Priority
+import javafx.stage.StageStyle
 import org.kodein.di.generic.instance
 import org.kodein.di.tornadofx.kodein
 import tornadofx.*
@@ -17,7 +18,7 @@ class ToggleView(private val tUnit: TToggle) : ControlView(tUnit) {
     val driver: TornadoDriver by kodein().instance<TornadoDriver>()
 
     override val control = ToggleButton().apply {
-addClass(MyStyle.ccToggleButton)
+        addClass(MyStyle.ccToggleButton)
         isSelected = tUnit.initialValue
         updateToggleStyle(tUnit.valueProperty.value)
 
@@ -25,7 +26,6 @@ addClass(MyStyle.ccToggleButton)
             tUnit.valueProperty.value = !tUnit.valueProperty.value
             updateToggleStyle(tUnit.valueProperty.value)
         }
-
     }
 
     val initialControlWidth by lazy { control.width }

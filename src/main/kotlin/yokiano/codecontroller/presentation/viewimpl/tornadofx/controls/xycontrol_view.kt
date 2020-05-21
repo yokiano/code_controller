@@ -19,15 +19,6 @@ class XYControlView(private val tUnit: TXYControl, val parentPane: ResponsivePan
     val xyControlObject = XYControl(this,tUnit.range,tUnit.valueProperty)
     override val control = xyControlObject.root
 
-
-/*
-    override fun bindScale(property: SimpleDoubleProperty) {
-        property.onChange {
-            root.scale(driver.globalParams.controlScalingAnimationDuration, Point2D(it))
-//            control.scaleX = it
-        }
-    }
-*/
     override val root = vbox {
         alignment = Pos.CENTER
         paddingAll = 5.0

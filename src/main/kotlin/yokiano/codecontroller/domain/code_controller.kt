@@ -17,7 +17,6 @@ import org.kodein.di.tornadofx.installTornadoSource
 import reactToChannelOn
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.PlotLine
 import yokiano.codecontroller.presentation.viewimpl.tornadofx.TInfoLabel
-import java.io.File
 import kotlin.random.Random
 
 @ExperimentalCoroutinesApi
@@ -80,7 +79,7 @@ object CodeController : KodeinAware {
     private var callCounter = 0
     // Properties declaration >>>
 
-    var initialOrientation: ScreenOrientation = VERTICAL
+    var initialOrientation: ScreenOrientation = HORIZONTAL
 
     init {
         // Launch the TornadoFx application
@@ -115,19 +114,14 @@ object CodeController : KodeinAware {
         // The for loop will consume each event once it arrives and will never finish.
         for (event in valueEventsChannel.channel) {
             event.run {
-                if (event.state == CCUnitState.DEAD) {
-                    println("Changing file for ${event.id}")
-
-                } else {
-                    // This instance() call will fetch the (only) unit with the specified ID from the defined multiton in kodein.
-                    val unit: CCUnit by instance(
-                        arg = UnitKodeinParams(
-                            type = ccType,
-                            id = this.id
-                        )
+                // This instance() call will fetch the (only) unit with the specified ID from the defined multiton in kodein.
+                val unit: CCUnit by instance(
+                    arg = UnitKodeinParams(
+                        type = ccType,
+                        id = this.id
                     )
-                    unit.updateValue(event.value)
-                }
+                )
+                unit.updateValue(event.value)
             }
         }
     }
@@ -163,12 +157,15 @@ object CodeController : KodeinAware {
     }
 
     // ------ BOOL ------ //                                                // ------ BOOL ------ //                                                // ------ BOOL ------ //
-    fun ccBool(id: String, fallBack: Boolean = true, initCode: CCBool.() -> Unit = {}): Boolean {
-        if (controllerState is PAUSED) return fallBack
-
-        val unit = (getUnit(CCType.BOOL, id) as CCBool)
-        registerUnitIfNew(unit, initCode)
-        return unit.value
+    fun ccBool(id: String, default: Boolean = true, initCode: CCBool.() -> Unit = {}): Boolean {
+        if (controllerState is PAUSED) return default
+        (getUnit(CCType.BOOL, id) as CCBool).apply {
+            if (state == CCUnitState.NEW) {
+                this.default = default
+            }
+            registerUnitIfNew(this, initCode)
+            return this.value
+        }
     }
 
     // Will execute the code given by 'f()' according to 'invokeWhen'
@@ -184,27 +181,37 @@ object CodeController : KodeinAware {
         }
     }
 
-
     // ------ DOUBLE ------ //                                                // ------ DOUBLE ------ //                                                // ------ DOUBLE ------ //
-    fun ccDouble(id: String, fallBack: Double = 0.0, initCode: CCDouble.() -> Unit = {}): Double {
-        if (controllerState is PAUSED) return fallBack
+    fun ccDouble(id: String, default: Double = 0.0, range : ClosedFloatingPointRange<Double> = 0.0..1.0, initCode: CCDouble.() -> Unit = {}): Double {
+        if (controllerState is PAUSED) return default
 
-        val unit = (getUnit(CCType.DOUBLE, id) as CCDouble)
-        registerUnitIfNew(unit, initCode)
-        return unit.value
+        (getUnit(CCType.DOUBLE, id) as CCDouble).apply {
+            if (state == CCUnitState.NEW) {
+                this.range = range
+                this.default = default
+            }
+            registerUnitIfNew(this, initCode)
+            return this.value
+        }
     }
 
     // ------ VECTOR ------ //                                                // ------ VECTOR ------ //                                                // ------ VECTOR ------ //
     fun ccVec2(
         id: String,
-        fallBack: Pair<Double, Double> = Pair(0.0, 0.0),
+        default: Pair<Double, Double> = Pair(0.0, 0.0),
+        range : Pair<Pair<Double,Double>,Pair<Double,Double>> = ((0.0 to 0.0) to (1.0 to 1.0)),
         initCode: CCVec.() -> Unit = {}
     ): Pair<Double, Double> {
-        if (controllerState is PAUSED) return fallBack
+        if (controllerState is PAUSED) return default
 
-        val unit = (getUnit(CCType.VEC2, id) as CCVec)
-        registerUnitIfNew(unit, initCode)
-        return unit.value
+        (getUnit(CCType.VEC2, id) as CCVec).apply {
+            if (state == CCUnitState.NEW) {
+                this.range = range
+                this.default = default
+            }
+            registerUnitIfNew(this, initCode)
+            return this.value
+        }
     }
 
     // ------ INFO ------ //                                                // ------ INFO ------ //                                                // ------ INFO ------ //
@@ -218,7 +225,6 @@ object CodeController : KodeinAware {
     }
 
     // ------ PLOT ------ //                                                // ------ PLOT ------ //                                                // ------ PLOT ------ //
-
     //   howOften - between 0.0..1.0, the higher the more dataPoints.
     // howMany - maximum number of data points in the plot
     fun ccPlot(id: String, x: Double, y: Double, reduceCalls: Double = 1.0, howMany: Int = Int.MAX_VALUE) {

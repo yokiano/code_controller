@@ -13,7 +13,8 @@ Any direct or indirect support and contribution will be much appreciated.
   
 For more in-depth explanations refer to the [wiki page](https://github.com/yokiano/code_controller/wiki).  
   
-**An example of a fully equipped control panel:**
+**An example of a fully equipped controls panel:**
+![All Controls](src/main/resources/screenshots/all_controls.png)
 
 
 **Core features overview:**
@@ -28,7 +29,7 @@ For more in-depth explanations refer to the [wiki page](https://github.com/yokia
 1. Fast resizing - The UI panel is designed for quick resizing and placement so you will spend less time dealing with layouting your windows and panes. 
   
 
-Watch a 2 minutes show case video that explains most of what you need to know about CC:
+**Watch a 2 minutes show case video which explains most of what you need to know about CC:**
 
 
 

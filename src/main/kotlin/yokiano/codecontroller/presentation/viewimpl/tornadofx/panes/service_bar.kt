@@ -78,6 +78,17 @@ class ServiceBar(
 
         if (validFeatures[Features.TEXT_RESIZE.ordinal]) {
             runLater {
+                // Text Decrease
+                button("A-") {
+                    addClass(MyStyle.serviceBarButton, MyStyle.textZoomButton)
+                    tooltip("Decrease Text Size")
+                    configureMouseEvents(this)
+
+                    action {
+                        textScale.value += (-scaleStep)
+                    }
+
+                }
                 // Text Increase
                 button("A+") {
                     addClass(MyStyle.serviceBarButton, MyStyle.textZoomButton)
@@ -90,17 +101,6 @@ class ServiceBar(
 
                 }
 
-                // Text Decrease
-                button("A-") {
-                    addClass(MyStyle.serviceBarButton, MyStyle.textZoomButton)
-                    tooltip("Decrease Text Size")
-                    configureMouseEvents(this)
-
-                    action {
-                        textScale.value += (-scaleStep)
-                    }
-
-                }
             }
         }
 

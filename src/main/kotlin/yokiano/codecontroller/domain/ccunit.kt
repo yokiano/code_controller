@@ -90,7 +90,6 @@ class CCBool(override val id: String) : CCUnit {
     override fun updateValue(newVal: Any) {
         value = !value
     }
-
 }
 
 
@@ -111,8 +110,8 @@ class CCVec(override val id: String) : CCUnit {
     override val type = CCType.VEC2
     override var state = CCUnitState.NEW
 
-    fun setRange(leftTopX: Double, leftTopY: Double, rightBottomX: Double, rightBottomY: Double) {
-        range = Pair(Pair(leftTopX, leftTopY), Pair(rightBottomX, rightBottomY))
+    fun setRange(topLeftX: Double, topLeftY: Double, bottomRightX: Double, bottomRightY: Double) {
+        range = Pair(Pair(topLeftX, topLeftY), Pair(bottomRightX, bottomRightY))
     }
 
     override fun getGuiUnit(): CCGuiUnit {

@@ -19,9 +19,8 @@ class XYControl(
     valueP: SimpleObjectProperty<XYPoint>
 ) : View() {
 
-    val pointerProperty = SimpleObjectProperty<XYPoint>(valueP.value)
+    val pointerProperty = SimpleObjectProperty(valueP.value)
     var pointer: XYPoint by pointerProperty
-
 
     private val dimensions = 100.0
 
@@ -139,11 +138,9 @@ class XYControl(
     fun updatePointer(x: Double, y: Double) {
 
         fromPixelToValue(x, y).run {
-            pointer.x = first
-            pointer.y = second
+            pointer = XYPoint(first,second)
             internalX.value = x.coerceIn(0.0, dimensions)
             internalY.value = y.coerceIn(0.0, dimensions)
-
         }
         valueLabel.value = "(${"%.2f".format(pointer.x)},${"%.2f".format(pointer.y)})"
 

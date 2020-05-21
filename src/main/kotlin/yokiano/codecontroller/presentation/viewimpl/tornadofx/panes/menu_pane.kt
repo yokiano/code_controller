@@ -17,8 +17,8 @@ object MenuPane : View() {
         adjustButtonOrientation()
 
         style {
-            paddingTop = 8
-            paddingLeft = 3
+            paddingTop = 4
+            paddingLeft = 2
             backgroundColor += Color(0.0, 0.0, 0.0, 0.3)
         }
 
