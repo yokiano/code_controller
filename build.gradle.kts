@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "yokiano"
-version = "0.0.6"
+version = "0.0.7"
 val artifactID = "code-controller"
 
 val shadowJar: ShadowJar by tasks
@@ -58,8 +58,8 @@ tasks {
     compileTestKotlin {
         kotlinOptions.jvmTarget = "1.8"
     }
-
 }
+
 java {
     withSourcesJar()
     withJavadocJar()

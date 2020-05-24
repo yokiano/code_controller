@@ -263,7 +263,6 @@ abstract class ResponsivePane() : View() {
                 if (fixedDividers) {
                     val oldWidth = driver.mainView.splitpane.width
                     with(driver.mainView.splitpane) {
-//                        println("Old width = ${oldWidth}, current width = ${width}")
                         dividers.forEachIndexed { index, divider ->
                             val distance = divider.position * oldWidth
                             val newPosition = if (isRightEdge) {

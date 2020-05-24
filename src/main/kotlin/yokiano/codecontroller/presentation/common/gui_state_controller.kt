@@ -24,7 +24,7 @@ class GuiStateController(override val kodein: Kodein) : KodeinAware {
             presentationDriver.addDataPointTo(data.id, data.data, data.limit)
         }
         infoLabelChannel.channel.reactToChannelOn(this) { data ->
-            presentationDriver.updateInfoLabel(data.id,data.info)
+            presentationDriver.updateInfoLabel(data.id,data.info,data.tooltip)
         }
     }
 

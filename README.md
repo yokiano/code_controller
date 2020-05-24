@@ -7,12 +7,14 @@ The project is still in development and will include additional features in the 
 Any direct or indirect support and contribution will be much appreciated. 
 
 **Notes**  
-**- The GUI elements are placed automatically in their dedicated panes. This is not intended to be an "end user" gui library but rather a quick and simple way to control and debug your program variables.**  
-**- The GUI controllers panel is opened as a separate window using an independent TornadoFX app. This way it doesn't matter what framework or platform you are using, as long as it's in kotlin/java.**  
+- The GUI elements are placed automatically in their dedicated panes. CC is not intended to be an "end user" gui library but rather a quick and quick way to control and debug your program variables.  
+- The GUI panel is opened as a **separate window** using an independent TornadoFX app. This way it doesn't matter what framework or platform you are using, as long as it's in kotlin/java.
   
   
 For more in-depth explanations refer to the [wiki page](https://github.com/yokiano/code_controller/wiki).  
-  
+Alternatively, watch a 10min coding demo which explains most of what you need to know about CC:
+https://youtu.be/vF_XVmXhOjg
+
 **An example of a fully equipped controls panel:**
 ![All Controls](src/main/resources/screenshots/all_controls.png)
 
@@ -26,15 +28,15 @@ For more in-depth explanations refer to the [wiki page](https://github.com/yokia
 1. Real time plotter (ccPlot).
 1. Value Registry - Save/Load values to/from a automatically created local file. Controllers are initialized with the previously saved value on startup. 
 1. Remove and Refactor - after you finish to use a control, normally you would go back to the source code to remove the gui elelemnts declarations manually. Instead of doing so this feature will remove a controller from the gui panel AND will automatically replace the source code declaration of that controller with the current controller value. Use with care.  
-1. Fast resizing - The UI panel is designed for quick resizing and placement so you will spend less time dealing with layouting your windows and panes. 
+1. Fast resizing - The UI panel is designed for quick resizing and placement so you will spend less time dealing with layouting your windows and panes.
+1. Touch screen friendly - The UI components are big and flexible enough so it will be possible to use CC on external touchscreens more easily.   
   
 
-**Watch a short video which explains most of what you need to know about CC:**
-https://youtu.be/P5TAE4VMvz0
-
-
-
-
+**Future Plans**
+1. Support of additional controls such as - range slider, option selector, color picker, XYZ controller, action button
+1. Improve layout flexibility and grouping features.
+1. Keyboard shortcuts for everything.
+1. Improve support for touch screens.  
 
 ## Installation via gradle:
 

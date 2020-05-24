@@ -21,7 +21,9 @@ class InfoPane : ResponsivePane() {
         bindChildren(driver.infoLabelList.asObservable()) { infoLabel ->
             borderpane {
                 left {
-                    label("${infoLabel.id} - ")
+                    label("${infoLabel.id} - ") {
+                        tooltip(infoLabel.tooltip)
+                    }
                 }
                 right {
                     label {

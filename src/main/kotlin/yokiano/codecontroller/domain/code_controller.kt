@@ -101,7 +101,7 @@ object CodeController : KodeinAware {
         // launch a timer event to report usage statistics
         GlobalScope.launch {
             while (true) {
-                ccInfo("CCPS", callCounter.toString())
+                ccInfo("CCPS", callCounter.toString(),tooltip = "Controller Calls Per Second")
                 callCounter = 0
                 delay(1000)
             }
@@ -213,13 +213,13 @@ object CodeController : KodeinAware {
     }
 
     // ------ INFO ------ //                                                // ------ INFO ------ //                                                // ------ INFO ------ //
-    fun ccInfo(id: String, info: String, reduceCalls: Double = 1.0) {
+    fun ccInfo(id: String, info: String, reduceCalls: Double = 1.0,tooltip: String = "") {
         if (controllerState is PAUSED) return
 
         if (Random.nextDouble() > reduceCalls) {
             return
         }
-        infoLabelChannel.send(CCInfoDatum(id, info.cleanDecimal()))
+        infoLabelChannel.send(CCInfoDatum(id, info.cleanDecimal(),tooltip))
     }
 
     // ------ PLOT ------ //                                                // ------ PLOT ------ //                                                // ------ PLOT ------ //

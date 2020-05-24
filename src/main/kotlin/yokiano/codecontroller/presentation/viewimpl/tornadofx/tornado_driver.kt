@@ -23,8 +23,9 @@ import kotlin.reflect.full.createInstance
 class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentationDriver, KodeinAware {
 
     data class GlobalParams(
-        val controlScalingAnimationDuration : Duration = 50.millis
+        val controlScalingAnimationDuration: Duration = 50.millis
     )
+
     val globalParams = GlobalParams()
     val tornadoApp: TornadoApp by instance<TornadoApp>()
 
@@ -115,6 +116,9 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
             unitsList.apply {
                 item.list.add(tUnitVM)
                 tUnit.valueProperty.onChange {
+                    if (it is Pair<*,*>) {
+                        println("change recorded for ${tUnit.id}. value is ${it.first}")
+                    }
                     eventsChannel.send(UnitAdapter.toCCUnit(tUnit))
                 }
 
@@ -225,10 +229,11 @@ class TornadoDriver(override val kodein: Kodein) : Controller(), GuiPresentation
         }
     }
 
-    fun updateInfoLabel(id: String, info: String) {
+    fun updateInfoLabel(id: String, info: String,tooltip: String) {
         val infoLabel: TInfoLabel by instance(arg = id)
 
         if (infoLabel.state == CCUnitState.NEW) {
+            infoLabel.tooltip = tooltip
             infoLabelList.add(infoLabel)
             reloadViews()
             infoLabel.state = CCUnitState.LIVE

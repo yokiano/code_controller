@@ -88,13 +88,6 @@ interface TUnit<T> {
     fun updateFromJson(jsonObject: JsonObject)
     fun convertToJson(): JsonObject
 
-
-    fun dismiss() {
-        println("Dismissing $id")
-
-        stateProperty.value = CCUnitState.DEAD // stateProperty is observable to detect the dismiss event .
-    }
-
     // ------ Refactoring related
     fun stringifiedValue() : String
     fun getDeclarationString() : String
@@ -170,8 +163,6 @@ class TXYControl(
 
     override fun updateFromJson(jsonObject: JsonObject) {
         val xy = jsonObject.getJsonObject("value")
-
-
         valueProperty.value = XYPoint(xy.getDouble("x"), xy.getDouble("y"))
     }
 
@@ -212,6 +203,7 @@ class PlotLine(val id: String, override val kodein: Kodein) : KodeinAware {
 class TInfoLabel(val id: String) {
     val valueProperty = SimpleStringProperty()
     val value: String by valueProperty
+    var tooltip: String = ""
 
     var state = CCUnitState.NEW
 }

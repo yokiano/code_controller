@@ -476,13 +476,13 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
         searchTargetPathList.forEach { searchTarget ->
             searchTarget.searchTask = runAsync(searchTarget.taskStatus) {
 
-                val numOfFiles = searchTarget.folder.walk().filter { it.extension in supportedExtensions }
-                    .count() // Needed for the progress bar calculation
+                val allFiles = searchTarget.folder.walk().filter { it.extension in supportedExtensions }
+                val numOfFiles = allFiles.count() // Needed for the progress bar calculation
                 if (numOfFiles > 0) {
-                    searchTarget.folder.walk().filter { it.extension in supportedExtensions }
+                    allFiles
                         .forEachIndexed() { index, file ->
                             runLater {
-                                updateProgress(index.toLong(), numOfFiles.toLong())
+                                updateProgress(index.toLong() + 1, numOfFiles.toLong())
                             }
 //                        updateMessage("Finished $index files out of $numOfFiles") // might be good later to give status on search progression with numbers.
                             isFirst = matchRegex(file, isFirst)
@@ -500,10 +500,6 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
 
         val localList =
             ArrayList<MatchOccurrence>() // workAround as the global list can be modified only from FX thread.
-/*
-        val regexPattern =
-            Regex("""(\w+\.)?(${unit.getDeclarationString()})\((?:[^()]|(\3))*\) *(\{(?:[^{}]++|(\4))*\})?""")
-*/
         val regexPattern =
             Regex("""(\w+\.)?(${unit.getDeclarationString()})\((?:.|(\3))*?\) *(\{(?:[^{}]++|(\4))*\})?""")
         val regexID = Regex(""""${unit.id}"""")
@@ -542,26 +538,6 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                 }
             }
         }
-/*
-        revisedFile.printWriter().use { writer ->
-            var lineNum = 0
-            originalFile.forEachLine { line ->
-                val newLine = regexPattern.find(line)?.let { matchResult ->
-                    regexID.find(matchResult.value)?.let {
-                        isChanged = true
-                        println("$lineNum fileName:${originalFile.name}:: matchResult.value = ${matchResult.value}")
-                        println("$lineNum groups = ${matchResult.groupValues}")
-                        println("unit.stringifiedValue() = ${unit.stringifiedValue()}")
-                        matches.add(matchResult.range)
-                        line.replace(regexPattern, unit.stringifiedValue())
-                        // TODO - add occurrence to list
-                    } ?: line
-                } ?: line // if regex was not matched leave the line as is.
-                writer.println(newLine)
-                lineNum++
-            }
-        }
-*/
 
         if (isChanged && isFirst && localList.size > 0) {
             localList.first().apply {
@@ -720,7 +696,9 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
                 return false
             }
 
-            val fileLists = backupFile.parentFile.listFiles()?.filter { it.name.startsWith("${file.name}.bkp.") }?.sorted() ?: return false
+            val fileLists =
+                backupFile.parentFile.listFiles()?.filter { it.name.startsWith("${file.name}.bkp.") }?.sorted()
+                    ?: return false
             if (fileLists.size > BACKUP_CYCLIC_LIMIT) {
                 val deletedFileName = fileLists.first().absolutePath
                 if (fileLists.first().delete()) {
@@ -836,42 +814,3 @@ class RefactoringHandler<T>(val unit: TUnit<T>) : View() {
 
 
 }
-
-
-/*
-class SearchablePathFragment : ListCellFragment<SearchTargetPath>() {
-
-
-    init {
-        println("INITING CELL. item = ${item}")
-    }
-
-    override val root = stackpane {
-        alignment = Pos.CENTER_LEFT
-        val pathLabel = label {
-            runLater {
-                item?.let {
-                    println("Setting text = ${it.folder.name}")
-//                    text = it.folder.absolutePath.putDotsAfter(100)
-                    text = "textyyy"
-                }
-            }
-        }
-*/
-/*        progressbar(taskStatus.progress) {
-            prefWidthProperty().bind(doubleBinding(pathLabel.widthProperty()) { value * 1.05 })
-            prefHeightProperty().bind(
-                doubleBinding(
-                    pathLabel.heightProperty()
-                ) { value * 1.2 })
-            stackpaneConstraints {
-                marginLeft = -3.0
-            }
-            addClass(MyStyle.taskProgress)
-            hgrow = Priority.ALWAYS
-            tooltip(rootProjectFolder.absolutePath)
-        }*//*
-
-    }
-}
-*/

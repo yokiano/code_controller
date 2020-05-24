@@ -27,7 +27,7 @@ class MyStyle : Stylesheet() {
 
 
         // Helper Values
-//        val textColor = Color.GRAY
+//        val defaultTextColor = Color.GRAY
         val defaultTextColor = Color.BLANCHEDALMOND
         val SEMI_OPAQUE = Color(0.3, 0.3, 0.3, 0.3)
         val ALMOST_OPAQUE = Color(0.5, 0.5, 0.5, 0.3)
@@ -443,24 +443,13 @@ class MyStyle : Stylesheet() {
             orientation = Orientation.VERTICAL
             chartLineSymbol {
                 visibility = FXVisibility.VISIBLE
-//                    backgroundColor = bgc.value
-//                    unsafe("-fx-background-color", raw("-fx-background-color"))
-                //                baseColor = Color.BLACK
-//                    println("a = ${a}")
             }
 
             label {
                 +defaultTextStyle_std
                 backgroundColor += Color.TRANSPARENT
                 chartLegendSymbol {
-//                    backgroundColor += Color.RED
-//                    fill = c("red")
                 }
-                child("*") {
-//                    backgroundColor +=
-                }
-
-
             }
         }
         chartLegendItem {

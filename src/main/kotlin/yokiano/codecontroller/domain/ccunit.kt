@@ -130,5 +130,5 @@ class CCVec(override val id: String) : CCUnit {
     }
 }
 
-data class CCInfoDatum(val id: String, val info : String)
+data class CCInfoDatum(val id: String, val info : String,val tooltip: String)
 
