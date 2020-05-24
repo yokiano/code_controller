@@ -7,7 +7,7 @@ The project is still in development and will include additional features in the 
 Any direct or indirect support and contribution will be much appreciated. 
 
 **Notes**  
-- The GUI elements are placed automatically in their dedicated panes. CC is not intended to be an "end user" gui library but rather a quick and quick way to control and debug your program variables.  
+- The GUI elements are placed automatically in their dedicated panes. CC is not intended to be an "end user" gui library but rather a quick and easy way to control and debug your program variables.  
 - The GUI panel is opened as a **separate window** using an independent TornadoFX app. This way it doesn't matter what framework or platform you are using, as long as it's in kotlin/java.
   
   
@@ -50,7 +50,7 @@ repositories {
 
 dependencies {
 	// ...
-  implementation("yokiano","code-controller", "0.0.1")
+  implementation("yokiano","code-controller", "0.0.7")
 }
 ```
  
@@ -64,7 +64,7 @@ repositories {
 
 dependencies {
 	// ...
-  implementation ‘yokiano:code-controller:0.0.1’
+  implementation ‘yokiano:code-controller:0.0.7’
 }
 ```  
 

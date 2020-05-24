@@ -28,14 +28,12 @@ class MyClass2 : CCAware {
                     range = 30.0..100.0
                 } // few optional (but sometimes essential) configuration parameters are available in the configuration block.
                 ccDouble("Slider2",3.0,1.0..12.0)
-//                ccDouble("Slider3") { range = (0.0..3.0).apply {  } }
 
-                ccInfo("AB", "${i * 20.5}")
-                ccInfo("FPS", "${i}")
-                ccInfo("counter", "${i * 0.34}")
                 val vector2 = ccVec2("XY Control1") { setRange(30.0, 30.0, 70.0, 70.0) }
-                ccInfo("XY1.x", "${vector2.first}")
                 val vector3 = ccVec2("XY Control2") { setRange(30.0, 30.0, maxRange, maxRange) }
+                ccInfo("AB", "${i * 20.5}")
+                ccInfo("counter", "${i * 0.34}")
+                ccInfo("XY1.x", "${vector2.first}")
 
                 delay(500)
             }
